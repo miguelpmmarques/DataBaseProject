@@ -59,16 +59,16 @@ class Result(models.Model):
 class CustomUser(AbstractUser):
 
     # Privilegies
-    isCaptain = models.BooleanField(null=False)
-    isTournamentManager = models.BooleanField(null=False)
-    isAdmin = models.BooleanField(null=False)
+    isCaptain = models.BooleanField(null=False, default=False)
+    isTournamentManager = models.BooleanField(null=False, default=False)
+    isAdmin = models.BooleanField(null=False, default=False)
     # Atributes
-    cc = models.BigIntegerField(primary_key=True, null=False, blank=False)
-    first_name = models.CharField(max_length=512, unique=True, null=False, blank=False)
-    last_name = models.CharField(max_length=512, unique=True, null=False, blank=False)
-    phone = PhoneNumberField(null=True, blank=True, unique=True, region="PT")
-    budget = models.BigIntegerField(null=False)
-    hierarchy = models.IntegerField(null=False)
+    citizen_card = models.BigIntegerField(null=False, blank=False)
+    first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
+    budget = models.BigIntegerField(null=False, default=0)
+    hierarchy = models.IntegerField(null=False, default=0)
     image = models.FileField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
     # Connection between Entities
     position = models.ManyToManyField(Position)

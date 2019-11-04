@@ -26,6 +26,9 @@ SECRET_KEY = "m6mt(r3&7agnkhi$yfet^)!slunmxcyq$222an%(_91lrho2a+"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
 ALLOWED_HOSTS = []
 
 
@@ -38,6 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "celery",
+    "django_celery_results",
     "main",
 ]
 
@@ -99,7 +105,23 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+CELERY_ACCEPT_CONTENT = ["json"]  # ['pickle', 'json', 'msgpack', 'yaml']
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
 
+CELERY_RESULT_BACKEND = "django-db"
+# CELERY_BROKER_URL = "redis://localhost:6379"
+# CELERY_BEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+
+CELERY_WORKER_DISABLE_RATE_LIMITS = True
+CELERY_SEND_TASK_ERROR_EMAILS = True
+CELERY_TASK_ERROR_WHITELIST = ()
+
+CELERY_ENABLE_UTC = True
+CELERY_TIMEZONE = "Europe/Lisbon"
+
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
