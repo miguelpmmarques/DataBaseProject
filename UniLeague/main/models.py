@@ -69,3 +69,77 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Game(models.Model):
+    thisTime = models.TimeField(null=False)
+    cost = models.IntegerField(null=False)
+    gameDate = models.DateTimeField(null=False)
+
+    class Meta:
+        db_table = "Game"
+        verbose_name = "Jogo"
+        verbose_name_plural = "Jogos"
+        ordering = ["-gameDate"]
+
+    def __str__(self):
+        return str(self.gameDate) + "Cost - " + self.cost
+
+
+class Result(models.Model):
+    home_score = models.IntegerField(null=False)
+    away_score = models.IntegerField(null=False)
+
+    class Meta:
+        db_table = "Result"
+        verbose_name = "Resultado"
+        verbose_name_plural = "Resultados"
+        ordering = ["-home_score"]
+
+    def __str__(self):
+        return str(self.home_score) + " - " + str(self.away_score)
+
+
+class Field(models.Model):
+    name = models.IntegerField(null=False)
+
+    class Meta:
+        db_table = "Field"
+        verbose_name = "Campo"
+        verbose_name_plural = "Campos"
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
+
+
+class TimeSlot(models.Model):
+    weekDay = models.CharField(max_length=512, null=False)
+    Hour = models.IntegerField(null=False)
+    Minute = models.IntegerField(null=False)
+    cost = models.IntegerField(null=False)
+    isFree = models.BooleanField(null=False)
+
+    class Meta:
+        db_table = "TimeSlot"
+        verbose_name = "Intervalo de tempo"
+        verbose_name_plural = "Intervalos de tempo"
+        ordering = ["-weekDay"]
+
+    def __str__(self):
+        return self.weekDay
+
+
+class Tournament(models.Model):
+    name = models.CharField(max_length=512, null=False, unique=True)
+    beginTournament = models.DateTimeField(null=False)
+    endTournament = models.DateTimeField(null=False)
+
+    class Meta:
+        db_table = "Tournament"
+        verbose_name = "Torneio"
+        verbose_name_plural = "Torneio"
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
