@@ -21,10 +21,10 @@ from .tokens import account_activation_token
 def ask_admin_for_permissions(self, host, pk):
     user = CustomUser.objects.get(pk=pk)
     mail_subject = "Activate your UniLeague account."
-    admin = CustomUser.objects.filter(is_admin=True).first()
+    admin = CustomUser.objects.filter(isAdmin=True).first()
     message = render_to_string(
-        "registration/activate_permissions.html",
-        {"admin": admin, "user": user, "domain": host + "/users/admin-validation/"},
+        "main/activate_user.html",
+        {"admin": admin, "user": user, "domain": host + "/users/validate"},
     )
     email = EmailMessage(mail_subject, message, to=[admin.email])
     email.send()

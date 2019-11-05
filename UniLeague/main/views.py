@@ -55,7 +55,6 @@ class RegisterView(generic.CreateView):
         overriding native post method, for e-mail sending with token verification
         """
         form = CustomUserForm(request.POST)
-        print("FORM:::::", form)
         if form.is_valid():
             # try:
             #    with transaction.atomic():
@@ -84,7 +83,6 @@ class RegisterView(generic.CreateView):
                 "Please confirm your email address to complete the registration"
             )
         else:
-            sleep(30)
             return HttpResponse("Please Fill all Fields")
 
 
@@ -95,24 +93,24 @@ def activate(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-        try:
-            gp = Group.objects.get(name="Basic jeKBills Users")
-            user.groups.set(gp)
-            gp.save()
-            user.save()
-        except Group.DoesNotExist:
-            pass
         # task for later- use celery task to send e-mail to an admin to
         # certificate the user type, so later we can add user permitions to this project
         user.is_active = True
+        user.save()
         login(request, user)
-        if user.membership.pk > 1:
-            current_site = get_current_site(request)
-            host = request.get_host()
-            ask_admin_for_permissions.apply_async((host, uid))
+        current_site = get_current_site(request)
+        host = request.get_host()
+        ask_admin_for_permissions.apply_async((host, uid))
         # return redirect('home')
         return HttpResponse(
             "Thank you for your email confirmation. Now you can login your account."
         )
     else:
         return HttpResponse("Activation link is invalid!")
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def validate(request, pk):
+    return render(
+        request, template_name="main/admin-validation.html", context={"id": pk}
+    )

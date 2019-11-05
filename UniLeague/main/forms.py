@@ -19,16 +19,14 @@ class CustomUserForm(UserCreationForm):
             "image",
         )
 
-        def clean(self):
-            cleaned_data = super(CustomUserForm, self).clean()
-            mail = cleaned_data.get("email")
-            mail_exists = WhitelistedMail.objects.filter(email=mail).exists()
-            mail_used = CustomUser.objects.filter(email=mail).exists()
-            msg = None
-            if not mail_exists:
-                msg = "Mail Doesn't Exist"
-            elif mail_used:
-                msg = "Specified email already in use"
-            if msg:
-                raise forms.ValidationError(msg)
-            return cleaned_data
+    """def clean(self):
+        cleaned_data = super(CustomUserForm, self).clean()
+        mail = cleaned_data.get("email")
+        msg = None
+        if not mail_exists:
+            msg = "Mail Doesn't Exist"
+        elif mail_used:
+            msg = "Specified email already in use"
+        if msg:
+            raise forms.ValidationError(msg)
+        return cleaned_data"""
