@@ -1,0 +1,23 @@
+{% include 'main/base_auth.html' %}
+{% load static %}
+{% block title %}Register{% endblock %}
+
+<head>
+    <script src="{% static 'js/activateUser.js' %}"></script>
+</head>
+{% block content %}
+{% csrf_token %}
+<h1>The User {{user.username}} has registered and would like to become a member of Unileague</h1>
+<br>
+<h2>{{user.first_name}} {{user.last_name}}</h2>
+<ul id="user_info_{{user.pk}}">
+    {% for k,v in user.items %}
+    {% ifnotequal k 'first_name' %}
+    {% ifnotequal k 'last_name' %}
+    <li>{{k}}: {{v}}</li>
+    {% endifnotequal %}
+    {% endifnotequal %}
+    {% endfor %}
+</ul>
+<button id="activate_user">ACTIVATE</button>
+{% endblock %}
