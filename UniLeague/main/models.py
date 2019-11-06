@@ -57,8 +57,10 @@ class Result(models.Model):
 
 
 class CustomUser(AbstractUser):
-
+    # has confirmed by email
+    isConfirmed = models.BooleanField(null=False, default=True)
     # Privilegies
+    email = models.EmailField(unique=True)
     isCaptain = models.BooleanField(null=False, default=False)
     isTournamentManager = models.BooleanField(null=False, default=False)
     isAdmin = models.BooleanField(null=False, default=False)
@@ -95,7 +97,7 @@ class Tournament(models.Model):
         null=False,
         on_delete=models.PROTECT,
     )
-    fields = models.ManyToManyField(Field, null=False)
+    fields = models.ManyToManyField(Field)
 
     class Meta:
         db_table = "Tournament"
@@ -155,7 +157,7 @@ class TimeSlot(models.Model):
     cost = models.IntegerField(null=False, default=0)
     isFree = models.BooleanField(null=False, default=True)
     field = models.ForeignKey(Field, null=False, on_delete=models.PROTECT)
-    tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
+    tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = "TimeSlot"

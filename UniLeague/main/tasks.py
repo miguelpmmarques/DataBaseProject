@@ -19,12 +19,15 @@ from .tokens import account_activation_token
     default_retry_delay=60,
 )
 def ask_admin_for_permissions(self, host, pk):
-    user = CustomUser.objects.get(pk=pk)
-    mail_subject = "Activate your UniLeague account."
-    admin = CustomUser.objects.filter(isAdmin=True).first()
-    message = render_to_string(
-        "main/activate_user.html",
-        {"admin": admin, "user": user, "domain": host + "/users/validate"},
-    )
-    email = EmailMessage(mail_subject, message, to=[admin.email])
-    email.send()
+    try:
+        user = CustomUser.objects.get(pk=pk)
+        mail_subject = "Activate your UniLeague account."
+        admin = CustomUser.objects.filter(isAdmin=True).first()
+        message = render_to_string(
+            "main/email_activate_user.html",
+            {"admin": admin, "user": user, "domain": host + "/users/validate"},
+        )
+        email = EmailMessage(mail_subject, message, to=[admin.email])
+        return email.send()
+    except CustomUser.DoesNotExist:
+        return self.retry()

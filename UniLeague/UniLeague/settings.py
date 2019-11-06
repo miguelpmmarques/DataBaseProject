@@ -31,21 +31,24 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
-
-INSTALLED_APPS = [
+DJANGO_NATIVE_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
-    "celery",
-    "django_celery_results",
-    "main",
 ]
+
+DJANGO_TRUSTED_APPS = ["rest_framework"]
+
+DEVELOPED_APPS = ["main"]
+# Application definition
+THIRD_PARTY_APPS = ["celery", "django_celery_results", "phonenumber_field"]
+
+INSTALLED_APPS = (
+    DJANGO_NATIVE_APPS + DJANGO_TRUSTED_APPS + DEVELOPED_APPS + THIRD_PARTY_APPS
+)
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

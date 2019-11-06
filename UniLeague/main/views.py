@@ -18,6 +18,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.http import Http404
 from django.http import HttpResponseBadRequest
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -33,10 +34,12 @@ from django.contrib.auth.decorators import user_passes_test
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 # internal imports
 
 from .serializers import CustomUserSerializer
+from .serializers import PartialCustomUserSerializer
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
@@ -47,7 +50,7 @@ from time import sleep
 # Create your views here.
 class RegisterView(generic.CreateView):
     form_class = CustomUserForm
-    # success_url = reverse_lazy("login")
+    success_url = reverse_lazy("login")
     template_name = "main/register.html"
 
     def post(self, request):
@@ -56,15 +59,16 @@ class RegisterView(generic.CreateView):
         """
         form = CustomUserForm(request.POST)
         if form.is_valid():
-            # try:
-            #    with transaction.atomic():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            # except IntegrityError as err:
-            #    return HttpResponse(
-            #        "Critical database error\nUnable to save your user\nPlease try again"
-            #    )
+            try:
+                with transaction.atomic():
+                    user = form.save(commit=False)
+                    user.is_active = False
+                    user.save()
+            except IntegrityError as err:
+                print("Database Integrity error:", err)
+                return HttpResponse(
+                    "Critical database error\nUnable to save your user\nPlease try again"
+                )
             current_site = get_current_site(request)
             mail_subject = "Activate your UniLeague account."
             message = render_to_string(
@@ -82,8 +86,8 @@ class RegisterView(generic.CreateView):
             return HttpResponse(
                 "Please confirm your email address to complete the registration"
             )
-        else:
-            return HttpResponse("Please Fill all Fields")
+        print(form.errors)
+        return HttpResponse("Please Fill all Fields")
 
 
 def activate(request, uidb64, token):
@@ -93,15 +97,9 @@ def activate(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-        # task for later- use celery task to send e-mail to an admin to
-        # certificate the user type, so later we can add user permitions to this project
-        user.is_active = True
-        user.save()
-        login(request, user)
-        current_site = get_current_site(request)
+        user.isConfirmed = True
         host = request.get_host()
         ask_admin_for_permissions.apply_async((host, uid))
-        # return redirect('home')
         return HttpResponse(
             "Thank you for your email confirmation. Now you can login your account."
         )
@@ -111,6 +109,19 @@ def activate(request, uidb64, token):
 
 @user_passes_test(lambda u: u.is_superuser)
 def validate(request, pk):
-    return render(
-        request, template_name="main/admin-validation.html", context={"id": pk}
-    )
+    user = CustomUser.objects.filter(pk=pk).first()
+    serializer = PartialCustomUserSerializer(user)
+    if user:
+        return render(
+            request,
+            template_name="main/admin_validation.html",
+            context={"user": serializer.data},
+        )
+    else:
+        raise Http404
+
+
+class RestUsers(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
