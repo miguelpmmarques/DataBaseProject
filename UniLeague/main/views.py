@@ -12,6 +12,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.contrib.auth import logout
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -56,6 +57,13 @@ from time import sleep
 
 class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
+
+
+def log_out_request(request):
+    logout(request)
+    messages.info(request, "Logged out successfully!")
+    print("Fez logout e chegou aqui")
+    return HttpResponseRedirect(reverse("landing-page"))
 
 
 # Create your views here.
