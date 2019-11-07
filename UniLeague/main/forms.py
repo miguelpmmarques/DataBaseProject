@@ -1,6 +1,7 @@
 from django import forms
+from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
-
+from django.contrib.auth.forms import AuthenticationForm
 from .models import CustomUser
 
 
@@ -30,3 +31,10 @@ class CustomUserForm(UserCreationForm):
         if msg:
             raise forms.ValidationError(msg)
         return cleaned_data"""
+
+
+"""
+class CustomUserLoginForm(AuthenticationForm):
+    class Meta:
+        model = CustomUser
+        fields = ("username", "Password")"""

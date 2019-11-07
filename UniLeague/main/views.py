@@ -20,6 +20,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.http import Http404
 from django.http import HttpResponseBadRequest
+from django.http import HttpResponseRedirect
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import render_to_string
@@ -27,6 +28,7 @@ from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db import IntegrityError
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.forms import AuthenticationForm
 
 
 # third party imports
@@ -44,11 +46,47 @@ from .serializers import PartialCustomUserSerializer
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
+
+# from .forms import CustomUserLoginForm
 from .models import CustomUser
 
 from time import sleep
 
+
+class LandingPageView(generic.TemplateView):
+    template_name = "main/MainMenu.html"
+
+
 # Create your views here.
+class LoginView(generic.CreateView):
+    template_name = "main/login.html"
+    form_class = AuthenticationForm
+
+    def get(self, request):
+        return render(
+            request, template_name=self.template_name, context={"form": self.form_class}
+        )
+
+    def post(self, request):
+        """
+        Overriting the default post made by html form
+        """
+        form = AuthenticationForm(request=request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+            user = authenticate(
+                username=username, password=password
+            )  # Gets Variables from HTML form
+            login(
+                request, user
+            )  # Loggin already implemented by Django, lo sign in a user
+            data = request.POST
+            return HttpResponseRedirect(data.get("next", "/"))
+        else:
+            return HttpResponseBadRequest
+
+
 class RegisterView(generic.CreateView):
     form_class = CustomUserForm
     success_url = reverse_lazy("login")
@@ -110,7 +148,12 @@ def activate(request, uidb64, token):
 
 @user_passes_test(lambda u: u.is_superuser)
 def validate(request, pk):
-    user = CustomUser.objects.filter(pk=pk).first()
+    user = (
+        CustomUser.objects.filter(pk=pk)
+        .filter(is_active=False)
+        .filter(isConfirmed=True)
+        .first()
+    )
     serializer = PartialCustomUserSerializer(user)
     if user:
         return render(
