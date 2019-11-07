@@ -5,6 +5,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.urls import reverse_lazy
+from django.urls import reverse
 from django.views import generic
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -63,9 +64,13 @@ class LoginView(generic.CreateView):
     form_class = AuthenticationForm
 
     def get(self, request):
-        return render(
-            request, template_name=self.template_name, context={"form": self.form_class}
-        )
+        if not request.user.is_authenticated:
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"form": self.form_class},
+            )
+        return HttpResponseRedirect(reverse("landing-page"))
 
     def post(self, request):
         """
@@ -195,9 +200,7 @@ class RestUsersList(APIView):
         print(data)
         try:
             for elem in request.data:
-                print("ELEM===", elem)
                 instance = CustomUser.objects.get(pk=list(elem.keys())[0])
-                print("instance==", instance)
                 serializer = CustomUserSerializer(
                     instance, data=list(elem.values())[0], partial=True
                 )
