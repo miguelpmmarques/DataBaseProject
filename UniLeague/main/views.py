@@ -35,6 +35,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions
 
 # internal imports
 
@@ -121,7 +122,45 @@ def validate(request, pk):
         raise Http404
 
 
-class RestUsers(generics.RetrieveUpdateDestroyAPIView):
+def validateMultiple(request):
+    users = CustomUser.objects.filter(is_active=False).filter(isConfirmed=True)
+    serializer = PartialCustomUserSerializer(users, many=True)
+    if users.exists():
+        print(serializer.data)
+        return render(
+            request,
+            template_name="main/admin_validation_multiple.html",
+            context={"users": serializer.data},
+        )
+    else:
+        raise Http404
+
+
+class RestUsers(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
+
+
+class RestUsersList(APIView):
+    allowed_methods = "PATCH"
+    # authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAdminUser]
+
+    def patch(self, request):
+        data = request.data
+        print(data)
+        try:
+            for elem in request.data:
+                print("ELEM===", elem)
+                instance = CustomUser.objects.get(pk=list(elem.keys())[0])
+                print("instance==", instance)
+                serializer = CustomUserSerializer(
+                    instance, data=list(elem.values())[0], partial=True
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            return Response("success")
+        except Exception as exp:
+            print("exp::", exp)
+            raise exp
