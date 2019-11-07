@@ -65,7 +65,7 @@ class CustomUser(AbstractUser):
     isTournamentManager = models.BooleanField(null=False, default=False)
     isAdmin = models.BooleanField(null=False, default=False)
     # Atributes
-    citizen_card = models.BigIntegerField(null=False, blank=False)
+    citizen_card = models.BigIntegerField(null=False, default=0, blank=False)
     first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
     last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
     phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
