@@ -63,7 +63,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     isCaptain = models.BooleanField(null=False, default=False)
     isTournamentManager = models.BooleanField(null=False, default=False)
-    isAdmin = models.BooleanField(null=False, default=False)
+    # is_superuser(admin) is already
     # Atributes
     citizen_card = models.BigIntegerField(null=False, default=0, blank=False)
     first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
@@ -91,11 +91,10 @@ class Tournament(models.Model):
     name = models.CharField(max_length=512, null=False, unique=True, default="")
     beginTournament = models.DateTimeField(null=False, auto_now_add=True)
     endTournament = models.DateTimeField(null=False, auto_now_add=True)
-    tournament_manager = models.ForeignKey(
-        # TALVEZ DEVA SER 1 to 1
-        CustomUser,
-        null=False,
-        on_delete=models.PROTECT,
+    number_teams = models.IntegerField(default=0, null=False)
+    # TALVEZ DEVA SER 1 to 1
+    tournament_manager = models.OneToOneField(
+        CustomUser, null=False, on_delete=models.PROTECT,
     )
     fields = models.ManyToManyField(Field)
 
@@ -115,6 +114,7 @@ class Team(models.Model):
     numberPlayers = models.IntegerField(null=False, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
     players = models.ManyToManyField(CustomUser)
+    teamLogo = models.FileField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
 
     class Meta:
         db_table = "Team"

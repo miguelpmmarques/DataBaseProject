@@ -2,7 +2,11 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
+
+
 from .models import CustomUser
+from .models import Tournament
+from .models import Team
 
 
 class CustomUserForm(UserCreationForm):
@@ -33,8 +37,19 @@ class CustomUserForm(UserCreationForm):
         return cleaned_data"""
 
 
-"""
-class CustomUserLoginForm(AuthenticationForm):
+class TeamCreationForm(ModelForm):
     class Meta:
-        model = CustomUser
-        fields = ("username", "Password")"""
+        model = Team
+        fields = ("name", "teamLogo")
+
+
+"""
+class TournamentCreationForm(ModelForm):
+    class Meta:
+        model = Tournament
+        fields= ("name"
+    "beginTournament"
+    "endTournament"
+    "tournament_manager"
+    )
+"""

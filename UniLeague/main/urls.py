@@ -7,6 +7,8 @@ urlpatterns = [
     path("", views.LandingPageView.as_view(), name="landing-page"),
     path("register/", views.RegisterView.as_view()),
     path("login/", views.LoginView.as_view()),
+    path("profile/", views.ProfileView.as_view()),
+    path("createTeam/", views.CreateTeam.as_view()),
     path("logout/", views.log_out_request, name="logout"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),

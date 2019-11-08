@@ -55,6 +55,17 @@ from .models import CustomUser
 from time import sleep
 
 
+# Create your views here.
+
+
+class CreateTeam(generic.TemplateView):
+    template_name = "main/createTeam.html"
+
+
+class ProfileView(generic.TemplateView):
+    template_name = "main/profile.html"
+
+
 class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
 
@@ -182,7 +193,6 @@ def validateMultiple(request):
     users = CustomUser.objects.filter(is_active=False).filter(isConfirmed=True)
     serializer = PartialCustomUserSerializer(users, many=True)
     if users.exists():
-        print(serializer.data)
         return render(
             request,
             template_name="main/admin_validation_multiple.html",

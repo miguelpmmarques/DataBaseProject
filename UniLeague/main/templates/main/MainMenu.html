@@ -9,6 +9,7 @@
 
     {% if user.is_authenticated %}
     <a href="/logout/">LOG OUT</a>
+    <a href="/profile/">My Profile</a>
     <p>WELCOME {{user.first_name}} {{user.last_name}} </p>
     {% else %}
     <a href="/login/">LOG IN</a>
