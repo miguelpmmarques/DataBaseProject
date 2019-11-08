@@ -1,7 +1,12 @@
 from django import forms
+from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
+
 
 from .models import CustomUser
+from .models import Tournament
+from .models import Team
 
 
 class CustomUserForm(UserCreationForm):
@@ -30,3 +35,21 @@ class CustomUserForm(UserCreationForm):
         if msg:
             raise forms.ValidationError(msg)
         return cleaned_data"""
+
+
+class TeamCreationForm(ModelForm):
+    class Meta:
+        model = Team
+        fields = ("name", "teamLogo")
+
+
+"""
+class TournamentCreationForm(ModelForm):
+    class Meta:
+        model = Tournament
+        fields= ("name"
+    "beginTournament"
+    "endTournament"
+    "tournament_manager"
+    )
+"""
