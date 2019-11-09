@@ -13,7 +13,7 @@ DATA BASE MODELS CRIATION
 
 # foreign keys done, I think
 class Position(models.Model):
-    name = models.CharField(max_length=512, unique=True, null=False)
+    name = models.CharField(max_length=512, unique=True, null=False, default="")
     start = models.BooleanField()
 
     class Meta:
@@ -27,7 +27,7 @@ class Position(models.Model):
 
 
 class Field(models.Model):
-    name = models.IntegerField(null=False)
+    name = models.CharField(max_length=512, null=False, default="")
 
     class Meta:
         db_table = "Field"
@@ -41,10 +41,10 @@ class Field(models.Model):
 
 # foreign keys done i think
 class Result(models.Model):
-    home_score = models.IntegerField(null=False)
-    away_score = models.IntegerField(null=False)
-    home_team = models.CharField(max_length=512, null=False)
-    away_team = models.CharField(max_length=512, null=False)
+    home_score = models.IntegerField(null=False, default=0)
+    away_score = models.IntegerField(null=False, default=0)
+    home_team = models.CharField(max_length=512, null=False, default="")
+    away_team = models.CharField(max_length=512, null=False, default="")
 
     class Meta:
         db_table = "Result"
@@ -57,18 +57,20 @@ class Result(models.Model):
 
 
 class CustomUser(AbstractUser):
-
+    # has confirmed by email
+    isConfirmed = models.BooleanField(null=False, default=True)
     # Privilegies
-    isCaptain = models.BooleanField(null=False)
-    isTournamentManager = models.BooleanField(null=False)
-    isAdmin = models.BooleanField(null=False)
+    email = models.EmailField(unique=True)
+    isCaptain = models.BooleanField(null=False, default=False)
+    isTournamentManager = models.BooleanField(null=False, default=False)
+    # is_superuser(admin) is already
     # Atributes
-    cc = models.BigIntegerField(primary_key=True, null=False, blank=False)
-    first_name = models.CharField(max_length=512, unique=True, null=False, blank=False)
-    last_name = models.CharField(max_length=512, unique=True, null=False, blank=False)
-    phone = PhoneNumberField(null=True, blank=True, unique=True, region="PT")
-    budget = models.BigIntegerField(null=False)
-    hierarchy = models.IntegerField(null=False)
+    citizen_card = models.BigIntegerField(null=False, default=0, blank=False)
+    first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
+    budget = models.BigIntegerField(null=False, default=0)
+    hierarchy = models.IntegerField(null=False, default=0)
     image = models.FileField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
     # Connection between Entities
     position = models.ManyToManyField(Position)
@@ -86,13 +88,15 @@ class CustomUser(AbstractUser):
 
 
 class Tournament(models.Model):
-    name = models.CharField(max_length=512, null=False, unique=True)
-    beginTournament = models.DateTimeField(null=False)
-    endTournament = models.DateTimeField(null=False)
-    tournament_manager = models.ForeignKey(
-        CustomUser, null=False, on_delete=models.PROTECT
+    name = models.CharField(max_length=512, null=False, unique=True, default="")
+    beginTournament = models.DateTimeField(null=False, auto_now_add=True)
+    endTournament = models.DateTimeField(null=False, auto_now_add=True)
+    number_teams = models.IntegerField(default=0, null=False)
+    # TALVEZ DEVA SER 1 to 1
+    tournament_manager = models.OneToOneField(
+        CustomUser, null=False, on_delete=models.PROTECT,
     )
-    fields = models.ManyToManyField(Field, null=False)
+    fields = models.ManyToManyField(Field)
 
     class Meta:
         db_table = "Tournament"
@@ -106,10 +110,11 @@ class Tournament(models.Model):
 
 # foreign keys done
 class Team(models.Model):
-    name = models.CharField(max_length=512, null=False)
-    numberPlayers = models.IntegerField(null=False)
+    name = models.CharField(max_length=512, null=False, default="")
+    numberPlayers = models.IntegerField(null=False, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
     players = models.ManyToManyField(CustomUser)
+    teamLogo = models.FileField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
 
     class Meta:
         db_table = "Team"
@@ -146,11 +151,11 @@ class Tactic(models.Model):
 
 
 class TimeSlot(models.Model):
-    weekDay = models.CharField(max_length=512, null=False)
-    Hour = models.IntegerField(null=False)
-    Minute = models.IntegerField(null=False)
-    cost = models.IntegerField(null=False)
-    isFree = models.BooleanField(null=False)
+    weekDay = models.CharField(max_length=512, null=False, default="")
+    Hour = models.IntegerField(null=False, default=0)
+    Minute = models.IntegerField(null=False, default=0)
+    cost = models.IntegerField(null=False, default=0)
+    isFree = models.BooleanField(null=False, default=True)
     field = models.ForeignKey(Field, null=False, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
 
@@ -166,14 +171,14 @@ class TimeSlot(models.Model):
 
 # foreign keys done i think
 class Game(models.Model):
-    thisTime = models.TimeField(null=False)
-    cost = models.IntegerField(null=False)
-    gameDate = models.DateTimeField(null=False)
+    thisTime = models.TimeField(null=False, auto_now_add=True)
+    cost = models.IntegerField(null=False, default=0)
+    gameDate = models.DateTimeField(null=False, auto_now_add=True)
     score = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
     # timeslot not sure if ok
     timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
-    field = models.ForeignKey(Field, null=False, on_delete=models.PROTECT)
+    field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = "Game"

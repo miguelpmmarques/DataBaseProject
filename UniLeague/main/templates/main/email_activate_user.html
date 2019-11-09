@@ -1,0 +1,6 @@
+{% autoescape off %}
+Hi {{ admin.username }}!
+The user {{user.username}}, id {{user.id}} has asked to join UniLeague as a normal user.
+Please go to the following link to edit their permissions
+http://{{ domain }}/{{user.id}}/
+{% endautoescape %}
