@@ -77,6 +77,8 @@ class CustomUser(AbstractUser):
     # um utlizador pode estar inscrito em varias equipas desde que n sejam do mesmo torneio, certo? senao fica foreign key
     result_scores = models.ManyToManyField(Result)
 
+    # missing games and goals
+
     class Meta:
         db_table = "CustomUser"
         verbose_name = "Utilizador"
