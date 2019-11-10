@@ -48,6 +48,7 @@ from .serializers import PartialCustomUserSerializer
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
+from .forms import TeamCreationForm
 
 # from .forms import CustomUserLoginForm
 from .models import CustomUser
@@ -58,8 +59,43 @@ from time import sleep
 # Create your views here.
 
 
-class CreateTeam(generic.TemplateView):
+class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
+    form_class = TeamCreationForm
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"form": self.form_class},
+            )
+        return HttpResponseRedirect(reverse("landing-page"))
+
+    def post(self, request):
+        """
+        overriding native post method, for e-mail sending with token verification
+        """
+        user = request.user
+        if user.is_authenticated:
+            form = TeamCreationForm(request.POST)
+            if form.is_valid():
+                try:
+                    with transaction.atomic():
+                        team = form.save(commit=False)
+                        team.captain = user
+                        user.isCaptain = True
+                        user.save()
+                        team.save()
+                except IntegrityError as err:
+                    print("Database Integrity error:", err)
+                    return HttpResponse(
+                        "Critical database error\nUnable to save your user\nPlease try again"
+                    )
+
+                return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
+            return HttpResponse("Please Fill all Fields")
+        return HttpResponseRedirect(reverse("landing-page"))
 
 
 class ProfileView(generic.TemplateView):

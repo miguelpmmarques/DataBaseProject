@@ -1,5 +1,7 @@
 from django.urls import path
 from django.urls import include
+from django.conf import settings
+from django.conf.urls.static import static
 
 from . import views
 
@@ -16,4 +18,4 @@ urlpatterns = [
     path("users/", include("django.contrib.auth.urls")),
     path("users/rest/list/", views.RestUsersList.as_view()),
     path("users/rest/<int:pk>", views.RestUsers.as_view()),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

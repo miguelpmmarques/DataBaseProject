@@ -11,6 +11,8 @@ from .models import TimeSlot
 from .models import Game
 
 # Register your models here.
+
+
 admin.site.register(CustomUser)
 admin.site.register(Position)
 admin.site.register(Field)
