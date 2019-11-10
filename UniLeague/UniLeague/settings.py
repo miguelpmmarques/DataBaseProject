@@ -28,8 +28,12 @@ DEBUG = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+DATE_INPUT_FORMATS = ("%d-%m-%Y", "%Y-%m-%d")
 
 ALLOWED_HOSTS = []
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_URL = "/media/"
 
 DJANGO_NATIVE_APPS = [
     "django.contrib.admin",

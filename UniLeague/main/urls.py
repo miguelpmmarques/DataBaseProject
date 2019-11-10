@@ -8,7 +8,7 @@ urlpatterns = [
     path("register/", views.RegisterView.as_view()),
     path("login/", views.LoginView.as_view()),
     path("profile/", views.ProfileView.as_view()),
-    path("createTeam/", views.CreateTeam.as_view()),
+    path("teams/create/", views.CreateTeam.as_view()),
     path("logout/", views.log_out_request, name="logout"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),
@@ -16,4 +16,5 @@ urlpatterns = [
     path("users/", include("django.contrib.auth.urls")),
     path("users/rest/list/", views.RestUsersList.as_view()),
     path("users/rest/<int:pk>", views.RestUsers.as_view()),
+    path("tournaments/create/", views.CreateTournamentView.as_view()),
 ]

@@ -9,6 +9,9 @@ from .models import Team
 from .models import Tactic
 from .models import TimeSlot
 from .models import Game
+from .models import GameWeekDay
+from .models import Day
+
 
 # Register your models here.
 admin.site.register(CustomUser)
@@ -20,3 +23,5 @@ admin.site.register(Team)
 admin.site.register(Tactic)
 admin.site.register(TimeSlot)
 admin.site.register(Game)
+admin.site.register(GameWeekDay)
+admin.site.register(Day)
