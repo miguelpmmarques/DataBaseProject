@@ -43,13 +43,15 @@ class TeamCreationForm(ModelForm):
         fields = ("name", "tournament", "teamLogo", "tactic")
 
 
-"""
 class TournamentCreationForm(ModelForm):
     class Meta:
         model = Tournament
-        fields= ("name"
-    "beginTournament"
-    "endTournament"
-    "tournament_manager"
-    )
-"""
+        fields = (
+            "name",
+            "beginTournament",
+            "endTournament",
+            "number_teams",
+            "fields",
+            "game_week_days",
+            "days_without_games",
+        )

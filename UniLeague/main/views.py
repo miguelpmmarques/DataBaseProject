@@ -1,6 +1,7 @@
+import json
+
 from django.shortcuts import render
 from django.views.generic import View
-
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -45,13 +46,21 @@ from rest_framework import permissions
 
 from .serializers import CustomUserSerializer
 from .serializers import PartialCustomUserSerializer
+from .serializers import GameWeekDaySerializer
+from .serializers import TournamentSerializer
+from .serializers import FieldSerializer
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
+from .forms import TournamentCreationForm
 from .forms import TeamCreationForm
 
 # from .forms import CustomUserLoginForm
 from .models import CustomUser
+from .models import GameWeekDay
+from .models import Tournament
+from .models import Day
+from .models import Field
 
 from time import sleep
 
@@ -187,6 +196,107 @@ class RegisterView(generic.CreateView):
             )
         print(form.errors)
         return HttpResponse("Please Fill all Fields")
+
+
+class CreateTournamentView(APIView):
+    # form_class = TournamentCreationForm
+    """
+    future optimization: mix a django form with the context, copy the request.data,
+    pop the extra values and the send the copy to the forms
+    """
+    template_name = "main/create_tournament.html"
+    allowed_methods = ("GET", "POST")
+    game_week_day_serializer = GameWeekDaySerializer(
+        GameWeekDay.objects.all(), many=True
+    )
+    list_to_send = []
+    list_to_send_fields = []
+    fields_serializer = FieldSerializer(Field.objects.all(), many=True)
+    labels = {
+        "name": {"value": "Tournament Name", "type": "text"},
+        "number_teams": {"value": "Number of Teams", "type": "number"},
+        "number_of_hands": {"value": "Number of Hands", "type": "number"},
+        "beginTournament": {
+            "value": "Begining of Tournament",
+            "type": "datetime-local",
+        },
+        "endTournament": {"value": "End of Tournament", "type": "datetime-local"},
+        "fields": {
+            "value": "Game Fields",
+            "type": "select",
+            "choices": list_to_send_fields,
+        },
+        "tournament_badge": {"value": "Tournament Badge", "type": "file"},
+        "game_week_days": {
+            "value": "Game Week Days",
+            "type": "checkbox",
+            "choices": list_to_send,
+        },
+        "days_without_games": {"value": "Days Without Games", "type": "date"},
+    }
+    # success_url = reverse_lazy("login")
+    def get(self, request):
+
+        if request.user.is_authenticated:
+            # send the week days list to present the checkbox
+            for elem in self.game_week_day_serializer.data:
+                if elem["week_day"] not in self.list_to_send:
+                    self.list_to_send.append(elem["week_day"])
+            # check if the list is in the correct order
+            if not self.list_to_send[0] == "Monday":
+                self.list_to_send.reverse()
+            # change this to work in the same way as the fields to make it fully restfull
+            self.labels["game_week_days"].update({"choices": self.list_to_send})
+            # send the fields list
+            for elem in self.fields_serializer.data:
+                aux_elem = {"id": elem["id"], "name": elem["name"]}
+                if aux_elem not in self.list_to_send_fields:
+                    self.list_to_send_fields.append(aux_elem)
+            self.labels["fields"].update({"choices": self.list_to_send_fields})
+            # handmade form
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"labels": self.labels},
+            )
+        else:
+            return HttpResponseRedirect(reverse("landing-page"))
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            data = request.data
+            # getting a mutable copy of the request data to modify and send to the serializer
+            data_copy = data.copy()
+            # ---------------------------------------------------
+            # unnecessary once it's fully restfull, but for now, it's premature optimization
+            for k in data.keys():
+                if k in self.list_to_send:
+                    data_copy.pop(k)
+                    key = str(self.list_to_send.index(k))
+                    dates = data_copy.get("game_week_days")
+                    try:
+                        fk = GameWeekDay.objects.get(week_day=key).pk
+                        data_copy.update({"game_week_days": fk})
+                    except GameWeekDay.DoesNotExist as err:
+                        raise err
+                # ------------------------------------------------
+                if k == "days_without_games":
+                    dates = data_copy.pop(k)
+                    for elem in dates[0].split(","):
+                        try:
+                            day = Day.objects.get(day=elem)
+                        except Day.DoesNotExist:
+                            day = Day.objects.create(day=elem)
+                        data_copy.update({k: day.pk})
+            data_copy.update({"tournament_manager": request.user.pk})
+            data_copy.update({"fields": 1})
+            serializer = TournamentSerializer(data=data_copy)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"sucess": True})
+            return Response({"errors": serializer.errors})
+        else:
+            return HttpResponseRedirect(reverse("landing-page"))
 
 
 def activate(request, uidb64, token):

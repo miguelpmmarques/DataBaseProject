@@ -23,7 +23,7 @@ function activateThisUser(e) {
     }
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     try {
-        fetch(`http://127.0.0.1:8000/users/rest/${usr_id}`, {
+        fetch(`${window.location.origin}/users/rest/${usr_id}`, {
             method: "PATCH",
             credentials: "include",
             headers: {
