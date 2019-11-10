@@ -29,6 +29,19 @@ DEBUG = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
+# IN ORDER TO STORE IMAGES
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_URL = "/media/"
+OPTIONS = {
+    "context_processors": [
+        "django.template.context_processors.debug",
+        "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth",
+        "django.contrib.messages.context_processors.messages",
+        "django.template.context_processors.media",
+    ],
+}
+
 ALLOWED_HOSTS = []
 
 DJANGO_NATIVE_APPS = [

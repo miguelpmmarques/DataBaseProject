@@ -40,7 +40,7 @@ class CustomUserForm(UserCreationForm):
 class TeamCreationForm(ModelForm):
     class Meta:
         model = Team
-        fields = ("name", "teamLogo")
+        fields = ("name", "tournament", "teamLogo", "tactic")
 
 
 """
