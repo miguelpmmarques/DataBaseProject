@@ -61,6 +61,7 @@ from .models import GameWeekDay
 from .models import Tournament
 from .models import Day
 from .models import Field
+from .models import Team
 
 from time import sleep
 
@@ -96,6 +97,7 @@ class CreateTeam(generic.CreateView):
                         user.isCaptain = True
                         user.save()
                         team.save()
+                        team.players.add(user)
                 except IntegrityError as err:
                     print("Database Integrity error:", err)
                     return HttpResponse(
@@ -105,6 +107,25 @@ class CreateTeam(generic.CreateView):
                 return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
             return HttpResponse("Please Fill all Fields")
         return HttpResponseRedirect(reverse("landing-page"))
+
+
+class TeamView(generic.DetailView):
+    template_name = "main/profileTeam.html"
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            team_selected = Team.objects.get(captain=request.user.pk)
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"myTeam": team_selected, "players": team_selected.players},
+            )
+        return HttpResponseRedirect(reverse("landing-page"))
+
+
+def profileOtherView(request, user_selected):
+    user = CustomUser.objects.get(username=user_selected)
+    return render(request, template_name="main/profile.html", context={"user": user},)
 
 
 class ProfileView(generic.TemplateView):

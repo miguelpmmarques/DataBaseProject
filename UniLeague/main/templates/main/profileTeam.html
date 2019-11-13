@@ -1,0 +1,19 @@
+{% extends 'headerProfile.html' %}
+
+
+{% block body %}
+
+    <h1> NAME {{myTeam.name}} </h1>
+
+    <p>Captain: {{myTeam.captain.first_name}} {{myTeam.captain.last_name}}</p>
+    <button type="button" onclick="location.href='/user/profile/{{myTeam.captain.username}}'">Go To Captain Profile</button>
+    <h3>Number players - {{myTeam.numberPlayers}}</h3>
+
+    {% for player in myTeam.players.all %}
+       <p>{{ forloop.counter }} - {{ player.username }} </p>
+    {% endfor %}
+    <p>Tournament - {{myTeam.tournament.name}}</p>
+    <p>Tactic - {{myTeam.tactic}}</p>
+    <img src="{{myTeam.teamLogo}}" alt="">
+
+    {% endblock %}
