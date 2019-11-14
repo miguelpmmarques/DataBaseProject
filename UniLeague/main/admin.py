@@ -14,9 +14,28 @@ from .models import Day
 
 
 # Register your models here.
+class CustomUserAdmin(admin.ModelAdmin):
+    fields = [
+        "username",
+        "password",
+        "first_name",
+        "last_name",
+        "citizen_card",
+        "email",
+        "phone",
+        "budget",
+        "hierarchy",
+        "image",
+        "isConfirmed",
+        "isCaptain",
+        "isTournamentManager",
+        "is_superuser",
+        "is_active",
+        "is_staff",
+    ]
 
 
-admin.site.register(CustomUser)
+admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Position)
 admin.site.register(Field)
 admin.site.register(Result)

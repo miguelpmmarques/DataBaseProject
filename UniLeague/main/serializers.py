@@ -6,6 +6,7 @@ from .models import CustomUser
 from .models import GameWeekDay
 from .models import Tournament
 from .models import Field
+from .models import Team
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -35,6 +36,12 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
+        fields = "__all__"
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
         fields = "__all__"
 
 
