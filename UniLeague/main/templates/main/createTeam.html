@@ -1,18 +1,9 @@
-<!DOCTYPE html>
-<html >
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    {% block content %}
-    <h2>CREATE TEAM</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Create Team</button>
-    </form>
+{% extends 'main/navbar.html' %}
+    {% block body %}
+      <h2>CREATE TEAM</h2>
+      <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit">Create Team</button>
+      </form>
     {% endblock %}
-
-  </body>
-</html>

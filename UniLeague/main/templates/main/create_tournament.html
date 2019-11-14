@@ -1,9 +1,10 @@
+{% extends 'main/navbar.html' %}
 {% include 'main/base_auth.html' %}
 {% load static %}
 {% block title %}Create Tournament{% endblock %}
 
-<head>
-    <!-- javascript for this page-->
+
+{% block imports %}
     <script src="{% static 'js/createTournaments.js' %}"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
@@ -11,11 +12,12 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha256-siyOpF/pBWUPgIcQi17TLBkjvNgNQArcmwJB8YvkAgg=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha256-bqVeqGdJ7h/lYPq6xrPv/YGzMEb6dNxlfiTUHSgRCp8=" crossorigin="anonymous"></script>
-</head>
-
-<br>
+  {% endblock %}
 {% block content %}
+{% block body %}
+<br>
 <form method="post" enctype="multipart/form-data">
+  <h1><b>CREATE TOURNAMENT</b></h1>
     {% csrf_token %}
     {% if labels %}
     {% for k, v in labels.items %}
@@ -52,4 +54,5 @@
 
     <button type="submit" id="create">Create Tournament</button>
 </form>
+{% endblock %}
 {% endblock %}
