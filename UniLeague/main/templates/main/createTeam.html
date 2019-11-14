@@ -1,4 +1,4 @@
-{% extends 'main/base_auth.html' %}
+{% extends 'main/navbar.html' %}
 {% load static %}
 
 <head>
@@ -6,14 +6,11 @@
 
 </head>
 
-<body>
-    {% block content %}
-    <h2>CREATE TEAM</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Create Team</button>
-    </form>
+    {% block body %}
+      <h2>CREATE TEAM</h2>
+      <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit">Create Team</button>
+      </form>
     {% endblock %}
-
-</body>
