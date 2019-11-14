@@ -1,0 +1,55 @@
+{% extends "main/base_auth.html" %}
+{% load static %}
+
+<body>
+    {% block content %}
+    <script src="{% static 'js/adminMenu.js' %}"></script>
+    <h2>Admin Menu</h2>
+    {% if users %}
+    <h1>Users:</h1>
+    <form class="form-inline" id="users">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input class="form-control form-control-sm ml-3 w-25" id="input_users" type="text" placeholder="Search" aria-label="Search">
+    </form>
+    <ul id="ul_users">
+        {% for elem in users %}
+        <li>{{elem.first_name}} {{elem.last_name}} (
+            {% if elem.isCaptain %}
+            Captain
+            {% elif elem.isTournamentManager %}
+            Tournament Manager
+            {% else %}
+            Player
+            {% endif %}
+            )
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if tournaments %}
+    <h2>Tournaments:</h2>
+    <form class="form-inline" id="tournaments">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input id="input_tournaments" class="form-control form-control-sm ml-3 w-25" type="text" placeholder="Search" aria-label="Search">
+    </form>
+    <ul id="ul_tournaments">
+        {% for tournament in tournaments %}
+        <li>{{tournament.name}}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if teams %}
+    <h3>Teams:</h3>
+    <form class="form-inline" id="teams">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input id="input_teams" class="form-control form-control-sm ml-3 w-25" type="text" placeholder="Search" aria-label="Search">
+    </form>
+    <ul id="ul_teams">
+        {% for team in teams %}
+        <li>{{team.name}}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endblock %}
+
+</body>

@@ -80,6 +80,8 @@ class CustomUser(AbstractUser):
     # que n sejam do mesmo torneio, certo? senao fica foreign key
     result_scores = models.ManyToManyField(Result)
 
+    # missing games and goals
+
     class Meta:
         db_table = "CustomUser"
         verbose_name = "Utilizador"
@@ -159,12 +161,32 @@ class Tournament(models.Model):
 
 
 # foreign keys done
+class Tactic(models.Model):
+    # Atributes
+    positions = models.ManyToManyField(Position)
+    name = models.CharField(max_length=20, default="tatica")
+
+    class Meta:
+        db_table = "Tactic"
+        verbose_name = "Tatica"
+
+    def __str__(self):
+        return self.name
+
+
+# foreign keys done
 class Team(models.Model):
     name = models.CharField(max_length=512, null=False, default="")
-    numberPlayers = models.IntegerField(null=False, default=1)
+    numberPlayers = models.IntegerField(null=True, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
-    players = models.ManyToManyField(CustomUser)
-    teamLogo = models.FileField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
+    players = models.ManyToManyField(
+        CustomUser, blank=True, null=True, related_name="players",
+    )
+    captain = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    tactic = models.ForeignKey(Tactic, null=True, on_delete=models.PROTECT)
+    teamLogo = models.ImageField(
+        upload_to="images/", null=True, verbose_name="teamLogo", blank=True
+    )
 
     class Meta:
         db_table = "Team"
@@ -173,31 +195,7 @@ class Team(models.Model):
         ordering = ["-name"]
 
     def __str__(self):
-        return self.name
-
-
-# foreign keys done
-class Tactic(models.Model):
-    # Atributes
-    # found better way to do dis
-    """
-    id = models.BigIntegerField(primary_key=True, null=False, blank=False)
-    nrStrikers = models.IntegerField(null=False, blank=False)
-    nrForwards = models.IntegerField(null=False, blank=False)
-    nrMidfielders = models.IntegerField(null=False, blank=False)
-    nrDefenders = models.IntegerField(null=False, blank=False)
-    nrGoalies = models.IntegerField(null=False, blank=False)
-    """
-    # Connection between Entities
-    positions = models.ManyToManyField(Position)
-    team = models.ManyToManyField(Team)
-
-    class Meta:
-        db_table = "Tactic"
-        verbose_name = "Tatica"
-
-    def __str__(self):
-        return str(self.pk)
+        return self.name + str(self.teamLogo)
 
 
 class TimeSlot(models.Model):

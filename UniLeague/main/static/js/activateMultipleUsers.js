@@ -30,7 +30,7 @@ function activateMultipleUsers(e) {
     console.log("OLOLE:::>", reqData);
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     try {
-        fetch(`http://127.0.0.1:8000/users/rest/list/`, {
+        fetch(`http://127.0.0.1:8000/users/rest/list/patch/`, {
             method: "PATCH",
             credentials: "include",
             headers: {

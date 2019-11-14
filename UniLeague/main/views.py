@@ -23,6 +23,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.http import Http404
 from django.http import HttpResponseBadRequest
+from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -30,6 +31,9 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db import IntegrityError
+from django.db.models import Q
+from django.db.models import Value as V
+from django.db.models.functions import Concat
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 
@@ -49,10 +53,12 @@ from .serializers import PartialCustomUserSerializer
 from .serializers import GameWeekDaySerializer
 from .serializers import TournamentSerializer
 from .serializers import FieldSerializer
+from .serializers import TeamSerializer
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
 from .forms import TournamentCreationForm
+from .forms import TeamCreationForm
 
 # from .forms import CustomUserLoginForm
 from .models import CustomUser
@@ -60,6 +66,7 @@ from .models import GameWeekDay
 from .models import Tournament
 from .models import Day
 from .models import Field
+from .models import Team
 
 from time import sleep
 
@@ -67,8 +74,43 @@ from time import sleep
 # Create your views here.
 
 
-class CreateTeam(generic.TemplateView):
+class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
+    form_class = TeamCreationForm
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"form": self.form_class},
+            )
+        return HttpResponseRedirect(reverse("landing-page"))
+
+    def post(self, request):
+        """
+        overriding native post method, for e-mail sending with token verification
+        """
+        user = request.user
+        if user.is_authenticated:
+            form = TeamCreationForm(request.POST)
+            if form.is_valid():
+                try:
+                    with transaction.atomic():
+                        team = form.save(commit=False)
+                        team.captain = user
+                        user.isCaptain = True
+                        user.save()
+                        team.save()
+                except IntegrityError as err:
+                    print("Database Integrity error:", err)
+                    return HttpResponse(
+                        "Critical database error\nUnable to save your user\nPlease try again"
+                    )
+
+                return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
+            return HttpResponse("Please Fill all Fields")
+        return HttpResponseRedirect(reverse("landing-page"))
 
 
 class ProfileView(generic.TemplateView):
@@ -117,7 +159,7 @@ class LoginView(generic.CreateView):
             data = request.POST
             return HttpResponseRedirect(data.get("next", "/"))
         else:
-            return HttpResponseBadRequest
+            raise Http404
 
 
 class RegisterView(generic.CreateView):
@@ -263,6 +305,33 @@ class CreateTournamentView(APIView):
             return HttpResponseRedirect(reverse("landing-page"))
 
 
+class RestTournaments(generics.RetrieveUpdateAPIView):
+    queryset = Tournament.objects.all()
+    serializer_class = TournamentSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class RestListTournaments(generics.ListAPIView):
+    queryset = Tournament.objects.all()
+    serializer_class = TournamentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwarg):
+        print("HERE")
+        queryset = self.filter_queryset(self.get_queryset())
+        params = request.query_params
+        if params["name"] != "":
+            queryset = queryset.filter(name__icontains=params["name"])
+        print("SET?===", queryset)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 def activate(request, uidb64, token):
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
@@ -318,7 +387,7 @@ class RestUsers(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class RestUsersList(APIView):
+class RestUsersListPatch(APIView):
     allowed_methods = "PATCH"
     # authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAdminUser]
@@ -338,3 +407,87 @@ class RestUsersList(APIView):
         except Exception as exp:
             print("exp::", exp)
             raise exp
+
+
+class RestUsersList(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        params = request.query_params
+        queryset = queryset.annotate(
+            search_name=Concat("first_name", V(" "), "last_name")
+        ).filter(
+            Q(search_name__icontains=params["name"])
+            | Q(first_name__icontains=params["name"])
+            | Q(last_name__icontains=params["name"])
+        )
+        print("SET?===", queryset)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class RestCaptainsList(RestUsers):
+    queryset = CustomUser.objects.filter(isCaptain=True)
+
+    def list(self, request, tournamentId):
+
+        q_set = CustomUser.objects.filter(isCaptain=True).team_set(
+            tournament__pk=tournamentId
+        )
+        print(q_set)
+        page = self.paginate_queryset(q_set)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(q_set, many=True)
+        return Response(serializer.data)
+
+
+class RestTeamsList(generics.ListAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        params = request.query_params
+        if params["name"] != "":
+            queryset = queryset.filter(name__icontains=params["name"])
+        print("SET?===", queryset)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class AdminMenuView(generic.TemplateView):
+    template_name = "main/adminMenu.html"
+
+    def get(self, request):
+        if request.user.is_superuser == True:
+            users = CustomUserSerializer(CustomUser.objects.all(), many=True)
+            teams = TeamSerializer(Team.objects.all(), many=True)
+            tournaments = TournamentSerializer(Tournament.objects.all(), many=True)
+            return render(
+                request,
+                template_name=self.template_name,
+                context={
+                    "users": users.data,
+                    "teams": teams.data,
+                    "tournaments": tournaments.data,
+                },
+            )
+        else:
+            raise Http404

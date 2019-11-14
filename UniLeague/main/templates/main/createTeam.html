@@ -1,13 +1,19 @@
-<!DOCTYPE html>
-<html >
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    {% csrf_token %}
-    <h1>PROFILE {{user.first_name}} {{user.last_name}} </h1>
-    <p>E-mail: {{user.email}}</p>
-    <p>Phone Number: {{user.phone}}</p>
-  </body>
-</html>
+{% extends 'main/base_auth.html' %}
+{% load static %}
+
+<head>
+    <script src="{% static 'js/createTeam.js' %}"></script>
+
+</head>
+
+<body>
+    {% block content %}
+    <h2>CREATE TEAM</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Team</button>
+    </form>
+    {% endblock %}
+
+</body>
