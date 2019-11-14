@@ -1,0 +1,9 @@
+{% extends 'main/navbar.html' %}
+    {% block body %}
+      <h2>CREATE TEAM</h2>
+      <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit">Create Team</button>
+      </form>
+    {% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'main/navbar.html' %}
+
+{% block body %}
+
+
+<div class="container">
+  <h1> NAME {{user.first_name}} {{user.last_name}} </h1>
+  <p>E-mail: {{user.email}}</p>
+  <!-- <p> Team: {{user.team}}</p> -->
+  <p>Budget: {{user.budget}} </p>
+  <button type="button">Change Configurations</button>
+  <p>Games: {{user.games}} </p>
+  <p>Goals: {{user.goals}} </p>
+  <button type="button">View Team</button>
+  <button type="button">View Tournament</button>
+  <p>Most recent games:</p>
+  <table>
+    <!-- <thead>
+      <tr>
+        <th></th>
+      </tr>
+    </thead> -->
+    <tbody>
+      <tr>
+        <!-- falta ter uma lista com os ultimos jogos -->
+        <td>TeamA </td>
+        <td>TeamA.goals</td>
+        <td> - </td>
+        <td>TeamB.goals</td>
+        <td> TeamB</td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+
+</div>
+
+{% endblock %}
