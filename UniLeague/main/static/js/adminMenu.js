@@ -31,12 +31,14 @@ function main() {
                     extra = "(Player)";
                 }
                 var li = document.createElement("li");
+                li.className = "groupList list-group-item";
                 li.appendChild(document.createTextNode(`${elem.first_name} ${elem.last_name} ${extra}`));
                 ul.appendChild(li);
             }
         } else {
             for (elem of e) {
                 var li = document.createElement("li");
+                li.className = "groupList list-group-item";
                 li.appendChild(document.createTextNode(`${elem.name}`));
                 ul.appendChild(li);
             }

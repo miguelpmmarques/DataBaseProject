@@ -1,45 +1,58 @@
 {% extends 'main/navbar.html' %}
+{% load static %}
 <!DOCTYPE html>
-<html >
-  <head>
+<html>
+
+<head>
     <meta charset="utf-8">
-
     <title>MAIN MENU</title>
-  </head>
-  <body>
-    {% block body %}
+</head>
 
-  {% if user.is_authenticated %}
+<body>
+    {% block body %}
+    <script src="{% static 'js/adminMenu.js' %}"></script>
+
+    {% if user.is_authenticated %}
     <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
-  {% else %}
-  <h1 class="font-weight-bold text-center">Welcome</h1>
-  <br>
-  <br>
-  <div class="row">
-    <div class="col-sm-6 text-center" >
-      <h2 class="text-center">SEARCH FOR TEAMS</h2>
-      <input class="form-control-lg margin" type="text" class="" onkeyup="myFunction()" placeholder="Search for teams.." title="Type in a name">
-      <br>
-      <ul class="list-group margin">
-        <li class="groupList list-group-item">Benfica</li>
-        <li class="groupList list-group-item">Sporting</li>
-        <li class="groupList list-group-item">Porto</li>
-        <li class="groupList list-group-item">AAC</li>
-        <li class="groupList list-group-item">Braga</li>
-      </ul>
+    {% else %}
+    <h1 class="font-weight-bold text-center">Welcome</h1>
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-sm-6 text-center">
+            <h2 class="text-center">SEARCH FOR TEAMS</h2>
+            <form class="form-inline d-flex justify-content-center" id="teams">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
+            </form>
+            <br>
+            {% if teams %}
+            <ul id="ul_teams" class="list-group margin">
+                {% for team in teams %}
+                <li class="groupList list-group-item">{{team.name}}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <div class="col-sm-6 text-center">
+            <h2 class="text-center">SEARCH FOR TOURNAMENTS</h2>
+            <form class="form-inline d-flex justify-content-center" id="tournaments">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="input_tournaments" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
+            </form>
+            <br>
+            {% if tournaments %}
+            <ul id="ul_tournaments" class="list-group margin">
+                {% for tournament in tournaments %}
+                <li class="groupList list-group-item">{{tournament.name}}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
     </div>
-    <div class="col-sm-6 text-center" >
-      <h2 class="text-center">SEARCH FOR TOURNAMENTS</h2>
-      <input class="form-control-lg margin" type="text" class="" onkeyup="myFunction()" placeholder="Search for tournaments.." title="Type in a name">
-      <ul class="list-group margin">
-        <li class="groupList list-group-item">Liga NOS</li>
-        <li class="groupList list-group-item">Liga Santander</li>
-        <li class="groupList list-group-item">Torneio DEI</li>
-      </ul>
-    </div>
-  </div>
-  {% endif %}
+    {% endif %}
 
     {% endblock %}
-  </body>
+</body>
+
 </html>

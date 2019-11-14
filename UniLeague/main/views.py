@@ -130,8 +130,7 @@ class TeamView(generic.DetailView):
 
 def profileOtherView(request, user_selected):
     user = CustomUser.objects.get(username=user_selected)
-    return render(request, template_name="main/profile.html", context={"user": user},)
-
+    return render(request, template_name="main/profile.html", context={"user": user})
 
 
 class ProfileView(generic.TemplateView):
@@ -140,6 +139,19 @@ class ProfileView(generic.TemplateView):
 
 class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
+
+    def get(self, request):
+        try:
+            tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
+            teams = TeamSerializer(Team.objects.all(), many=True).data
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"teams": teams, "tournaments": tournaments},
+            )
+
+        except (Tournament.DoesNotExist, Team.DoesNotExist) as err:
+            raise Http404
 
 
 def log_out_request(request):
@@ -335,7 +347,6 @@ class RestTournaments(generics.RetrieveUpdateAPIView):
 class RestListTournaments(generics.ListAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
-    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwarg):
         print("HERE")
@@ -476,7 +487,6 @@ class RestCaptainsList(RestUsers):
 class RestTeamsList(generics.ListAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
