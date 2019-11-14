@@ -11,6 +11,7 @@ urlpatterns = [
     path("login/", views.LoginView.as_view(), name="login"),
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("teams/create/", views.CreateTeam.as_view(), name="createTeam"),
+    path("teams/profile/", views.TeamView.as_view(), name="TeamProfile"),
     path(
         "tournaments/create/",
         views.CreateTournamentView.as_view(),
@@ -20,6 +21,11 @@ urlpatterns = [
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),
     path("users/validate/", views.validateMultiple, name="validate_multiple"),
+    path(
+        "user/profile/<str:user_selected>",
+        views.profileOtherView,
+        name="seeUserProfile",
+    ),
     path("users/", include("django.contrib.auth.urls")),
     path("users/rest/list/patch/", views.RestUsersListPatch.as_view()),
     path("users/rest/list/", views.RestUsersList.as_view()),
@@ -31,4 +37,5 @@ urlpatterns = [
         views.RestCaptainsList.as_view(),
     ),
     path("administration/", views.AdminMenuView.as_view(), name="admin-menu"),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

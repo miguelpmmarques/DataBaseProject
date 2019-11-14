@@ -1,6 +1,7 @@
-{% extends 'headerProfile.html' %}
+{% extends 'main/navbar.html' %}
 
 {% block body %}
+
 <div class="container">
   <h1> NAME {{user.first_name}} {{user.last_name}} </h1>
   <p>E-mail: {{user.email}}</p>
@@ -29,7 +30,8 @@
       </tr>
     </tbody>
   </table>
-  <a href="{{request.META.HTTP_REFERER}}">Back</a>
+  <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+
 </div>
 
 {% endblock %}
