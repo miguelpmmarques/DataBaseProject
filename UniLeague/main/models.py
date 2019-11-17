@@ -268,7 +268,7 @@ class Team(models.Model):
     numberPlayers = models.IntegerField(null=True, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
     players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
-    captain = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    captain = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     tactic = models.ForeignKey(Tactic, null=True, on_delete=models.PROTECT)
     teamLogo = models.ImageField(
         upload_to="images/", null=True, verbose_name="teamLogo", blank=True
