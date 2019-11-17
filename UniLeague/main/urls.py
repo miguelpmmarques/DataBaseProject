@@ -14,6 +14,7 @@ não é preciso fazer nenhum get, fazes só request.user
 urlpatterns = [
     path("administration/", views.AdminMenuView.as_view(), name="admin-menu"),
     path("", views.LandingPageView.as_view(), name="landing-page"),
+
     path("logout/", views.log_out_request, name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
@@ -29,6 +30,11 @@ urlpatterns = [
     path("users/", include("django.contrib.auth.urls")),
     path("users/rest/list/patch/", views.RestUsersListPatch.as_view()),
     path("users/rest/list/", views.RestUsersList.as_view()),
+    path(
+        "team/apply/<str:team_selected>",
+        views.ChoosePositionView.as_view(),
+        name="choosePosition",
+    ),
     path(
         "tournaments/create/",
         views.CreateTournamentView.as_view(),

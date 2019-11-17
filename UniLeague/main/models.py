@@ -6,27 +6,12 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.functions import Extract
-from UniLeague.settings import MEDIA_URL
 
+from UniLeague.settings import MEDIA_URL
 
 """
 DATA BASE MODELS CRIATION
 """
-
-
-# foreign keys done, I think
-class Position(models.Model):
-    name = models.CharField(max_length=512, unique=True, null=False, default="")
-    start = models.BooleanField()
-
-    class Meta:
-        db_table = "Position"
-        verbose_name = "Posicao"
-        verbose_name_plural = "Posicoes"
-        ordering = ["-name"]
-
-    def __str__(self):
-        return self.name
 
 
 class Field(models.Model):
@@ -40,6 +25,8 @@ class Field(models.Model):
 
     def __str__(self):
         return self.name
+
+        # foreign keys done i think
 
 
 class Day(models.Model):
@@ -99,10 +86,8 @@ class CustomUser(AbstractUser):
     budget = models.BigIntegerField(null=False, default=0)
     hierarchy = models.IntegerField(null=False, default=0)
     image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
-    # Connection between Entities
-    position = models.ManyToManyField(Position)
-    # um utlizador pode estar inscrito em varias equipas desde
-    # que n sejam do mesmo torneio, certo? senao fica foreign key
+
+
 
     # missing games and goals
 
@@ -114,6 +99,63 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+# foreign keys done, I think
+class Position(models.Model):
+    name = models.CharField(max_length=512, unique=True, null=False, default="")
+    start = models.BooleanField()
+    users = models.ManyToManyField(CustomUser)
+
+    class Meta:
+        db_table = "Position"
+        verbose_name = "Posicao"
+        verbose_name_plural = "Posicoes"
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
+
+
+class GameWeekDay(models.Model):
+    DAYS_OF_WEEK = (
+        ("0", "Monday"),
+        ("1", "Tuesday"),
+        ("2", "Wednesday"),
+        ("3", "Thursday"),
+        ("4", "Friday"),
+        ("5", "Saturday"),
+        ("6", "Sunday"),
+    )
+
+    week_day = models.CharField(
+        max_length=2, choices=DAYS_OF_WEEK, null=False, default=0
+    )
+
+    class Meta:
+        db_table = "WeekDay"
+        verbose_name = "Dia de Semana"
+        verbose_name_plural = "Dias de Semana"
+        ordering = ["-week_day"]
+
+    def get_week_day(self):
+        return str(self.DAYS_OF_WEEK[int(self.week_day)][1])
+
+    def __str__(self):
+        return self.get_week_day()
+
+
+class Day(models.Model):
+    day = models.DateField(null=True)
+
+    class Meta:
+        db_table = "Day"
+        verbose_name = "Dia"
+        verbose_name_plural = "Dias"
+        ordering = ["-day"]
+
+    def __str__(self):
+        return str(self.day)
 
 
 class Tournament(models.Model):
@@ -142,7 +184,6 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
-
 class TimeSlot(models.Model):
     """
     weekDay = models.CharField(max_length=512, null=False, default="")
@@ -154,6 +195,7 @@ class TimeSlot(models.Model):
     description = models.TextField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(auto_now=True)
+
     cost = models.IntegerField(null=False, default=0)
     isFree = models.BooleanField(null=False, default=True)
     field = models.ForeignKey(Field, null=False, on_delete=models.PROTECT)
@@ -163,6 +205,7 @@ class TimeSlot(models.Model):
         db_table = "TimeSlot"
         verbose_name = "Intervalo de tempo"
         verbose_name_plural = "Intervalos de tempo"
+
         ordering = ["-start_time"]
 
     def __str__(self):
@@ -173,6 +216,7 @@ class TimeSlot(models.Model):
 class Game(models.Model):
     cost = models.IntegerField(null=False, default=0)
     gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
+    score = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
     # timeslot not sure if ok
     timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)

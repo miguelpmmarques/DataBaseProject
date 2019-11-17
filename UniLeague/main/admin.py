@@ -32,6 +32,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         "is_superuser",
         "is_active",
         "is_staff",
+        "position",
     ]
 
 
