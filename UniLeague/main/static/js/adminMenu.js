@@ -36,6 +36,7 @@ function main() {
                 ul.appendChild(li);
             }
         } else {
+
             for (elem of e) {
                 var li = document.createElement("li");
                 li.className = "groupList list-group-item";

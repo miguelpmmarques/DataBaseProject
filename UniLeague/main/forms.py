@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import CustomUser
 from .models import Tournament
 from .models import Team
+from .models import Position
 
 
 class CustomUserForm(UserCreationForm):
@@ -42,6 +43,11 @@ class TeamCreationForm(ModelForm):
         model = Team
         fields = ("name", "tournament", "teamLogo", "tactic")
 
+
+class PositionsForm(ModelForm):
+    class Meta:
+        model = Position
+        fields = ("name", "start")
 
 class TournamentCreationForm(ModelForm):
     class Meta:

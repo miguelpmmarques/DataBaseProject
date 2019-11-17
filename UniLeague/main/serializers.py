@@ -7,11 +7,18 @@ from .models import GameWeekDay
 from .models import Tournament
 from .models import Field
 from .models import Team
+from .models import Position
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
+        fields = "__all__"
+
+
+class PositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Position
         fields = "__all__"
 
 
