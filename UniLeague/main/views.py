@@ -112,7 +112,7 @@ class CreateTeam(generic.CreateView):
                 template_name=self.template_name,
                 context={"form": self.form_class},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -138,7 +138,7 @@ class CreateTeam(generic.CreateView):
 
                 return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
             return HttpResponse("Please Fill all Fields")
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 class TeamView(generic.DetailView):
@@ -198,7 +198,7 @@ class CreateTeam(generic.CreateView):
                 template_name=self.template_name,
                 context={"form": self.form_class},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -223,7 +223,7 @@ class CreateTeam(generic.CreateView):
                     )
                 return HttpResponseRedirect("/team/apply/" + team.name)
             return HttpResponse("Please Fill all Fields")
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 class ChoosePositionView(generics.RetrieveUpdateAPIView):
@@ -295,7 +295,7 @@ def log_out_request(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
     print("Fez logout e chegou aqui")
-    return HttpResponseRedirect(reverse("landing-page"))
+    return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 # Create your views here.
@@ -310,7 +310,7 @@ class LoginView(generic.CreateView):
                 template_name=self.template_name,
                 context={"form": self.form_class},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -436,7 +436,7 @@ class CreateTournamentView(APIView):
                 context={"labels": self.labels},
             )
         else:
-            return HttpResponseRedirect(reverse("landing-page"))
+            return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         if request.user.is_authenticated:
@@ -472,7 +472,7 @@ class CreateTournamentView(APIView):
                 return Response({"sucess": True})
             return Response({"errors": serializer.errors})
         else:
-            return HttpResponseRedirect(reverse("landing-page"))
+            return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 class RestTournaments(generics.RetrieveUpdateAPIView):

@@ -42,34 +42,6 @@ class Day(models.Model):
         return str(self.day)
 
 
-class GameWeekDay(models.Model):
-    DAYS_OF_WEEK = (
-        ("0", "Monday"),
-        ("1", "Tuesday"),
-        ("2", "Wednesday"),
-        ("3", "Thursday"),
-        ("4", "Friday"),
-        ("5", "Saturday"),
-        ("6", "Sunday"),
-    )
-
-    week_day = models.CharField(
-        max_length=2, choices=DAYS_OF_WEEK, null=False, default=0
-    )
-
-    class Meta:
-        db_table = "WeekDay"
-        verbose_name = "Dia de Semana"
-        verbose_name_plural = "Dias de Semana"
-        ordering = ["-week_day"]
-
-    def get_week_day(self):
-        return str(self.DAYS_OF_WEEK[int(self.week_day)][1])
-
-    def __str__(self):
-        return self.get_week_day()
-
-
 class CustomUser(AbstractUser):
     # has confirmed by email
     isConfirmed = models.BooleanField(null=False, default=True)
@@ -141,19 +113,6 @@ class GameWeekDay(models.Model):
 
     def __str__(self):
         return self.get_week_day()
-
-
-class Day(models.Model):
-    day = models.DateField(null=True)
-
-    class Meta:
-        db_table = "Day"
-        verbose_name = "Dia"
-        verbose_name_plural = "Dias"
-        ordering = ["-day"]
-
-    def __str__(self):
-        return str(self.day)
 
 
 class Tournament(models.Model):
