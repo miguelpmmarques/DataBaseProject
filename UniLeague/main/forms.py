@@ -49,7 +49,6 @@ class PositionsForm(ModelForm):
         model = Position
         fields = ("name", "start")
 
-
 class TournamentCreationForm(ModelForm):
     class Meta:
         model = Tournament

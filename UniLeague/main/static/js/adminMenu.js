@@ -36,24 +36,13 @@ function main() {
                 ul.appendChild(li);
             }
         } else {
-          if (e.length===0) {
-            var li = document.createElement("li");
-            li.className = "groupList list-group-item";
-            li.appendChild(document.createTextNode('Nothing found'));
-            ul.appendChild(li);
-          }
-          else {
-            for (elem of e) {
-              var li = document.createElement("li");
-              var a = document.createElement("a");
-              a.href = `/team/profile/${elem.name}`;
-              li.className = "groupList list-group-item";
-              li.appendChild(document.createTextNode(`${elem.name}`));
-              a.appendChild(li)
-              ul.appendChild(a);
-            }
 
-          }
+            for (elem of e) {
+                var li = document.createElement("li");
+                li.className = "groupList list-group-item";
+                li.appendChild(document.createTextNode(`${elem.name}`));
+                ul.appendChild(li);
+            }
         }
     }
     var failure_helper = function(e) {
