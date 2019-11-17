@@ -226,20 +226,6 @@ class CreateTeam(generic.CreateView):
         return HttpResponseRedirect(reverse("landing-page"))
 
 
-class TeamView(generic.DetailView):
-    template_name = "main/profileTeam.html"
-
-    def get(self, request):
-        if request.user.is_authenticated:
-            team_selected = Team.objects.get(captain=request.user.pk)
-            return render(
-                request,
-                template_name=self.template_name,
-                context={"myTeam": team_selected, "players": team_selected.players},
-            )
-        return HttpResponseRedirect(reverse("landing-page"))
-
-
 class ChoosePositionView(generics.RetrieveUpdateAPIView):
     template_name = "main/teamApply.html"
     allowed_methods = "PATCH"
@@ -275,20 +261,6 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
         # return HttpResponseRedirect(reverse("landing-page"))
 
 
-class TeamView(generic.DetailView):
-    template_name = "main/profileTeam.html"
-
-    def get(self, request):
-        if request.user.is_authenticated:
-            team_selected = Team.objects.get(captain=request.user.pk)
-            return render(
-                request,
-                template_name=self.template_name,
-                context={"myTeam": team_selected, "players": team_selected.players},
-            )
-        return HttpResponseRedirect(reverse("landing-page"))
-
-
 def profileOtherView(request, user_selected):
     user = CustomUser.objects.get(username=user_selected)
     return render(request, template_name="main/profile.html", context={"user": user})
@@ -300,10 +272,6 @@ def profileTeamOtherView(request, team_selected):
     return render(
         request, template_name="main/profileTeam.html", context={"myTeam": team}
     )
-
-
-class ProfileView(generic.TemplateView):
-    template_name = "main/profile.html"
 
 
 class LandingPageView(generic.TemplateView):
@@ -513,7 +481,6 @@ class RestTournaments(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-
 class RestTeams(generics.RetrieveUpdateAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
@@ -702,7 +669,6 @@ class AdminMenuView(generic.TemplateView):
             raise Http404
 
 
-
 class TournamentDetailsView(generic.View):
     def get(self, request, pk):
         try:
@@ -711,9 +677,12 @@ class TournamentDetailsView(generic.View):
             teams = []
             tournament = Tournament.objects.get(pk=pk)
             for elem in teams_data:
-                games_won, goals_scored, tied_games, lost_games = self.get_games_won_goals_scored(
-                    elem, tournament
-                )
+                (
+                    games_won,
+                    goals_scored,
+                    tied_games,
+                    lost_games,
+                ) = self.get_games_won_goals_scored(elem, tournament)
                 teams.append(
                     {
                         "id": elem.pk,

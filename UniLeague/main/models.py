@@ -87,8 +87,6 @@ class CustomUser(AbstractUser):
     hierarchy = models.IntegerField(null=False, default=0)
     image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
 
-
-
     # missing games and goals
 
     class Meta:
@@ -184,6 +182,7 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
+
 class TimeSlot(models.Model):
     """
     weekDay = models.CharField(max_length=512, null=False, default="")
@@ -216,7 +215,6 @@ class TimeSlot(models.Model):
 class Game(models.Model):
     cost = models.IntegerField(null=False, default=0)
     gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
-    score = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
     # timeslot not sure if ok
     timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)

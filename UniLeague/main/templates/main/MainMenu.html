@@ -30,7 +30,7 @@
             <ul id="ul_teams" class="list-group margin">
               {% if teams %}
                 {% for team in teams %}
-                <a href="/team/profile/{{team.pk}}"><li class="groupList list-group-item">{{team.name}}</li></a>
+                <a href="/teams/profile/{{team.id}}/"><li class="groupList list-group-item">{{team.name}}</li></a>
                 {% endfor %}
               {% else %}
                 <li class="groupList list-group-item">No Teams found</li>

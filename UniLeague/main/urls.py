@@ -14,7 +14,6 @@ não é preciso fazer nenhum get, fazes só request.user
 urlpatterns = [
     path("administration/", views.AdminMenuView.as_view(), name="admin-menu"),
     path("", views.LandingPageView.as_view(), name="landing-page"),
-
     path("logout/", views.log_out_request, name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
