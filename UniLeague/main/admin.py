@@ -9,9 +9,34 @@ from .models import Team
 from .models import Tactic
 from .models import TimeSlot
 from .models import Game
+from .models import GameWeekDay
+from .models import Day
+
 
 # Register your models here.
-admin.site.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
+    fields = [
+        "username",
+        "password",
+        "first_name",
+        "last_name",
+        "citizen_card",
+        "email",
+        "phone",
+        "budget",
+        "hierarchy",
+        "image",
+        "isConfirmed",
+        "isCaptain",
+        "isTournamentManager",
+        "is_superuser",
+        "is_active",
+        "is_staff",
+        "position",
+    ]
+
+
+admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Position)
 admin.site.register(Field)
 admin.site.register(Result)
@@ -20,3 +45,5 @@ admin.site.register(Team)
 admin.site.register(Tactic)
 admin.site.register(TimeSlot)
 admin.site.register(Game)
+admin.site.register(GameWeekDay)
+admin.site.register(Day)

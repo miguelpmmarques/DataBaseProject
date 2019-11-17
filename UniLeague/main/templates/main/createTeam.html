@@ -1,4 +1,11 @@
 {% extends 'main/navbar.html' %}
+{% load static %}
+
+<head>
+    <script src="{% static 'js/createTeam.js' %}"></script>
+
+</head>
+
     {% block body %}
       <h2>CREATE TEAM</h2>
       <form method="post">

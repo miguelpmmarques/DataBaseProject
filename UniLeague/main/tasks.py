@@ -22,7 +22,7 @@ def ask_admin_for_permissions(self, host, pk):
     try:
         user = CustomUser.objects.get(pk=pk)
         mail_subject = "Activate your UniLeague account."
-        admin = CustomUser.objects.filter(isAdmin=True).first()
+        admin = CustomUser.objects.filter(is_superuser=True).first()
         message = render_to_string(
             "main/email_activate_user.html",
             {"admin": admin, "user": user, "domain": host + "/users/validate"},
