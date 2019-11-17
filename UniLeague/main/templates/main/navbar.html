@@ -1,10 +1,12 @@
 {% load static %}
+{% load fontawesome_5 %}
 <html>
 
 <head>
     {% block head %}
     <title>Profile</title>
     {% endblock %}
+    {% fontawesome_5_static %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap  -->
@@ -38,7 +40,7 @@
                 {% if user.is_authenticated %}
                 {% if user.team_set.all %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/teams/profile/"> My Team </a>
+                    <a class="nav-link text-white" href="/teams/profile/captain/"> My Team </a>
                 </li>
                 {% else %}
                 <li class="nav-item">
@@ -62,7 +64,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li>
                     {% if user.is_authenticated %}
-                    <a class="nav-link text-white" href="/profile/"> Profile </a>
+                    <a class="nav-link text-white" href="/users/profile/{{user.pk}}"> Profile </a>
                     {% else %}
                     <a class="nav-link text-white" href="/register/"> Register </a>
                     {% endif %}

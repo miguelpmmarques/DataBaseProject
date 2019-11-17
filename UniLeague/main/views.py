@@ -1,4 +1,8 @@
 import json
+from operator import itemgetter
+import calendar
+from datetime import datetime, date, timedelta
+
 
 from django.shortcuts import render
 from django.views.generic import View
@@ -67,8 +71,25 @@ from .models import Tournament
 from .models import Day
 from .models import Field
 from .models import Team
+from .models import Result
+from .models import Game
+from .models import TimeSlot
+
+from .utils import Calendar
+from django.utils.safestring import mark_safe
 
 from time import sleep
+
+from django.views.generic.dates import YearArchiveView
+
+from .models import Game
+
+
+class BaseCalendarView(YearArchiveView):
+    model = TimeSlot
+    date_field = "start_time"
+    make_object_list = True
+    template_name = "main/calendar.html"
 
 
 # Create your views here.
@@ -117,24 +138,44 @@ class CreateTeam(generic.CreateView):
 class TeamView(generic.DetailView):
     template_name = "main/profileTeam.html"
 
-    def get(self, request):
-        if request.user.is_authenticated:
-            team_selected = Team.objects.get(captain=request.user.pk)
+    def get(self, request, param):
+        if param == "captain":
+            if request.user.isCaptain and Team.objects.filter(
+                captain__pk=request.user.pk
+            ):
+                team_selected = Team.objects.filter(captain__pk=request.user.pk).first()
+        else:
+            try:
+                pk = int(param)
+                team_selected = Team.objects.filter(pk=pk).first()
+            except ValueError:
+                team_selected = None
+        if team_selected:
             return render(
                 request,
                 template_name=self.template_name,
                 context={"myTeam": team_selected, "players": team_selected.players},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        raise Http404
+
+    """def get(self, request):
+        if request.user.is_authenticated:
+            try:
+                # ver --- Um user pode ser capitão de mais do que uma equipa?
+                team_selected = Team.objects.get(captain__pk=request.user.pk)
+                return render(
+                    request,
+                    template_name=self.template_name,
+                    context={"myTeam": team_selected, "players": team_selected.players},
+                )
+            except Team.DoesNotExist:
+                raise Http404
+        return HttpResponseRedirect(reverse("landing-page"))"""
 
 
-def profileOtherView(request, user_selected):
-    user = CustomUser.objects.get(username=user_selected)
-    return render(request, template_name="main/profile.html", context={"user": user})
-
-
-class ProfileView(generic.TemplateView):
+class ProfileView(generic.DetailView):
     template_name = "main/profile.html"
+    model = CustomUser
 
 
 class LandingPageView(generic.TemplateView):
@@ -344,12 +385,17 @@ class RestTournaments(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
 
+class RestTeams(generics.RetrieveUpdateAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated]
+
+
 class RestListTournaments(generics.ListAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
 
     def list(self, request, *args, **kwarg):
-        print("HERE")
         queryset = self.filter_queryset(self.get_queryset())
         params = request.query_params
         if params["name"] != "":
@@ -488,12 +534,14 @@ class RestTeamsList(generics.ListAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         params = request.query_params
-        if params["name"] != "":
-            queryset = queryset.filter(name__icontains=params["name"])
-        print("SET?===", queryset)
+        for key in params.keys():
+            if key == "name":
+                queryset = queryset.filter(name__icontains=params[key])
+            if key == "tournament_pk":
+                queryset = queryset.filter(tournament__pk=params[key])
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -522,3 +570,120 @@ class AdminMenuView(generic.TemplateView):
             )
         else:
             raise Http404
+
+
+class TournamentDetailsView(generic.View):
+    def get(self, request, pk):
+        try:
+            teams_data = Team.objects.filter(tournament__id=pk)
+
+            teams = []
+            tournament = Tournament.objects.get(pk=pk)
+            for elem in teams_data:
+                games_won, goals_scored, tied_games, lost_games = self.get_games_won_goals_scored(
+                    elem, tournament
+                )
+                teams.append(
+                    {
+                        "id": elem.pk,
+                        "name": elem.name,
+                        "points": (games_won * 3 + tied_games),
+                        "goals_scored": goals_scored,
+                    }
+                )
+            # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
+            print("teams===", teams)
+            teams = sorted(teams, key=itemgetter("points", "goals_scored"))
+            return render(
+                request,
+                template_name="main/tournamentDetails.html",
+                context={"tournament": tournament, "teams": teams},
+            )
+        except (Team.DoesNotExist, Tournament.DoesNotExist):
+            return JsonResponse(
+                {"teams": ["Nothing was Found"], "tournament": ["Nothing Was Found"]}
+            )
+
+    def get_games_won_goals_scored(self, team, tournament):
+        games_won = 0
+        goals_scored = 0
+        tied_games = 0
+        lost_games = 0
+        games = tournament.game_set.all()
+        for elem in games:
+            res_set = elem.result_set.all()
+            home = False
+            away = False
+            first_res = res_set.first()
+            second_res = res_set.last()
+            if first_res.home_team == team.name and second_res.home_team == team.name:
+                home = True
+            elif first_res.away_team == team.name and second_res.away_team == team.name:
+                away = True
+            if home or away:
+                if (
+                    first_res.home_score == second_res.home_score
+                    and first_res.away_score == second_res.away_score
+                ):
+                    if home:
+                        goals_scored += first_res.home_score
+                        if first_res.home_score > first_res.away_score:
+                            games_won += 1
+                        elif first_res.home_score < first_res.away_score:
+                            games_lost += 1
+                        else:
+                            tied_games += 1
+                    elif away:
+                        goals_scored += first_res.away_score
+                        if first_res.away_score > first_res.home_score:
+                            games_won += 1
+                        elif first_res.away_score < first_res.home_score:
+                            games_lost += 1
+                        else:
+                            tied_games += 1
+        return games_won, goals_scored, tied_games, lost_games
+
+
+class CalendarView(BaseCalendarView):
+    model = TimeSlot
+    template_name = "main/calendar.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # use today's date for the calendar
+        d = get_date(self.request.GET.get("month", None))
+        print("DATE===", d)
+        # Instantiate our calendar class with today's year and date
+        cal = Calendar(d.year, d.month)
+
+        # Call the formatmonth method, which returns our calendar as a table
+        html_cal = cal.formatmonth(withyear=True)
+        context["calendar"] = mark_safe(html_cal)
+        context["prev_month"] = prev_month(d)
+        context["next_month"] = next_month(d)
+
+        print("CONTEXT===", context)
+        return context
+
+
+def prev_month(d):
+    first = d.replace(day=1)
+    prev_month = first - timedelta(days=1)
+    month = "month=" + str(prev_month.year) + "-" + str(prev_month.month)
+    return month
+
+
+def next_month(d):
+    days_in_month = calendar.monthrange(d.year, d.month)[1]
+    last = d.replace(day=days_in_month)
+    next_month = last + timedelta(days=1)
+    month = "month=" + str(next_month.year) + "-" + str(next_month.month)
+    return month
+
+
+def get_date(req_day):
+    if req_day:
+        year, month = (int(x) for x in req_day.split("-"))
+        return date(year, month, day=1)
+    return datetime.today()
