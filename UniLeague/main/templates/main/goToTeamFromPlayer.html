@@ -21,8 +21,9 @@
     <br>
     <br>
     <div class="row">
+        <div class="col"></div>
         <div class="col-sm-10 text-center">
-            <h2 class="text-center">SEARCH FOR TEAMS</h2>
+            <h2 class="text-center">SEARCH FOR USERS</h2>
             <form class="form-inline d-flex justify-content-center" id="teams">
                 <i class="fas fa-search" aria-hidden="true"></i>
                 <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
@@ -32,9 +33,13 @@
             <ul id="ul_teams" class="list-group margin">
                 {% if users %}
                 {% for user in users %}
-                <a href="/users/profile/{{user.pk}}">
-                    <li class="groupList list-group-item">{{user.first_name}} {{user.last_name}}</li>
-                </a>
+                    <li class="groupList list-group-item">{{user.first_name}} {{user.last_name}} teams:
+                    <ul>
+                      {% for team in user.team_set.all %}
+                      <a href="/teams/profile/{{team.id}}"><li class="groupList list-group-item">{{team.name}}</li></a>
+                      {% endfor %}
+                    </ul>
+                    </li>
                 {% endfor %}
                 {% else %}
                 <li class="groupList list-group-item">No Teams found</li>
@@ -42,6 +47,7 @@
             </ul>
             {% endif %}
         </div>
+        <div class="col"></div>
     </div>
     {% endblock %}
 </body>
