@@ -141,6 +141,25 @@ class CreateTeam(generic.CreateView):
         return HttpResponseRedirect(reverse("main:landing-page"))
 
 
+class GoToTeamFromPlayer(generic.DetailView):
+    template_name = "main/goToTeamFromPlayer.html"
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        print(users)
+        usersToSend = []
+        for elem in users:
+            print(len(elem.team_set.all()))
+            if len(elem.team_set.all()) != 0:
+                usersToSend.append(elem)
+                # print(elem.team_set.all())
+        # usersTeam = CustomUser.objects.filter(CustomUser.team_set)
+        # print(usersTeam)
+        return render(
+            request, template_name=self.template_name, context={"users": usersToSend},
+        )
+
+
 class TeamView(generic.DetailView):
     template_name = "main/profileTeam.html"
 
@@ -296,6 +315,28 @@ def log_out_request(request):
     messages.info(request, "Logged out successfully!")
     print("Fez logout e chegou aqui")
     return HttpResponseRedirect(reverse("main:landing-page"))
+
+
+class CreateTournamentListView(generic.TemplateView):
+    template_name = "main/listTeam.html"
+
+    def get(self, request):
+        teams = Team.objects.all()
+        return render(
+            request, template_name=self.template_name, context={"teams": teams}
+        )
+
+
+class CreateTeamView(generic.TemplateView):
+    template_name = "main/listTournament.html"
+
+    def get(self, request):
+        tournaments = Tournament.objects.all()
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"tournaments": tournaments},
+        )
 
 
 # Create your views here.

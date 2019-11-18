@@ -21,11 +21,14 @@ urlpatterns = [
     path("users/validate/<int:pk>/", views.validate, name="validate"),
     path("users/validate/", views.validateMultiple, name="validate_multiple"),
     path(
+        "users/goToTeam/", views.GoToTeamFromPlayer.as_view(), name="validate_multiple"
+    ),
+    path(
         "users/rest/captains/<int:tournamentId>/<int:pk>/",
         views.RestCaptainsList.as_view(),
     ),
     path("users/profile/<int:pk>/", views.ProfileView.as_view(), name="profile"),
-    path("users/rest/<int:pk>", views.RestUsers.as_view()),
+    path("users/rest/<int:pk>/", views.RestUsers.as_view()),
     path("users/", include("django.contrib.auth.urls")),
     path("users/rest/list/patch/", views.RestUsersListPatch.as_view()),
     path("users/rest/list/", views.RestUsersList.as_view()),
@@ -33,6 +36,11 @@ urlpatterns = [
         "team/apply/<str:team_selected>",
         views.ChoosePositionView.as_view(),
         name="choosePosition",
+    ),
+    path(
+        "tournaments/list/",
+        views.CreateTournamentListView.as_view(),
+        name="createTournament",
     ),
     path(
         "tournaments/create/",
@@ -46,6 +54,7 @@ urlpatterns = [
         name="tournament-details",
     ),
     path("teams/create/", views.CreateTeam.as_view(), name="createTeam"),
+    path("teams/list/", views.CreateTeamView.as_view(), name="createTournament"),
     path("teams/profile/<str:param>/", views.TeamView.as_view(), name="TeamProfile"),
     path("teams/rest/<int:pk>/", views.RestTeams.as_view()),
     path("teams/rest/list/", views.RestTeamsList.as_view()),

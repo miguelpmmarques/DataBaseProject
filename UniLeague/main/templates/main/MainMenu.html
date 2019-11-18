@@ -15,9 +15,9 @@
     {% block body %}
     <script src="{% static 'js/adminMenu.js' %}"></script>
 
-    <!-- REGISTERED USER -->
     {% if user.is_authenticated %}
     <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
+<<<<<<< HEAD
       <!-- CAPTAIN -->
       {% if user.isCaptain %}
         <div class="row container">
@@ -68,6 +68,8 @@
       {% endif %}
 
     <!-- UNREGISTERED USER -->
+=======
+>>>>>>> 1840d3dc7bdc56fc4a931a140249c8119dc8d010
     {% else %}
     <h1 class="font-weight-bold text-center">Welcome</h1>
     <br>
