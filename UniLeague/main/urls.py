@@ -54,7 +54,7 @@ urlpatterns = [
         name="tournament-details",
     ),
     path("teams/create/", views.CreateTeam.as_view(), name="createTeam"),
-    path("teams/list/", views.CreateTeamView.as_view(), name="createTournament"),
+    path("teams/list/", views.CreateTeamView.as_view(), name="listTeam"),
     path("teams/profile/<str:param>/", views.TeamView.as_view(), name="TeamProfile"),
     path("teams/rest/<int:pk>/", views.RestTeams.as_view()),
     path("teams/rest/list/", views.RestTeamsList.as_view()),
