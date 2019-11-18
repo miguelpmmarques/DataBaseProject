@@ -21,6 +21,9 @@ urlpatterns = [
     path("users/validate/<int:pk>/", views.validate, name="validate"),
     path("users/validate/", views.validateMultiple, name="validate_multiple"),
     path(
+        "users/goToTeam/", views.GoToTeamFromPlayer.as_view(), name="validate_multiple"
+    ),
+    path(
         "users/rest/captains/<int:tournamentId>/<int:pk>/",
         views.RestCaptainsList.as_view(),
     ),

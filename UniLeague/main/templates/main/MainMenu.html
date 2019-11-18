@@ -15,12 +15,8 @@
     {% block body %}
     <script src="{% static 'js/adminMenu.js' %}"></script>
 
-    <!-- REGISTERED USER -->
     {% if user.is_authenticated %}
     <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
-      {% if user.}
-
-    <!-- UNREGISTERED USER -->
     {% else %}
     <h1 class="font-weight-bold text-center">Welcome</h1>
     <br>

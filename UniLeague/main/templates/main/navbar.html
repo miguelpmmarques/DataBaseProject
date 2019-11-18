@@ -51,13 +51,23 @@
                 {% endif %}
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#"> Go to Team from PLayer </a>
+                    <a class="nav-link text-white" href="/users/goToTeam/"> Go to Team from PLayer </a>
                 </li>
                 {% endif %}
                 {% if user.is_authenticated %}
+                {% if user.isTournamentManager %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="">My Tournaments </a>
+                </li>
+                {% else %}
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/tournaments/create/">Create Tournaments </a>
                 </li>
+                {% endif %}
+
+
+
+
                 {% endif %}
                 <li class="nav-item">
                     <a class="nav-link text-white" href="help.html"> Help </a>
