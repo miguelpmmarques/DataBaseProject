@@ -105,12 +105,17 @@ class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
     form_class = TeamCreationForm
 
+    tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
+    #need to create tactic serializer
+    # teams = TeamSerializer(Team.objects.all(), many=True).data
+
+
     def get(self, request):
         if request.user.is_authenticated:
             return render(
                 request,
                 template_name=self.template_name,
-                context={"form": self.form_class},
+                context={"form": self.form_class, "tournaments":tournaments},
             )
         return HttpResponseRedirect(reverse("main:landing-page"))
 

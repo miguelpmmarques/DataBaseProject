@@ -16,12 +16,10 @@
     <script src="{% static 'js/adminMenu.js' %}"></script>
 
     {% if user.is_authenticated %}
-    <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
-<<<<<<< HEAD
       <!-- CAPTAIN -->
       {% if user.isCaptain %}
-        <div class="row container">
-          <div class="col-3 container text-center mt-5">
+        <div class="row">
+          <div class="col-3 text-center mt-5">
             <!-- MANAGE TEAM BUTTON -->
             <button type="button" onclick="window.location.href='/teams/profile/captain/';" class="btn-lg">My team</button>
             <br>
@@ -30,9 +28,10 @@
 
           </div>
 
-          <div class="col-6 container alg-center">
+          <div class="col-6 text-center">
+            <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
               <!-- PLAYERS FROM TEAM PLACEHOLDER -->
-              <form class="form-inline d-flex justify-content-center mt-5" style="text-align: center;"id="teams">
+              <form class="form-inline justify-content-center mt-5" style="text-align: center;"id="teams">
                   <i class="fas fa-search" aria-hidden="true"></i>
                   <input id="input_players_team" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
               </form>
@@ -44,7 +43,7 @@
 
               <!-- CHANGE_PRIORITIES GIVE_PENALTY MAKE _CAPTAIN buttons -->
 
-              <div class="btn-group btn-group-center mr-3">
+              <div class="text-center mr-3">
                 <a href="#" class="btn btn-primary">Change Priority</a>
                 <a href="#" class="btn btn-primary">Give Penalty</a>
                 <a href="#" class="btn btn-primary">Make Captain</a>
@@ -52,24 +51,103 @@
 
               <!-- BUDGET PLACEHOLDER -->
               <br>
-              <label class="label label-default mt-5">Current Budget</label>
+              <label class="label label-default mt-5 t">Current Budget</label>
 
           </div>
 
-          <div class="col-3 container">
+          <div class="col-3">
             <!-- LOGO -->
 
           </div>
         </div>
-      {% elif user.isTournamentManager %}
 
+      <!-- TOURNAMENT MANAGER (nao sei bem o que preciso de meter aqui)-->
+      {% elif user.isTournamentManager %}
+        <div class="row">
+          <div class="col">
+            <h2 class="text-center">TEAM CAPTAINS</h2>
+            <form class="form-inline d-flex justify-content-center" id="teams">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="captians_search" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
+            </form>
+            <br>
+            {% if teams %}
+            <ul id="list_captains" class="list-group margin">
+                {% if teams %}
+                {% for team in teams %}
+                <a href="/users/profile/{{team.captain.id}}/">
+                    <li class="groupList list-group-item">{{team.captain.name}}</li>
+                </a>
+                {% endfor %}
+                {% else %}
+                <li class="groupList list-group-item">No Teams found</li>
+                {% endif %}
+            </ul>
+            {% endif %}
+          </div>
+
+          <div class="col">
+            <h2 class="text-center">TOURNAMENT TEAMS</h2>
+
+
+            <form class="form-inline d-flex justify-content-center" id="teams">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="teams_search" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
+            </form>
+            <br>
+            {% if teams %}
+            <ul id="teams_tournament" class="list-group margin">
+                {% if teams %}
+                {% for team in teams %}
+                <a href="/teams/profile/{{team.id}}/">
+                    <li class="groupList list-group-item">{{team.name}}</li>
+                </a>
+                {% endfor %}
+                {% else %}
+                <li class="groupList list-group-item">No Teams found</li>
+                {% endif %}
+            </ul>
+            {% endif %}
+            <div class="container text-center">
+              <a href="#" class="btn btn-primary m-auto">View Leaderboards</a>
+            </div>
+
+          </div>
+
+          <div class="col-2">
+            <!-- LOGO -->
+            <!-- CURRENT TIME -->
+          </div>
+        </div>
+        <br>
+        <div class="row text-center">
+          <h2 class="text-center m-auto">Tournament end:</h2>
+        </div>
+      <!-- REGULAR USER (FALTA QUANDO TEM EQUIPA)-->
       {% else %}
 
+        <div class="row">
+          <div class="col">
+            <!-- IF PLAYER HAS TEAM THIS APPEARS -->
+
+          </div>
+
+          <div class="col">
+            <div class="text-center mt-4">
+              <a href="#" class="btn btn-primary mt-4 menuButton">My Calendar</a>
+              <a href="#" class="btn btn-primary mt-4 menuButton">Find Tournament</a>
+              <a href="#" class="btn btn-primary mt-4 menuButton">Create Team</a>
+            </div>
+          </div>
+
+          <div class="col">
+            <!-- LOGO -->
+            <!-- CURRENT TIME -->
+          </div>
+        </div>
       {% endif %}
 
     <!-- UNREGISTERED USER -->
-=======
->>>>>>> 1840d3dc7bdc56fc4a931a140249c8119dc8d010
     {% else %}
     <h1 class="font-weight-bold text-center">Welcome</h1>
     <br>
