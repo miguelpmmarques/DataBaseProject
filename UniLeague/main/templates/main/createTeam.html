@@ -17,9 +17,9 @@
             {% csrf_token %}
             {{ form.as_p }}
 
-            <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br>
+            <!-- <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br> -->
 
-            <select name="tournament" class="mt-4" required id="id_tournament">
+            <!-- <select name="tournament" class="mt-4" required id="id_tournament">
               <option value="" selected="">Select a tournament</option>
               {% for t in form.fields.tournament.items %}
 
@@ -34,7 +34,7 @@
               {% for t in form.tournaments.items %}
                 <option value="">{{t}}</option>
               {% endfor %}
-            </select>
+            </select> -->
 
             <div class="text-center mt-4">
               <button type="submit">Create Team</button>
