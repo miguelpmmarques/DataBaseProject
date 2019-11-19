@@ -11,53 +11,254 @@
 {% block body %}
 {% csrf_token %}
 <h1 id="myTeam" name="{{myTeam.pk}}">Team: {{myTeam.name}}</h1>
+<div class="row">
 
-<div class="card bg-dark" style="width: 18rem;">
-    <div class="embed-responsive embed-responsive-4by3">
+
+  <div class="col-lg-5">
+    <div class="card bg-dark" style="width: 18rem;">
+      <div class="embed-responsive embed-responsive-4by3">
         <img id="captainImg" src="{{ MEDIA_URL }}/media/{{myTeam.captain.image}}" class="card-img-top embed-responsive-item" alt="...">
-    </div>
-    <div class="card-body">
+      </div>
+      <div class="card-body">
         <p class="card-text">Team Captain: {{myTeam.captain.first_name}} {{myTeam.captain.last_name}} </p>
         <p class="card-text">username: {{myTeam.captain.username}} </p>
         {% if user.pk == myTeam.captain.pk %}
         <select class=" form-control" id="exampleFormControlSelect1">
-            {% for player in myTeam.players.all %}
-            {% if player.pk == myTeam.captain.pk %}
-            <option value="{{player.pk}}" selected="selected">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
-            {% else %}
-            <option value="{{player.pk}}">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
-            {% endif %}
-            {% endfor %}
+          {% for player in myTeam.players.all %}
+          {% if player.pk == myTeam.captain.pk %}
+          <option value="{{player.pk}}" selected="selected">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
+          {% else %}
+          <option value="{{player.pk}}">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
+          {% endif %}
+          {% endfor %}
         </select>
         <br>
         <div class=" d-flex justify-content-center">
-            <button class="btn btn-light btn-outline-secondary" id="changeCaptain">
-                <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                Change Captain
-            </button>
+          <button class="btn btn-light btn-outline-secondary" id="changeCaptain">
+            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+            Change Captain
+          </button>
         </div>
         {% endif %}
+      </div>
     </div>
-</div>
-
-<h3 id="numberPlayer">Number of players: {{myTeam.players.all.count}}/{{myTeam.numberPlayers}}</h3>
-
-
-<div id="playerList">
-    <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
+    <h3 id="numberPlayer">Number of players: {{myTeam.players.all.count}}/{{myTeam.numberPlayers}}</h3>
+    <div id="playerList">
+      <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
         {% for elem in myTeam.players.all %}
         <li class="groupList list-group-item">{{forloop.counter}} -{{elem.first_name}} {{elem.last_name}} - {{elem.username}}
-            {% if user.pk == myTeam.captain.pk and user.isCaptain %}
-            <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
-            {% endif %}
-
+          {% if user.pk == myTeam.captain.pk and user.isCaptain %}
+          <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+          {% endif %}
         </li>
         {% endfor %}
-    </ul>
+      </ul>
+    </div>
+    {% if myTeam not in user.team_set.all or not user.is_authenticated%}
+    <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.name}}';">
+      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+      Join Team
+    </button>
+    {% else %}
+    <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.name}}';">
+      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+      Change Positions
+    </button>
+    {% endif %}
+    <p id="tournament">Tournament: {{myTeam.tournament.name}}</p>
+    <p id="tactic">Tactic: {{myTeam.tactic}}</p>
+    <img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
+  </div>
+  <div class="col-lg-6">
+
+    <h2>Tactic {{team.tactic}}</h2>
+    <form>
+      {% csrf_token %}
+
+      <div class="row ">
+        <div class="col-sm-6">
+          <h1 class="text-center"><b>STARTERS</b></h1>
+          <div class="row ">
+
+            <div class="col-lg-11 col-centered text-center">
+              {% for position in tactic.positions.all %}
+              {% if "Guarda" in  position.name and position.start == True %}
+              {% for customUser in position.users.all|slice:":1" %}
+              {% if team in customUser.team_set.all %}
+              <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+              {% endif %}
+              {% endfor %}
+              <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              {% for position in tactic.positions.all %}
+              {% if "Defesa" in  position.name and position.start == True %}
+              {% for customUser in position.users.all %}
+              {% if team in customUser.team_set.all %}
+              <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+              {% endif %}
+
+              {% empty %}
+              <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+              {% endfor %}
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              {% for position in tactic.positions.all %}
+              {% if "Medio" in  position.name and position.start == True %}
+              {% for customUser in position.users.all %}
+              {% if team in customUser.team_set.all %}
+              <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+              {% endif %}
+              {% empty %}
+              <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+              {% endfor %}
+              {% endif %}
+              {% endfor %}
+
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              {% for position in tactic.positions.all %}
+              {% if "Avancado" in  position.name and position.start == True %}
+              {% for customUser in position.users.all %}
+              {% if team in customUser.team_set.all %}
+              <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+              {% endif %}
+              {% empty %}
+              <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+              {% endfor %}
+              {% endif %}
+              {% endfor %}
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              {% for position in tactic.positions.all %}
+              {% if "Striker" in  position.name and position.start == True %}
+              {% for customUser in position.users.all %}
+              {% if team in customUser.team_set.all %}
+              <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+              {% endif %}
+              {% empty %}
+              <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+              {% endfor %}
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <h1><b>SUBSTITUTES</b></h1>
+          <div class="row ">
+            <div class="col-lg-11 col-centered text-center">
+              <div class="row ">
+                {% for position in tactic.positions.all %}
+                {% if "Guarda" in  position.name and position.start == False %}
+                {% for customUser in position.users.all %}
+                {% if team in customUser.team_set.all %}
+                <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+                {% endif %}
+                {% empty %}
+                <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+                <h1>Goalkeeper</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              <div class="row ">
+                {% for position in tactic.positions.all %}
+                {% if "Defesa" in  position.name and position.start == False %}
+                {% for customUser in position.users.all %}
+                {% if team in customUser.team_set.all %}
+                <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+                {% endif %}
+                {% empty %}
+                <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+                <h1>Defender</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              <div class="row ">
+                {% for position in tactic.positions.all %}
+                {% if "Medio" in  position.name and position.start == False %}
+                {% for customUser in position.users.all %}
+                {% if team in customUser.team_set.all %}
+                <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+                {% endif %}
+                {% empty %}
+                <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+                <h1>Midfielder</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              <div class="row ">
+                {% for position in tactic.positions.all %}
+                {% if "Avancado" in  position.name and position.start == False %}
+                {% for customUser in position.users.all %}
+                {% if team in customUser.team_set.all %}
+                <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+                {% endif %}
+                {% empty %}
+                <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+                <h1>Forward</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-11 col-centered text-center">
+              <div class="row ">
+                {% for position in tactic.positions.all %}
+                {% if "Striker" in  position.name and position.start == False %}
+                {% for customUser in position.users.all %}
+                {% if team in customUser.team_set.all %}
+                <button class="btn disabled" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+                {% endif %}
+                {% empty %}
+                <button class="btn positionBtn" onclick="window.location.href='/team/apply/{{team.name}}'" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+                <h1>Stricker</h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
-<p id="tournament">Tournament: {{myTeam.tournament.name}}</p>
-<p id="tactic">Tactic: {{myTeam.tactic}}</p>
-<img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 231a8a9e5d48843c777f052e1e16510ee4251896
 {% endblock %}

@@ -29,9 +29,13 @@ function main() {
     function myFunction(e){
       $.ajax({url: "",
             type: 'PATCH', timeout: 3000, data: { 'position': this.id }//, processData:false, contentType = 'application/json'
+        }).done(function(d){
+          if (d=="success"){
+            window.location.href = window.location.origin;
+          }
         })
         .fail(function(){
-            alert('Error updating this model instance.');
+            alert('Position already filled!');
         });
 
     }
