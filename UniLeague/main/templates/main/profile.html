@@ -30,10 +30,10 @@
         {% endfor %}
       </select>
       <div class="d-flex justify-content-center">
-          <button class="btn btn-light btn-outline-secondary" id="view_team" style="margin-top: 20px;">
-              <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-              View Team
-          </button>
+        <button class="btn btn-light btn-outline-secondary" id="{{team.name}}" style="margin-top: 20px;">
+            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+            View Team
+        </button>
       </div>
       <select class="form-control" id="tournaments" style="margin-top: 50px;">
         <option value="" selected="">Select a tournament</option>
@@ -70,8 +70,11 @@
 </div>
 
 
-
-
-
+<!--
+  profile photo
+  view team button
+  view tournament button
+  recent games
+-->
 
 {% endblock %}
