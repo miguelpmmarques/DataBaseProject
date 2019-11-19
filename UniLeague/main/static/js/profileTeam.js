@@ -65,6 +65,7 @@ function changeCaptainFun(e, old_captain, options) {
                             window.location.href = window.location.origin;
                         }
                     }
+                    data: data[elem] //, processData:false, contentType = 'application/json'
                 })
                 .fail(function() {
                     alert('Error updating this model instance.');

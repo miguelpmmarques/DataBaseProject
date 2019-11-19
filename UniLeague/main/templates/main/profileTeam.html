@@ -39,7 +39,9 @@
         {% endif %}
     </div>
 </div>
+
 <h3 id="numberPlayer">Number of players: {{myTeam.players.all.count}}/{{myTeam.numberPlayers}}</h3>
+
 
 <div id="playerList">
     <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
@@ -48,6 +50,7 @@
             {% if user.pk == myTeam.captain.pk and user.isCaptain %}
             <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
             {% endif %}
+
         </li>
         {% endfor %}
     </ul>
