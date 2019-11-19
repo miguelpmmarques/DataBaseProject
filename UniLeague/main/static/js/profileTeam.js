@@ -51,10 +51,20 @@ function changeCaptainFun(e, old_captain, options) {
         for (elem in urls) {
             console.log(data[elem]);
             console.log(urls[elem]);
+            console.log(elem);
             $.ajax({
                     url: urls[elem],
                     type: 'PATCH',
                     timeout: 3000,
+                    data: data[elem], //, processData:false, contentType = 'application/json'
+                    success: function(d) {
+                        console.log("INDEX====", elem);
+                        if (elem == 2) {
+                            console.log("HEREREREER");
+                            spinner.hidden = true;
+                            window.location.href = window.location.origin;
+                        }
+                    }
                     data: data[elem] //, processData:false, contentType = 'application/json'
                 })
                 .fail(function() {
