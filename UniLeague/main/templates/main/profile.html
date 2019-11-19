@@ -10,7 +10,7 @@
 <div class="container">
   <div class="row">
     <div class="col-sm">
-      <div class="card bg-dark rounded-lg" style="width: 30rem;">
+      <div class="card bg-dark rounded-lg background-color: #0B0C10;" style="width: 30rem;">
         <div class="embed-responsive embed-responsive-4by3">
             <img id="profileImg" src="{{ MEDIA_URL }}/media/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
         </div>
@@ -49,8 +49,22 @@
       </div>
     </div>
     <div class="col-sm">
-      <p>Most recent games:</p>
-      <button type="button" style="margin-top: 15px;" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+      <table class="table table-bordered table-striped table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th>Most recent games:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>TEAM: {{user.team_set.first}}</th>
+          </tr>
+          <tr>
+            <th>TEAM: {{user.team_set.first}}</th>
+          </tr>
+        </tbody>
+      </table>
+      <button type="button" style="background-color: #0B0C10; margin-top: 15px; position: fixed; bottom: 50px; right: 50px; width: 200px;" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
     </div>
   </div>
 </div>
