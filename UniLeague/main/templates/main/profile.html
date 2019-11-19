@@ -6,45 +6,58 @@
 
 {% block body %}
 {% csrf_token %}
-<h1 id="myProfile" name="{{user.name}}"> NAME {{user.first_name}} {{user.last_name}} </h1>
-<div class="card bg-dark" style="width: 18rem;">
-  <div class="embed-responsive embed-responsive-4by3">
-      <img id="profileImg" src="{{ MEDIA_URL }}/users/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
-  </div>
-  <div class="card-body">
-      <p class="card-text">E-mail: {{user.email}}</p>
-      <p class="card-text">Budget: {{user.budget}}</p>
-      <p class="card-text">Games: {{user.games}}</p>
-      <p class="card-text">Goals: {{user.goals}}</p>
+<h1 id="myProfile" style="text-align: center; margin-bottom: 50px; margin-top: 50px" name="{{user.name}}"> NAME {{user.first_name}} {{user.last_name}} </h1>
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      <div class="card bg-dark rounded-lg" style="width: 30rem;">
+        <div class="embed-responsive embed-responsive-4by3">
+            <img id="profileImg" src="{{ MEDIA_URL }}/media/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
+        </div>
+        <div class="card-body">
+            <p class="card-text">E-mail: {{user.email}}</p>
+            <p class="card-text">Budget: {{user.budget}}</p>
+            <p class="card-text">Games: {{user.games}}</p>
+            <p class="card-text">Goals: {{user.goals}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm" style="margin-right: 100px; margin-left: 100px;">
       <select class="form-control" id="teams">
         <option value="" selected="">Select a team</option>
         {% for team in user.team_set.all %}
           <option value="">{{team}}</option>
         {% endfor %}
       </select>
-      <div class=" d-flex justify-content-center">
-          <button class="btn btn-light btn-outline-secondary" id="view_team">
+      <div class="d-flex justify-content-center">
+          <button class="btn btn-light btn-outline-secondary" id="view_team" style="margin-top: 20px;">
               <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
               View Team
           </button>
       </div>
-      <select class="form-control" id="tournaments">
+      <select class="form-control" id="tournaments" style="margin-top: 50px;">
         <option value="" selected="">Select a tournament</option>
         {% for tournament in user. %}
           <option value="">{{tournament}}</option>
         {% endfor %}
       </select>
-      <div class=" d-flex justify-content-center">
-          <button class="btn btn-light btn-outline-secondary" id="view_tourmament">
+      <div class="d-flex justify-content-center">
+          <button class="btn btn-light btn-outline-secondary" id="view_tourmament" style="margin-top: 20px;">
               <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
               View Tournament
           </button>
       </div>
+    </div>
+    <div class="col-sm">
+      <p>Most recent games:</p>
+      <button type="button" style="margin-top: 15px;" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+    </div>
   </div>
 </div>
 
-<p>Most recent games:</p>
-<button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+
+
+
 
 
 {% endblock %}
