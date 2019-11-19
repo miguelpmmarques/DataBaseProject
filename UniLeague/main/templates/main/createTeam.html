@@ -6,6 +6,21 @@
 
 </head>
 
+
+{% block body %}
+<div class="row">
+    <div class="col"></div>
+
+    <div class="col">
+        <h2 class="text-center">CREATE TEAM</h2>
+
+        <form class="mt-4" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <!-- <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br> -->
+
+            <!-- <select name="tournament" class="mt-4" required id="id_tournament">
     {% block body %}
       <div class="row">
         <div class="col"></div>
@@ -17,14 +32,18 @@
             {% csrf_token %}
             {{ form.as_p }}
 
-            <!-- <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br> -->
+            <!-- <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br>
 
-            <!-- <select name="tournament" class="mt-4" required id="id_tournament">
+            <select name="tournament" class="mt-4" required id="id_tournament">
+
               <option value="" selected="">Select a tournament</option>
-              {% for t in form.fields.tournament.items %}
+              {% if tournaments %}
+                {% for t in tournaments %}
 
-                <option value="">{{t}}</option>
-              {% endfor %}
+                  <option>{{t.name}}</option>
+                {% endfor %}
+              {% endif %}
+
             </select><br>
 
             <input type="file" class="mt-4" name="teamLogo" accept="image/*" id="id_teamLogo">
@@ -36,6 +55,7 @@
               {% endfor %}
             </select> -->
 
+
             <div class="text-center mt-4">
               <button type="submit">Create Team</button>
             </div>
@@ -45,3 +65,4 @@
         <div class="col"></div>
       </div>
     {% endblock %}
+
