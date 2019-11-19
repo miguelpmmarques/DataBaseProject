@@ -30,10 +30,21 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DATE_INPUT_FORMATS = ("%d-%m-%Y", "%Y-%m-%d")
 
-ALLOWED_HOSTS = []
-
+# IN ORDER TO STORE IMAGES
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 MEDIA_URL = "/media/"
+OPTIONS = {
+    "context_processors": [
+        "django.template.context_processors.debug",
+        "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth",
+        "django.contrib.messages.context_processors.messages",
+        "django.template.context_processors.media",
+    ]
+}
+
+ALLOWED_HOSTS = []
+
 
 DJANGO_NATIVE_APPS = [
     "django.contrib.admin",
@@ -48,7 +59,12 @@ DJANGO_TRUSTED_APPS = ["rest_framework"]
 
 DEVELOPED_APPS = ["main"]
 # Application definition
-THIRD_PARTY_APPS = ["celery", "django_celery_results", "phonenumber_field"]
+THIRD_PARTY_APPS = [
+    "celery",
+    "django_celery_results",
+    "phonenumber_field",
+    "fontawesome_5",
+]
 
 INSTALLED_APPS = (
     DJANGO_NATIVE_APPS + DJANGO_TRUSTED_APPS + DEVELOPED_APPS + THIRD_PARTY_APPS
@@ -83,7 +99,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "UniLeague.wsgi.application"
-
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

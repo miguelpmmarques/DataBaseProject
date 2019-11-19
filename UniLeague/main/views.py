@@ -1,5 +1,9 @@
 import json
 
+from operator import itemgetter
+import calendar
+from datetime import datetime, date, timedelta
+
 from django.shortcuts import render
 from django.views.generic import View
 from rest_framework import generics
@@ -59,6 +63,8 @@ from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
 from .forms import TournamentCreationForm
 from .forms import TeamCreationForm
+from .forms import PositionsForm
+
 
 # from .forms import CustomUserLoginForm
 from .models import CustomUser
@@ -68,7 +74,28 @@ from .models import Day
 from .models import Field
 from .models import Team
 
+from .models import Position
+
+from .models import Result
+from .models import Game
+from .models import TimeSlot
+
+from .utils import Calendar
+from django.utils.safestring import mark_safe
+
+
 from time import sleep
+
+from django.views.generic.dates import YearArchiveView
+
+from .models import Game
+
+
+class BaseCalendarView(YearArchiveView):
+    model = TimeSlot
+    date_field = "start_time"
+    make_object_list = True
+    template_name = "main/calendar.html"
 
 
 # Create your views here.
@@ -78,14 +105,19 @@ class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
     form_class = TeamCreationForm
 
+    tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
+    #need to create tactic serializer
+    # teams = TeamSerializer(Team.objects.all(), many=True).data
+
+
     def get(self, request):
         if request.user.is_authenticated:
             return render(
                 request,
                 template_name=self.template_name,
-                context={"form": self.form_class},
+                context={"form": self.form_class, "tournaments":tournaments},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -102,6 +134,7 @@ class CreateTeam(generic.CreateView):
                         user.isCaptain = True
                         user.save()
                         team.save()
+                        team.players.add(user)
                 except IntegrityError as err:
                     print("Database Integrity error:", err)
                     return HttpResponse(
@@ -110,22 +143,206 @@ class CreateTeam(generic.CreateView):
 
                 return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
             return HttpResponse("Please Fill all Fields")
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
 
-class ProfileView(generic.TemplateView):
+class GoToTeamFromPlayer(generic.DetailView):
+    template_name = "main/goToTeamFromPlayer.html"
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        print(users)
+        usersToSend = []
+        for elem in users:
+            print(len(elem.team_set.all()))
+            if len(elem.team_set.all()) != 0:
+                usersToSend.append(elem)
+                # print(elem.team_set.all())
+        # usersTeam = CustomUser.objects.filter(CustomUser.team_set)
+        # print(usersTeam)
+        return render(
+            request, template_name=self.template_name, context={"users": usersToSend},
+        )
+
+
+class TeamView(generic.DetailView):
+    template_name = "main/profileTeam.html"
+
+    def get(self, request, param):
+        if param == "captain":
+            if request.user.isCaptain and Team.objects.filter(
+                captain__pk=request.user.pk
+            ):
+                team_selected = Team.objects.filter(captain__pk=request.user.pk).first()
+        else:
+            try:
+                pk = int(param)
+                team_selected = Team.objects.filter(pk=pk).first()
+            except ValueError:
+                team_selected = None
+        if team_selected:
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"myTeam": team_selected, "players": team_selected.players},
+            )
+        raise Http404
+
+    """def get(self, request):
+        if request.user.is_authenticated:
+            try:
+                # ver --- Um user pode ser capitão de mais do que uma equipa?
+                team_selected = Team.objects.get(captain__pk=request.user.pk)
+                return render(
+                    request,
+                    template_name=self.template_name,
+                    context={"myTeam": team_selected, "players": team_selected.players},
+                )
+            except Team.DoesNotExist:
+                raise Http404
+        return HttpResponseRedirect(reverse("landing-page"))"""
+
+
+class ProfileView(generic.DetailView):
     template_name = "main/profile.html"
+    model = CustomUser
+
+
+# Create your views here.
+
+
+class CreateTeam(generic.CreateView):
+    template_name = "main/createTeam.html"
+    form_class = TeamCreationForm
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"form": self.form_class},
+            )
+        return HttpResponseRedirect(reverse("main:landing-page"))
+
+    def post(self, request):
+        """
+        overriding native post method, for e-mail sending with token verification
+        """
+        user = request.user
+        if user.is_authenticated:
+            form = TeamCreationForm(request.POST)
+            if form.is_valid():
+                try:
+                    with transaction.atomic():
+                        team = form.save(commit=False)
+                        team.captain = user
+                        user.isCaptain = True
+                        user.save()
+                        team.save()
+                        team.players.add(user)
+                except IntegrityError as err:
+                    print("Database Integrity error:", err)
+                    return HttpResponse(
+                        "Critical database error\nUnable to save your user\nPlease try again"
+                    )
+                return HttpResponseRedirect("/team/apply/" + team.name)
+            return HttpResponse("Please Fill all Fields")
+        return HttpResponseRedirect(reverse("main:landing-page"))
+
+
+class ChoosePositionView(generics.RetrieveUpdateAPIView):
+    template_name = "main/teamApply.html"
+    allowed_methods = "PATCH"
+
+    def get(self, request, team_selected):
+
+        team = Team.objects.get(name=team_selected)
+        tactic = team.tactic
+
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"team": team, "tactic": tactic},
+        )
+
+    def patch(self, request, team_selected):
+        team = Team.objects.get(name=team_selected)
+
+        try:
+            position = team.tactic.positions.get(name=request.data["position"])
+            position.users.add(request.user)
+            position.save()
+            # data_copy.update({"position": position.pk})
+            # data_copy = CustomUserSerializer(request.user).data.copy()
+            # new_pos = data_copy["position"]
+            # CustomUserSerializer(request.user, {"position": new_pos}, partial=True)
+
+        except Position.DoesNotExist:
+            raise Http404
+        print(request.data["position"])
+
+        return Response("success")
+        # return HttpResponseRedirect(reverse("landing-page"))
+
+
+def profileOtherView(request, user_selected):
+    user = CustomUser.objects.get(username=user_selected)
+    return render(request, template_name="main/profile.html", context={"user": user})
+
+
+def profileTeamOtherView(request, team_selected):
+    print("Chegou aqui")
+    team = Team.objects.get(name=team_selected)
+    return render(
+        request, template_name="main/profileTeam.html", context={"myTeam": team}
+    )
 
 
 class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
+
+    def get(self, request):
+        try:
+            tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
+            teams = TeamSerializer(Team.objects.all(), many=True).data
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"teams": teams, "tournaments": tournaments},
+            )
+
+        except (Tournament.DoesNotExist, Team.DoesNotExist) as err:
+            raise Http404
 
 
 def log_out_request(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
     print("Fez logout e chegou aqui")
-    return HttpResponseRedirect(reverse("landing-page"))
+    return HttpResponseRedirect(reverse("main:landing-page"))
+
+
+class CreateTournamentListView(generic.TemplateView):
+    template_name = "main/listTournament.html"
+
+    def get(self, request):
+
+        tournaments = Tournament.objects.all()
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"tournaments": tournaments},
+        )
+
+
+class CreateTeamView(generic.TemplateView):
+    template_name = "main/listTeam.html"
+
+    def get(self, request):
+        teams = Team.objects.all()
+        return render(
+            request, template_name=self.template_name, context={"teams": teams}
+        )
 
 
 # Create your views here.
@@ -140,7 +357,7 @@ class LoginView(generic.CreateView):
                 template_name=self.template_name,
                 context={"form": self.form_class},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -266,7 +483,7 @@ class CreateTournamentView(APIView):
                 context={"labels": self.labels},
             )
         else:
-            return HttpResponseRedirect(reverse("landing-page"))
+            return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         if request.user.is_authenticated:
@@ -302,7 +519,7 @@ class CreateTournamentView(APIView):
                 return Response({"sucess": True})
             return Response({"errors": serializer.errors})
         else:
-            return HttpResponseRedirect(reverse("landing-page"))
+            return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 class RestTournaments(generics.RetrieveUpdateAPIView):
@@ -311,13 +528,17 @@ class RestTournaments(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
 
+class RestTeams(generics.RetrieveUpdateAPIView):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated]
+
+
 class RestListTournaments(generics.ListAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
-    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwarg):
-        print("HERE")
         queryset = self.filter_queryset(self.get_queryset())
         params = request.query_params
         if params["name"] != "":
@@ -455,14 +676,16 @@ class RestCaptainsList(RestUsers):
 class RestTeamsList(generics.ListAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         params = request.query_params
-        if params["name"] != "":
-            queryset = queryset.filter(name__icontains=params["name"])
-        print("SET?===", queryset)
+        for key in params.keys():
+            if key == "name":
+                queryset = queryset.filter(name__icontains=params[key])
+            if key == "tournament_pk":
+                queryset = queryset.filter(tournament__pk=params[key])
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -491,3 +714,123 @@ class AdminMenuView(generic.TemplateView):
             )
         else:
             raise Http404
+
+
+class TournamentDetailsView(generic.View):
+    def get(self, request, pk):
+        try:
+            teams_data = Team.objects.filter(tournament__id=pk)
+
+            teams = []
+            tournament = Tournament.objects.get(pk=pk)
+            for elem in teams_data:
+                (
+                    games_won,
+                    goals_scored,
+                    tied_games,
+                    lost_games,
+                ) = self.get_games_won_goals_scored(elem, tournament)
+                teams.append(
+                    {
+                        "id": elem.pk,
+                        "name": elem.name,
+                        "points": (games_won * 3 + tied_games),
+                        "goals_scored": goals_scored,
+                    }
+                )
+            # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
+            print("teams===", teams)
+            teams = sorted(teams, key=itemgetter("points", "goals_scored"))
+            return render(
+                request,
+                template_name="main/tournamentDetails.html",
+                context={"tournament": tournament, "teams": teams},
+            )
+        except (Team.DoesNotExist, Tournament.DoesNotExist):
+            return JsonResponse(
+                {"teams": ["Nothing was Found"], "tournament": ["Nothing Was Found"]}
+            )
+
+    def get_games_won_goals_scored(self, team, tournament):
+        games_won = 0
+        goals_scored = 0
+        tied_games = 0
+        lost_games = 0
+        games = tournament.game_set.all()
+        for elem in games:
+            res_set = elem.result_set.all()
+            home = False
+            away = False
+            first_res = res_set.first()
+            second_res = res_set.last()
+            if first_res.home_team == team.name and second_res.home_team == team.name:
+                home = True
+            elif first_res.away_team == team.name and second_res.away_team == team.name:
+                away = True
+            if home or away:
+                if (
+                    first_res.home_score == second_res.home_score
+                    and first_res.away_score == second_res.away_score
+                ):
+                    if home:
+                        goals_scored += first_res.home_score
+                        if first_res.home_score > first_res.away_score:
+                            games_won += 1
+                        elif first_res.home_score < first_res.away_score:
+                            games_lost += 1
+                        else:
+                            tied_games += 1
+                    elif away:
+                        goals_scored += first_res.away_score
+                        if first_res.away_score > first_res.home_score:
+                            games_won += 1
+                        elif first_res.away_score < first_res.home_score:
+                            games_lost += 1
+                        else:
+                            tied_games += 1
+        return games_won, goals_scored, tied_games, lost_games
+
+
+class CalendarView(BaseCalendarView):
+    model = TimeSlot
+    template_name = "main/calendar.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # use today's date for the calendar
+        d = get_date(self.request.GET.get("month", None))
+        print("DATE===", d)
+        # Instantiate our calendar class with today's year and date
+        cal = Calendar(d.year, d.month)
+
+        # Call the formatmonth method, which returns our calendar as a table
+        html_cal = cal.formatmonth(withyear=True)
+        context["calendar"] = mark_safe(html_cal)
+        context["prev_month"] = prev_month(d)
+        context["next_month"] = next_month(d)
+
+        print("CONTEXT===", context)
+        return context
+
+
+def prev_month(d):
+    first = d.replace(day=1)
+    prev_month = first - timedelta(days=1)
+    month = "month=" + str(prev_month.year) + "-" + str(prev_month.month)
+    return month
+
+
+def next_month(d):
+    days_in_month = calendar.monthrange(d.year, d.month)[1]
+    last = d.replace(day=days_in_month)
+    next_month = last + timedelta(days=1)
+    month = "month=" + str(next_month.year) + "-" + str(next_month.month)
+    return month
+
+
+def get_date(req_day):
+    if req_day:
+        year, month = (int(x) for x in req_day.split("-"))
+        return date(year, month, day=1)
+    return datetime.today()

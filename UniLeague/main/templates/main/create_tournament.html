@@ -1,55 +1,113 @@
-{% include 'main/base_auth.html' %}
+{% include 'main/navbar.html' %}
 {% load static %}
-{% block title %}Create Tournament{% endblock %}
+<!-- {% block title %}Create Tournament{% endblock %} -->
 
-<head>
-    <!-- javascript for this page-->
-    <script src="{% static 'js/createTournaments.js' %}"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha256-siyOpF/pBWUPgIcQi17TLBkjvNgNQArcmwJB8YvkAgg=" crossorigin="anonymous" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha256-bqVeqGdJ7h/lYPq6xrPv/YGzMEb6dNxlfiTUHSgRCp8=" crossorigin="anonymous"></script>
-</head>
 
-<br>
+{% block imports %}
+  <script src="{% static 'js/createTournaments.js' %}"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha256-siyOpF/pBWUPgIcQi17TLBkjvNgNQArcmwJB8YvkAgg=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha256-bqVeqGdJ7h/lYPq6xrPv/YGzMEb6dNxlfiTUHSgRCp8=" crossorigin="anonymous"></script>
+{% endblock %}
 {% block content %}
-<form method="post" enctype="multipart/form-data">
+{% block body %}
+<br>
+<form method="post" class="text-center m-auto" enctype="multipart/form-data">
+    <h1><b>CREATE TOURNAMENT</b></h1>
     {% csrf_token %}
-    {% if labels %}
-    {% for k, v in labels.items %}
-    {% if k == "days_without_games" %}
-    <br><label for="datepicker">{{v.value}}:</label>
-    <div id="datepicker" name="datepicker">
-        <input type="text" class="form-control" hidden="true" name="{{k}}" required>
-    </div>
-    <br>
-    {% elif k == "fields" %}
-    <br><label for="{{k}}">{{v.value}}:</label><br>
-    <select name="{{k}}" multiple>
-        {% for field in v.choices %}
-        <option value="{{field.id}}">{{field.name}}</option>
-        {% endfor %}
-    </select>
-    {% elif k == "game_week_days" %}
-    <br><label for="{{k}}">{{v.value}}:</label><br>
-    <fieldset id="{{k}}" name="{{k}}">
-        {% for elem in v.choices %}
-        <input type="{{v.type}}" name="{{elem}}" id="{{elem}}">{{elem}} </input> <br>
-        {% endfor %}
-    </fieldset>
-    {% else %}
-    <br><label for="{{k}}">{{v.value}}</label><br>
-    <input type="{{v.type}}" name="{{k}}" id="{{k}}" required><br>
-    {% endif %}
-    {% endfor %}
 
-    {% else %}
-    <h1>Some Error occured</h1>
-    {%  endif %}
+      <!-- TEST CAROUSEL -->
+      <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval= false>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <div class="container m-auto text-center align-center">
+            {% for k, v in labels.items %}
+              {% if k == "name" %}
+                <input type="{{v.type}}" class="mt-3 mr-5 w-50 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+              {% elif k == "number_teams" %}
+                <input type="{{v.type}}" class="mt-3 mr-5 w-50 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+              {% elif k == "number_of_hands" %}
+                <input type="{{v.type}}" class="mt-3 mr-5 w-50 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
+              {% endif %}
+            {% endfor %}
+            </div>
+
+            <div class="container">
+              {% for k, v in labels.items %}
+                {% if k == "fields" %}
+                  <br><label for="{{k}}">{{v.value}}:</label><br>
+                  <select name="{{k}}" multiple>
+                      {% for field in v.choices %}
+                      <option value="{{field.id}}">{{field.name}}</option>
+                      {% endfor %}
+                  </select>
+                  {% endif %}
+                {% endfor %}
+              </div>
+          </div>
+          <div class="carousel-item">
+            <div class="container m-auto text-center justify-content-center">
+              {% for k, v in labels.items %}
+                {% if k == "beginTournament" %}
+                  <br><label for="{{k}}" class="mt-5 text-center">{{v.value}}:</label><br>
+                  <input type="{{v.type}}" class="mr-5 text-center"  name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
+                {% elif k == "endTournament" %}
+                  <br><label for="{{k}}" class="mt-5 text-center">{{v.value}}:</label><br>
+                  <input type="{{v.type}}" class="mr-5 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+
+                {% elif k == "game_week_days" %}
+
+                <label for="{{k}}" class="mt-5">{{v.value}}:</label><br>
+                <fieldset id="{{k}}"  name="{{k}}">
+                    {% for elem in v.choices %}
+                      <input type="{{v.type}}" name="{{elem}}" id="{{elem}}">{{elem}} </input>
+                    {% endfor %}
+                </fieldset>
 
 
-    <button type="submit" id="create">Create Tournament</button>
-</form>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="carousel-item">
+
+            <div class="row">
+              <div class="col"></div>
+              <div class="col-2">
+                {% for k, v in labels.items %}
+
+                  {% if k == "days_without_games" %}
+                    <br><label for="datepicker" class="mt-2 ">{{v.value}}:</label>
+
+                    <div id="datepicker" class= "mt-2 datepicker-center inline-block center-block block"name="datepicker">
+                        <input type="text" class="form-control" hidden="true" name="{{k}}" required>
+                    </div>
+
+                  {% endif %}
+                {% endfor %}
+                <button type="submit" class="mt-2"id="create">Create Tournament</button>
+              </div>
+              <div class="col"></div>
+            </div>
+          </div>
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+
+
+    </form>
+
+
+</div>
+{% endblock %}
 {% endblock %}
