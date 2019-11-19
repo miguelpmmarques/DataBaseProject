@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block body %}
-
-<h1 id="teamName">Team: {{myTeam.name}}</h1>
+{% csrf_token %}
+<h1 id="myTeam" name="{{myTeam.pk}}">Team: {{myTeam.name}}</h1>
 
 <div class="card bg-dark" style="width: 18rem;">
     <div class="embed-responsive embed-responsive-4by3">

@@ -105,12 +105,17 @@ class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
     form_class = TeamCreationForm
 
+    tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
+    #need to create tactic serializer
+    # teams = TeamSerializer(Team.objects.all(), many=True).data
+
+
     def get(self, request):
         if request.user.is_authenticated:
             return render(
                 request,
                 template_name=self.template_name,
-                context={"form": self.form_class},
+                context={"form": self.form_class, "tournaments":tournaments},
             )
         return HttpResponseRedirect(reverse("main:landing-page"))
 
@@ -139,6 +144,25 @@ class CreateTeam(generic.CreateView):
                 return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
             return HttpResponse("Please Fill all Fields")
         return HttpResponseRedirect(reverse("main:landing-page"))
+
+
+class GoToTeamFromPlayer(generic.DetailView):
+    template_name = "main/goToTeamFromPlayer.html"
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        print(users)
+        usersToSend = []
+        for elem in users:
+            print(len(elem.team_set.all()))
+            if len(elem.team_set.all()) != 0:
+                usersToSend.append(elem)
+                # print(elem.team_set.all())
+        # usersTeam = CustomUser.objects.filter(CustomUser.team_set)
+        # print(usersTeam)
+        return render(
+            request, template_name=self.template_name, context={"users": usersToSend},
+        )
 
 
 class TeamView(generic.DetailView):
@@ -298,6 +322,28 @@ def log_out_request(request):
     return HttpResponseRedirect(reverse("main:landing-page"))
 
 
+class CreateTournamentListView(generic.TemplateView):
+    template_name = "main/listTeam.html"
+
+    def get(self, request):
+        teams = Team.objects.all()
+        return render(
+            request, template_name=self.template_name, context={"teams": teams}
+        )
+
+
+class CreateTeamView(generic.TemplateView):
+    template_name = "main/listTournament.html"
+
+    def get(self, request):
+        tournaments = Tournament.objects.all()
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"tournaments": tournaments},
+        )
+
+
 # Create your views here.
 class LoginView(generic.CreateView):
     template_name = "main/login.html"
@@ -373,6 +419,9 @@ class RegisterView(generic.CreateView):
         print(form.errors)
         return HttpResponse("Please Fill all Fields")
 
+
+class HelpView(generic.TemplateView):
+    template_name="main/help.html"
 
 class CreateTournamentView(APIView):
     # form_class = TournamentCreationForm
@@ -473,7 +522,6 @@ class CreateTournamentView(APIView):
             return Response({"errors": serializer.errors})
         else:
             return HttpResponseRedirect(reverse("main:landing-page"))
-
 
 class RestTournaments(generics.RetrieveUpdateAPIView):
     queryset = Tournament.objects.all()
