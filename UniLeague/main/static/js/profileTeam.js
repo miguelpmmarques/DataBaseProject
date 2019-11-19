@@ -52,10 +52,12 @@ function changeCaptainFun(e, old_captain, options) {
             console.log(data[elem]);
             console.log(urls[elem]);
             console.log(elem);
+
             $.ajax({
                     url: urls[elem],
                     type: 'PATCH',
                     timeout: 3000,
+
                     data: data[elem], //, processData:false, contentType = 'application/json'
                     success: function(d) {
                         console.log("INDEX====", elem);
@@ -65,6 +67,7 @@ function changeCaptainFun(e, old_captain, options) {
                             window.location.href = window.location.origin;
                         }
                     }
+
                     data: data[elem] //, processData:false, contentType = 'application/json'
                 })
                 .fail(function() {
