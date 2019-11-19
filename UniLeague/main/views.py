@@ -323,24 +323,27 @@ def log_out_request(request):
 
 
 class CreateTournamentListView(generic.TemplateView):
+    template_name = "main/listTournament.html"
+
+    def get(self, request):
+
+        tournaments = Tournament.objects.all()
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"tournaments": tournaments},
+
+        )
+
+
+class CreateTeamView(generic.TemplateView):
     template_name = "main/listTeam.html"
 
     def get(self, request):
         teams = Team.objects.all()
         return render(
             request, template_name=self.template_name, context={"teams": teams}
-        )
 
-
-class CreateTeamView(generic.TemplateView):
-    template_name = "main/listTournament.html"
-
-    def get(self, request):
-        tournaments = Tournament.objects.all()
-        return render(
-            request,
-            template_name=self.template_name,
-            context={"tournaments": tournaments},
         )
 
 
@@ -419,6 +422,9 @@ class RegisterView(generic.CreateView):
         print(form.errors)
         return HttpResponse("Please Fill all Fields")
 
+
+class HelpView(generic.TemplateView):
+    template_name="main/help.html"
 
 class CreateTournamentView(APIView):
     # form_class = TournamentCreationForm
@@ -519,7 +525,6 @@ class CreateTournamentView(APIView):
             return Response({"errors": serializer.errors})
         else:
             return HttpResponseRedirect(reverse("main:landing-page"))
-
 
 class RestTournaments(generics.RetrieveUpdateAPIView):
     queryset = Tournament.objects.all()
