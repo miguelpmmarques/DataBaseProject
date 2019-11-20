@@ -21,6 +21,7 @@
         <div class="col-lg-11 col-centered text-center">
           {% for position in tactic.positions.all %}
           {% if "Guarda" in  position.name and position.start == True %}
+          
           {% for customUser in position.users.all %}
           {% if team in customUser.team_set.all %}
           <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
