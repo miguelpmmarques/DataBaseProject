@@ -556,6 +556,7 @@ def validateMultiple(request):
     if users.exists():
         return render(
             request,
+            queryset = CustomUser.objects.all(),
             template_name="main/admin_validation_multiple.html",
             context={"users": serializer.data},
         )
@@ -564,7 +565,6 @@ def validateMultiple(request):
 
 
 class RestUsers(generics.RetrieveUpdateAPIView):
-    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -795,3 +795,36 @@ def get_date(req_day):
         year, month = (int(x) for x in req_day.split("-"))
         return date(year, month, day=1)
     return datetime.today()
+
+
+class GameView(generic.DetailView):
+    model = Game
+    template_name = "main/game.html"
+
+
+    def get(self, request, pk):
+        try:
+            pk = int(param)
+            team_selected = Team.objects.filter(pk=pk).first()
+        except ValueError:
+            team_selected = None
+
+        selected_game = Game.objects.filter(pk = pk).first()
+        final_score = selected_game.result_set
+
+        if final_score.first() == final_score.last():
+
+            if selected_game:
+                return render(
+                    request,
+                    template_name=self.template_name,
+                    context={
+                        "game": selected_game,
+                        "result": final_score
+                    }
+                )
+                raise Http404
+
+        else:
+            #mandar notify ao admin
+            return HttpResponse("Aguardar resposta do tournament manager")
