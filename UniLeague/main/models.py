@@ -242,12 +242,8 @@ class Team(models.Model):
 
 class TeamUser(models.Model):
     isCaptain = models.BooleanField(null=False, default=True)
-    player = models.ForeignKey(
-        CustomUser, blank=True, related_name="player", on_delete=models.PROTECT
-    )
-    team = models.ForeignKey(
-        Team, blank=True, related_name="team", on_delete=models.PROTECT
-    )
+    player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
     position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
 
     class Meta:

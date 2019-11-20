@@ -43,10 +43,9 @@
                     <a class="nav-link text-white" href="/teams/list/"> Teams </a>
                 </li>
                 {% if user.is_authenticated %}
-                <p>oi{{user.teamuser_set.all}}</p>
                 {% if user.teamuser_set.all %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/teams/profile/captain/"> My Team </a>
+                    <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a>
                 </li>
                 {% else %}
                 <li class="nav-item">
