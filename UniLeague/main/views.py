@@ -94,6 +94,8 @@ from django.views.generic.dates import YearArchiveView
 
 from .models import Game
 
+# TINYURL.COM/SISTEMAS19
+
 
 class BaseCalendarView(YearArchiveView):
     model = TimeSlot
@@ -129,12 +131,18 @@ class GoToTeamFromPlayer(generic.DetailView):
 class TeamView(generic.DetailView):
     template_name = "main/profileTeam.html"
 
-    def get(self, request, param):
-        if param == "captain":
-            if request.user.teamuser_set.isCaptain and Team.objects.filter(
-                captain__pk=request.user.pk
-            ):
-                team_selected = Team.objects.filter(captain__pk=request.user.pk).first()
+    def get(self, request, pk):
+        teamuser = (
+            TeamUser.objects.all()
+            .filter(team__pk=pk)
+            .filter(player__pk=request.user.id)
+        ).first()
+
+        print(teamuser)
+        if teamuser.isCaptain:
+            print(request.user.teamuser_set.all)
+
+            team_selected = teamuser.team
         else:
             try:
                 pk = int(param)
@@ -142,13 +150,40 @@ class TeamView(generic.DetailView):
             except ValueError:
                 team_selected = None
         if team_selected:
+            print("__________________________")
+            print(
+                TeamUser.objects.filter(team__pk=team_selected.pk).values_list(
+                    "position", flat=True
+                )
+            )
+            for elem in TeamUser.objects.filter(team__pk=team_selected.pk).values_list(
+                "position", flat=True
+            ):
+                print(elem)
+
             return render(
                 request,
                 template_name=self.template_name,
                 context={
+                    "captain": CustomUser.objects.get(
+                        pk__in=list(
+                            TeamUser.objects.filter(team__pk=team_selected.pk)
+                            .filter(isCaptain=True)
+                            .values_list("player", flat=True)
+                        )
+                    ),
                     "myTeam": team_selected,
-                    "players": team_selected.players,
+                    "players": CustomUser.objects.filter(
+                        pk__in=list(
+                            TeamUser.objects.filter(
+                                team__pk=team_selected.pk
+                            ).values_list("player", flat=True)
+                        )
+                    ),
                     "tactic": team_selected.tactic,
+                    "positionsOcupied": TeamUser.objects.filter(
+                        team__pk=team_selected.pk
+                    ).values_list("position", flat=True),
                 },
             )
         raise Http404
@@ -258,7 +293,7 @@ class LandingPageView(generic.TemplateView):
 
     def get(self, request):
         print(TeamUser.objects.filter(player__pk=request.user.pk))
-        print(request.user.teamuser_set.all())
+        print(request.user.teamuser_set.all().first())
         try:
             tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
             teams = TeamSerializer(Team.objects.all(), many=True).data
