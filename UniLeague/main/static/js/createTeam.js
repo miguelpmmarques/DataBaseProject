@@ -10,7 +10,7 @@ function main() {
         window.location.href = window.location.origin;
     }
     var failure_helper = function(e) {
-        console.log(e);;
+        console.log(e);
     }
     $("form").submit(function(e) {
         e.preventDefault();

@@ -17,14 +17,16 @@
             <ul id="ul_users" class="list-group margin" style="width: 29vw; height: 40vw; overflow: auto;">
                 {% for elem in users %}
                 <li class="groupList list-group-item">{{elem.first_name}} {{elem.last_name}} (
-                    {% if elem.isCaptain %}
-                    Captain
-                    {% elif elem.isTournamentManager %}
-                    Tournament Manager
-                    {% else %}
-                    Player
+                  {% if elem.isTournamentManager %}
+                  Tournament Manager
+                  {% else %}
+                  {% for team_user in elem.teamuser_set.all %}
+                    {% if team_user.isCaptain %}
+                    Captain in Team {team_user.team.name}
+                    {% else%}
+                    Player in Team {team_user.team.name}
                     {% endif %}
-                    )
+                  {% endfor %}
                 </li>
                 {% endfor %}
             </ul>

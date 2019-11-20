@@ -34,7 +34,7 @@ urlpatterns = [
     path("users/rest/list/patch/", views.RestUsersListPatch.as_view()),
     path("users/rest/list/", views.RestUsersList.as_view()),
     path(
-        "team/apply/<str:team_selected>",
+        "team/apply/<str:team_selected>/",
         views.ChoosePositionView.as_view(),
         name="choosePosition",
     ),

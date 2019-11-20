@@ -47,7 +47,6 @@ class CustomUser(AbstractUser):
     isConfirmed = models.BooleanField(null=False, default=True)
     # Privilegies
     email = models.EmailField(unique=True)
-    isCaptain = models.BooleanField(null=False, default=False)
     isTournamentManager = models.BooleanField(null=False, default=False)
     # is_superuser(admin) is already
     # Atributes
@@ -75,7 +74,6 @@ class CustomUser(AbstractUser):
 class Position(models.Model):
     name = models.CharField(max_length=512, unique=True, null=False, default="")
     start = models.BooleanField()
-    users = models.ManyToManyField(CustomUser)
 
     class Meta:
         db_table = "Position"
@@ -226,8 +224,7 @@ class Team(models.Model):
     name = models.CharField(max_length=512, null=False, default="")
     numberPlayers = models.IntegerField(null=True, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
-    players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
-    captain = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    # players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
     tactic = models.ForeignKey(Tactic, null=True, on_delete=models.PROTECT)
     teamLogo = models.ImageField(
         upload_to="images/", null=True, verbose_name="teamLogo", blank=True
@@ -241,3 +238,22 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name + str(self.teamLogo)
+
+
+class TeamUser(models.Model):
+    isCaptain = models.BooleanField(null=False, default=True)
+    player = models.ForeignKey(
+        CustomUser, blank=True, related_name="player", on_delete=models.PROTECT
+    )
+    team = models.ForeignKey(
+        Team, blank=True, related_name="team", on_delete=models.PROTECT
+    )
+    position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "TeamUser"
+        verbose_name = "EquipaUtilizador"
+        verbose_name_plural = "EquipaUtilizadores"
+
+    def __str__(self):
+        return self.player.username + " - " + self.team.name
