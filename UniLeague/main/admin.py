@@ -11,6 +11,7 @@ from .models import TimeSlot
 from .models import Game
 from .models import GameWeekDay
 from .models import Day
+from .models import TeamUser
 
 
 # Register your models here.
@@ -27,12 +28,10 @@ class CustomUserAdmin(admin.ModelAdmin):
         "hierarchy",
         "image",
         "isConfirmed",
-        "isCaptain",
         "isTournamentManager",
         "is_superuser",
         "is_active",
         "is_staff",
-        "position",
     ]
 
 
@@ -47,3 +46,4 @@ admin.site.register(TimeSlot)
 admin.site.register(Game)
 admin.site.register(GameWeekDay)
 admin.site.register(Day)
+admin.site.register(TeamUser)

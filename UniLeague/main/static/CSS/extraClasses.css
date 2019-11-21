@@ -1,5 +1,7 @@
 .background {
-    background-image: radial-gradient(circle, #2ba84a, #2aa145, #299941, #27923c, #268b38, #18823d, #0a7a41, #007143, #006449, #0f564a, #214844, #2d3a3a);
+    /* background-image: radial-gradient(circle, #2ba84a, #2aa145, #299941, #27923c, #268b38, #18823d, #0a7a41, #007143, #006449, #0f564a, #214844, #2d3a3a); */
+    background-image: radial-gradient(circle, #ff785a, #c7576a, #834363, #433146, #191919);
+
     overflow-x: hidden;
 }
 
@@ -9,7 +11,7 @@
     font-size: 30px;
 }
 .positionBtn:hover{
-  border: 2px solid #4CAF50; 
+  border: 2px solid #4CAF50;
 }
 .navbar .navbar-collapse {
     text-align: center;
@@ -25,6 +27,14 @@ margin: 0 auto;
 .logoNavBar {
     width: 70px;
     height: 70px;
+}
+
+.myTeamNav{
+  font-size: 20px;
+  font-weight: bold;
+}
+.myTeamNav:hover {
+    font-size: 25px;
 }
 
 a {
@@ -59,4 +69,34 @@ a:hover {
     transition: 0.5s;
     -webkit-transition: 0.5s;
 
+}
+
+.split {
+  height: 100%;
+  width: 33%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}
+
+.middle {
+  right: 33%;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }

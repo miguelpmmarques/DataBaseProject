@@ -42,40 +42,11 @@ class Day(models.Model):
         return str(self.day)
 
 
-class GameWeekDay(models.Model):
-    DAYS_OF_WEEK = (
-        ("0", "Monday"),
-        ("1", "Tuesday"),
-        ("2", "Wednesday"),
-        ("3", "Thursday"),
-        ("4", "Friday"),
-        ("5", "Saturday"),
-        ("6", "Sunday"),
-    )
-
-    week_day = models.CharField(
-        max_length=2, choices=DAYS_OF_WEEK, null=False, default=0
-    )
-
-    class Meta:
-        db_table = "WeekDay"
-        verbose_name = "Dia de Semana"
-        verbose_name_plural = "Dias de Semana"
-        ordering = ["-week_day"]
-
-    def get_week_day(self):
-        return str(self.DAYS_OF_WEEK[int(self.week_day)][1])
-
-    def __str__(self):
-        return self.get_week_day()
-
-
 class CustomUser(AbstractUser):
     # has confirmed by email
     isConfirmed = models.BooleanField(null=False, default=True)
     # Privilegies
     email = models.EmailField(unique=True)
-    isCaptain = models.BooleanField(null=False, default=False)
     isTournamentManager = models.BooleanField(null=False, default=False)
     # is_superuser(admin) is already
     # Atributes
@@ -86,8 +57,6 @@ class CustomUser(AbstractUser):
     budget = models.BigIntegerField(null=False, default=0)
     hierarchy = models.IntegerField(null=False, default=0)
     image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
-
-
 
     # missing games and goals
 
@@ -105,7 +74,6 @@ class CustomUser(AbstractUser):
 class Position(models.Model):
     name = models.CharField(max_length=512, unique=True, null=False, default="")
     start = models.BooleanField()
-    users = models.ManyToManyField(CustomUser)
 
     class Meta:
         db_table = "Position"
@@ -145,19 +113,6 @@ class GameWeekDay(models.Model):
         return self.get_week_day()
 
 
-class Day(models.Model):
-    day = models.DateField(null=True)
-
-    class Meta:
-        db_table = "Day"
-        verbose_name = "Dia"
-        verbose_name_plural = "Dias"
-        ordering = ["-day"]
-
-    def __str__(self):
-        return str(self.day)
-
-
 class Tournament(models.Model):
     name = models.CharField(max_length=512, null=False, unique=True, default="")
     beginTournament = models.DateTimeField(null=True)
@@ -183,6 +138,7 @@ class Tournament(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class TimeSlot(models.Model):
     """
@@ -216,7 +172,6 @@ class TimeSlot(models.Model):
 class Game(models.Model):
     cost = models.IntegerField(null=False, default=0)
     gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
-    score = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
     # timeslot not sure if ok
     timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
@@ -269,8 +224,7 @@ class Team(models.Model):
     name = models.CharField(max_length=512, null=False, default="")
     numberPlayers = models.IntegerField(null=True, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
-    players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
-    captain = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    # players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
     tactic = models.ForeignKey(Tactic, null=True, on_delete=models.PROTECT)
     teamLogo = models.ImageField(
         upload_to="images/", null=True, verbose_name="teamLogo", blank=True
@@ -284,3 +238,18 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name + str(self.teamLogo)
+
+
+class TeamUser(models.Model):
+    isCaptain = models.BooleanField(null=False, default=True)
+    player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
+    position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "TeamUser"
+        verbose_name = "EquipaUtilizador"
+        verbose_name_plural = "EquipaUtilizadores"
+
+    def __str__(self):
+        return self.player.username + " - " + self.team.name

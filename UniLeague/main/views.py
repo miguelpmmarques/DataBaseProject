@@ -58,6 +58,8 @@ from .serializers import GameWeekDaySerializer
 from .serializers import TournamentSerializer
 from .serializers import FieldSerializer
 from .serializers import TeamSerializer
+from .serializers import PositionSerializer
+
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
 from .forms import CustomUserForm
@@ -73,6 +75,8 @@ from .models import Tournament
 from .models import Day
 from .models import Field
 from .models import Team
+from .models import TeamUser
+from .models import Tactic
 
 from .models import Position
 
@@ -90,6 +94,8 @@ from django.views.generic.dates import YearArchiveView
 
 from .models import Game
 
+# TINYURL.COM/SISTEMAS19
+
 
 class BaseCalendarView(YearArchiveView):
     model = TimeSlot
@@ -101,82 +107,83 @@ class BaseCalendarView(YearArchiveView):
 # Create your views here.
 
 
-class CreateTeam(generic.CreateView):
-    template_name = "main/createTeam.html"
-    form_class = TeamCreationForm
+class GoToTeamFromPlayer(generic.DetailView):
+    template_name = "main/goToTeamFromPlayer.html"
 
     def get(self, request):
-        if request.user.is_authenticated:
-            return render(
-                request,
-                template_name=self.template_name,
-                context={"form": self.form_class},
-            )
-        return HttpResponseRedirect(reverse("landing-page"))
 
-    def post(self, request):
-        """
-        overriding native post method, for e-mail sending with token verification
-        """
-        user = request.user
-        if user.is_authenticated:
-            form = TeamCreationForm(request.POST)
-            if form.is_valid():
-                try:
-                    with transaction.atomic():
-                        team = form.save(commit=False)
-                        team.captain = user
-                        user.isCaptain = True
-                        user.save()
-                        team.save()
-                        team.players.add(user)
-                except IntegrityError as err:
-                    print("Database Integrity error:", err)
-                    return HttpResponse(
-                        "Critical database error\nUnable to save your user\nPlease try again"
-                    )
-
-                return HttpResponse("GOOD JOB MR CAPTAIN, YOUR TEAM WAS CREATED!")
-            return HttpResponse("Please Fill all Fields")
-        return HttpResponseRedirect(reverse("landing-page"))
+        teamuser = TeamUser.objects.all()
+        usersToSend = []
+        for elem in teamuser:
+            usersToSend.append(elem.player)
+        """users = CustomUser.objects.all()
+        print(users)
+        for elem in users:
+            print(len(elem.team_set.all()))
+            if len(elem.team_set.all()) != 0:
+                usersToSend.append(elem)
+                # print(elem.team_set.all())"""
+        return render(
+            request, template_name=self.template_name, context={"users": usersToSend},
+        )
 
 
 class TeamView(generic.DetailView):
     template_name = "main/profileTeam.html"
 
-    def get(self, request, param):
-        if param == "captain":
-            if request.user.isCaptain and Team.objects.filter(
-                captain__pk=request.user.pk
-            ):
-                team_selected = Team.objects.filter(captain__pk=request.user.pk).first()
-        else:
-            try:
-                pk = int(param)
-                team_selected = Team.objects.filter(pk=pk).first()
-            except ValueError:
-                team_selected = None
-        if team_selected:
-            return render(
-                request,
-                template_name=self.template_name,
-                context={"myTeam": team_selected, "players": team_selected.players},
-            )
-        raise Http404
-
-    """def get(self, request):
+    def get(self, request, pk):
+        print(request.user)
         if request.user.is_authenticated:
-            try:
-                # ver --- Um user pode ser capitão de mais do que uma equipa?
-                team_selected = Team.objects.get(captain__pk=request.user.pk)
-                return render(
-                    request,
-                    template_name=self.template_name,
-                    context={"myTeam": team_selected, "players": team_selected.players},
-                )
-            except Team.DoesNotExist:
-                raise Http404
-        return HttpResponseRedirect(reverse("landing-page"))"""
+
+            teamuser = (
+                TeamUser.objects.all()
+                .filter(team__pk=pk)
+                .filter(player__pk=request.user.id)
+            ).first()
+
+            print(teamuser)
+            if teamuser == None:
+                team_selected = Team.objects.filter(pk=pk).first()
+            else:
+                if teamuser.isCaptain:
+                    print(request.user.teamuser_set.all)
+
+                    team_selected = teamuser.team
+                else:
+                    try:
+                        team_selected = Team.objects.filter(pk=pk).first()
+                    except ValueError:
+                        team_selected = None
+        else:
+            team_selected = Team.objects.get(pk=pk)
+
+        return render(
+            request,
+            template_name=self.template_name,
+            context={
+                "captain": CustomUser.objects.get(
+                    pk__in=list(
+                        TeamUser.objects.filter(team__pk=team_selected.pk)
+                        .filter(isCaptain=True)
+                        .values_list("player", flat=True)
+                    )
+                ),
+                "myTeam": team_selected,
+                "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
+                "players": CustomUser.objects.filter(
+                    pk__in=list(
+                        TeamUser.objects.filter(team__pk=team_selected.pk).values_list(
+                            "player", flat=True
+                        )
+                    )
+                ),
+                "tactic": team_selected.tactic,
+                "positionsOcupied": TeamUser.objects.filter(
+                    team__pk=team_selected.pk
+                ).values_list("position", flat=True),
+            },
+        )
+        raise Http404
 
 
 class ProfileView(generic.DetailView):
@@ -184,9 +191,6 @@ class ProfileView(generic.DetailView):
     model = CustomUser
 
 
-# Create your views here.
-
-
 class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
     form_class = TeamCreationForm
@@ -198,7 +202,7 @@ class CreateTeam(generic.CreateView):
                 template_name=self.template_name,
                 context={"form": self.form_class},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -208,85 +212,73 @@ class CreateTeam(generic.CreateView):
         if user.is_authenticated:
             form = TeamCreationForm(request.POST)
             if form.is_valid():
-                try:
-                    with transaction.atomic():
-                        team = form.save(commit=False)
-                        team.captain = user
-                        user.isCaptain = True
-                        user.save()
-                        team.save()
-                        team.players.add(user)
-                except IntegrityError as err:
-                    print("Database Integrity error:", err)
-                    return HttpResponse(
-                        "Critical database error\nUnable to save your user\nPlease try again"
-                    )
-                return HttpResponseRedirect("/team/apply/" + team.name)
+                team = form.save(commit=False)
+                request.session["team_form"] = TeamSerializer(team).data
+                return redirect("/team/apply/0/")
+
             return HttpResponse("Please Fill all Fields")
-        return HttpResponseRedirect(reverse("landing-page"))
-
-
-class TeamView(generic.DetailView):
-    template_name = "main/profileTeam.html"
-
-    def get(self, request):
-        if request.user.is_authenticated:
-            team_selected = Team.objects.get(captain=request.user.pk)
-            return render(
-                request,
-                template_name=self.template_name,
-                context={"myTeam": team_selected, "players": team_selected.players},
-            )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 class ChoosePositionView(generics.RetrieveUpdateAPIView):
     template_name = "main/teamApply.html"
     allowed_methods = "PATCH"
+    serializer_class = PositionSerializer
 
-    def get(self, request, team_selected):
+    def get(self, request, pk):
+        team_selected = Team.objects.filter(pk=pk).first()
+        print(team_selected)
+        if not team_selected:
+            team_serialized = request.session["team_form"]
+            tactic = Tactic.objects.get(pk=team_serialized["tactic"])
 
-        team = Team.objects.get(name=team_selected)
-        tactic = team.tactic
-
-        return render(
-            request,
-            template_name=self.template_name,
-            context={"team": team, "tactic": tactic},
-        )
-
-    def patch(self, request, team_selected):
-        team = Team.objects.get(name=team_selected)
-
-        try:
-            position = team.tactic.positions.get(name=request.data["position"])
-            position.users.add(request.user)
-            position.save()
-            # data_copy.update({"position": position.pk})
-            # data_copy = CustomUserSerializer(request.user).data.copy()
-            # new_pos = data_copy["position"]
-            # CustomUserSerializer(request.user, {"position": new_pos}, partial=True)
-
-        except Position.DoesNotExist:
-            raise Http404
-        print(request.data["position"])
-
-        return Response("success")
-        # return HttpResponseRedirect(reverse("landing-page"))
-
-
-class TeamView(generic.DetailView):
-    template_name = "main/profileTeam.html"
-
-    def get(self, request):
-        if request.user.is_authenticated:
-            team_selected = Team.objects.get(captain=request.user.pk)
             return render(
                 request,
                 template_name=self.template_name,
-                context={"myTeam": team_selected, "players": team_selected.players},
+                context={"team": team_serialized, "tactic": tactic},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        else:
+            return render(
+                request,
+                template_name=self.template_name,
+                context={
+                    "team": team_selected,
+                    "tactic": team_selected.tactic,
+                    "positionsOcupied": TeamUser.objects.filter(
+                        team__pk=team_selected.pk
+                    ).values_list("position", flat=True),
+                },
+            )
+
+    def patch(self, request, pk):
+        try:
+            position = Position.objects.get(name=request.data["position"])
+            team_exists = Team.objects.get(pk=pk)
+
+        except Position.DoesNotExist:
+            raise Http404
+        except Team.DoesNotExist:
+            team_serialized = request.session["team_form"]
+            team = TeamSerializer(data=team_serialized)
+            team_serialized = request.session["team_form"]
+            if team.is_valid(raise_exception=True):
+                print("GUARDOU")
+                new_team = team.save()
+                TeamUser.objects.create(
+                    isCaptain=True,
+                    player=request.user,
+                    team=new_team,
+                    position=position,
+                ).save()
+                return Response("success")
+            else:
+                print("\n\n" + team.errors)
+        TeamUser.objects.create(
+            isCaptain=False, player=request.user, team=team_exists, position=position,
+        ).save()
+        print(request.data["position"])
+
+        return Response("success")
 
 
 def profileOtherView(request, user_selected):
@@ -300,10 +292,6 @@ def profileTeamOtherView(request, team_selected):
     return render(
         request, template_name="main/profileTeam.html", context={"myTeam": team}
     )
-
-
-class ProfileView(generic.TemplateView):
-    template_name = "main/profile.html"
 
 
 class LandingPageView(generic.TemplateView):
@@ -327,7 +315,31 @@ def log_out_request(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
     print("Fez logout e chegou aqui")
-    return HttpResponseRedirect(reverse("landing-page"))
+    return HttpResponseRedirect(reverse("main:landing-page"))
+
+
+class CreateTournamentListView(generic.TemplateView):
+    template_name = "main/listTournament.html"
+
+    def get(self, request):
+        tournaments = Tournament.objects.all()
+        return render(
+            request,
+            template_name=self.template_name,
+            context={"tournaments": tournaments},
+        )
+
+
+class CreateTeamView(generic.TemplateView):
+    template_name = "main/listTeam.html"
+
+    def get(self, request):
+
+        team = Team.objects.all()
+        print(team)
+        return render(
+            request, template_name=self.template_name, context={"teams": team},
+        )
 
 
 # Create your views here.
@@ -342,7 +354,7 @@ class LoginView(generic.CreateView):
                 template_name=self.template_name,
                 context={"form": self.form_class},
             )
-        return HttpResponseRedirect(reverse("landing-page"))
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         """
@@ -404,6 +416,10 @@ class RegisterView(generic.CreateView):
             )
         print(form.errors)
         return HttpResponse("Please Fill all Fields")
+
+
+class HelpView(generic.TemplateView):
+    template_name = "main/help.html"
 
 
 class CreateTournamentView(APIView):
@@ -468,7 +484,7 @@ class CreateTournamentView(APIView):
                 context={"labels": self.labels},
             )
         else:
-            return HttpResponseRedirect(reverse("landing-page"))
+            return HttpResponseRedirect(reverse("main:landing-page"))
 
     def post(self, request):
         if request.user.is_authenticated:
@@ -504,14 +520,13 @@ class CreateTournamentView(APIView):
                 return Response({"sucess": True})
             return Response({"errors": serializer.errors})
         else:
-            return HttpResponseRedirect(reverse("landing-page"))
+            return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 class RestTournaments(generics.RetrieveUpdateAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
     permission_classes = [IsAuthenticated]
-
 
 
 class RestTeams(generics.RetrieveUpdateAPIView):
@@ -642,11 +657,11 @@ class RestUsersList(generics.ListAPIView):
 
 
 class RestCaptainsList(RestUsers):
-    queryset = CustomUser.objects.filter(isCaptain=True)
+    queryset = TeamUser.objects.filter(isCaptain=True)
 
     def list(self, request, tournamentId):
 
-        q_set = CustomUser.objects.filter(isCaptain=True).team_set(
+        q_set = TeamUser.objects.filter(isCaptain=True).team(
             tournament__pk=tournamentId
         )
         print(q_set)
@@ -702,7 +717,6 @@ class AdminMenuView(generic.TemplateView):
             raise Http404
 
 
-
 class TournamentDetailsView(generic.View):
     def get(self, request, pk):
         try:
@@ -711,9 +725,12 @@ class TournamentDetailsView(generic.View):
             teams = []
             tournament = Tournament.objects.get(pk=pk)
             for elem in teams_data:
-                games_won, goals_scored, tied_games, lost_games = self.get_games_won_goals_scored(
-                    elem, tournament
-                )
+                (
+                    games_won,
+                    goals_scored,
+                    tied_games,
+                    lost_games,
+                ) = self.get_games_won_goals_scored(elem, tournament)
                 teams.append(
                     {
                         "id": elem.pk,

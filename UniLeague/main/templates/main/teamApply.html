@@ -7,10 +7,10 @@
 {% endblock %}
 {% block body %}
 
-<h1> Apply to <b>{{team}}</b> </h1>
+<h1> Apply to <b>{{team.name}}</b> </h1>
 <br>
 <br>
-<h2>Tactic {{team.tactic}}</h2>
+<h2>Tactic {{tactic.name}}</h2>
 <form>
     {% csrf_token %}
   <div class="row ">
@@ -20,7 +20,7 @@
         <div class="col-lg-11 col-centered text-center">
           {% for position in tactic.positions.all %}
           {% if "Guarda" in  position.name and position.start == True %}
-          {% if position.users.all %}
+          {% if position.id in positionsOcupied %}
           <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
           {% else %}
           <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
@@ -33,10 +33,10 @@
         <div class="col-lg-11 col-centered text-center">
           {% for position in tactic.positions.all %}
           {% if "Defesa" in  position.name and position.start == True %}
-          {% if position.users.all %}
-          <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+          {% if position.id in positionsOcupied %}
+          <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
           {% else %}
-          <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+          <button class="btn positionBtn"id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
           {% endif %}
           {% endif %}
           {% endfor %}
@@ -46,8 +46,8 @@
         <div class="col-lg-11 col-centered text-center">
           {% for position in tactic.positions.all %}
           {% if "Medio" in  position.name and position.start == True %}
-          {% if position.users.all %}
-          <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+          {% if position.id in positionsOcupied %}
+          <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
           {% else %}
           <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
           {% endif %}
@@ -59,22 +59,21 @@
         <div class="col-lg-11 col-centered text-center">
           {% for position in tactic.positions.all %}
           {% if "Avancado" in  position.name and position.start == True %}
-          {% if position.users.all %}
-          <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+          {% if position.id in positionsOcupied %}
+          <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
           {% else %}
-          <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
+          <button class="btn positionBtn"id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
           {% endif %}
           {% endif %}
           {% endfor %}
         </div>
-
       </div>
       <div class="row">
         <div class="col-lg-11 col-centered text-center">
           {% for position in tactic.positions.all %}
           {% if "Striker" in  position.name and position.start == True %}
-          {% if position.users.all %}
-          <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+          {% if position.id in positionsOcupied %}
+          <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
           {% else %}
           <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
           {% endif %}
@@ -90,8 +89,8 @@
           <div class="row ">
             {% for position in tactic.positions.all %}
             {% if "Guarda" in  position.name and position.start == False %}
-            {% if position.users.all %}
-            <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+            {% if position.id in positionsOcupied %}
+            <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
             {% else %}
             <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
             {% endif %}
@@ -106,8 +105,8 @@
           <div class="row ">
             {% for position in tactic.positions.all %}
             {% if "Defesa" in  position.name and position.start == False %}
-            {% if position.users.all %}
-            <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+            {% if position.id in positionsOcupied %}
+            <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
             {% else %}
             <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
             {% endif %}
@@ -122,8 +121,8 @@
           <div class="row ">
             {% for position in tactic.positions.all %}
             {% if "Medio" in  position.name and position.start == False %}
-            {% if position.users.all %}
-            <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+            {% if position.id in positionsOcupied %}
+            <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
             {% else %}
             <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
             {% endif %}
@@ -138,8 +137,8 @@
           <div class="row ">
             {% for position in tactic.positions.all %}
             {% if "Avancado" in  position.name and position.start == False %}
-            {% if position.users.all %}
-            <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+            {% if position.id in positionsOcupied %}
+            <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
             {% else %}
             <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
             {% endif %}
@@ -154,8 +153,8 @@
           <div class="row ">
             {% for position in tactic.positions.all %}
             {% if "Striker" in  position.name and position.start == False %}
-            {% if position.users.all %}
-            <button class="btn disabled" type="button" name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
+            {% if position.id in positionsOcupied %}
+            <button class="btn disabled"  name="button"><img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt=""></button>
             {% else %}
             <button class="btn positionBtn" id="{{position.name}}" type="submit" name="button"> <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt=""></button>
             {% endif %}
@@ -167,7 +166,7 @@
       </div>
     </div>
 
-  </div>
+    </div>
 </form>
 
 

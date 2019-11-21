@@ -6,11 +6,23 @@
 
 </head>
 
-    {% block body %}
-      <h2>CREATE TEAM</h2>
-      <form method="post">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit">Create Team</button>
-      </form>
-    {% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col"></div>
+
+    <div class="col">
+        <h2 class="text-center">CREATE TEAM</h2>
+
+        <form class="mt-4" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="text-center mt-4">
+                <button type="submit">Create Team</button>
+            </div>
+
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock %}

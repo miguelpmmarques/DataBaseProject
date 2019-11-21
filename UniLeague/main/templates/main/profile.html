@@ -1,37 +1,79 @@
 {% extends 'main/navbar.html' %}
 
+{% load static %}
+{% load fontawesome_5 %}
+{% fontawesome_5_static %}
+
 {% block body %}
+{% csrf_token %}
+<h1 id="myProfile" > NAME {{user.first_name}} {{user.last_name}} </h1>
 
-<div class="container">
-  <h1> NAME {{user.first_name}} {{user.last_name}} </h1>
-  <p>E-mail: {{user.email}}</p>
-  <!-- <p> Team: {{user.team}}</p> -->
-  <p>Budget: {{user.budget}} </p>
-  <button type="button">Change Configurations</button>
-  <p>Games: {{user.games}} </p>
-  <p>Goals: {{user.goals}} </p>
-  <button type="button">View Team</button>
-  <button type="button">View Tournament</button>
-  <p>Most recent games:</p>
-  <table>
-    <!-- <thead>
-      <tr>
-        <th></th>
-      </tr>
-    </thead> -->
-    <tbody>
-      <tr>
-        <!-- falta ter uma lista com os ultimos jogos -->
-        <td>TeamA </td>
-        <td>TeamA.goals</td>
-        <td> - </td>
-        <td>TeamB.goals</td>
-        <td> TeamB</td>
-      </tr>
-    </tbody>
-  </table>
-  <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+  <div class="row">
 
-</div>
+    <div class="col-lg-4 ">
+      <div class="row text-center">
+        <div class="col-lg-7">
+
+          <div class=" bg-dark rounded-lg background-color: #0B0C10;">
+            <div class="embed-responsive embed-responsive-4by3">
+              <img id="profileImg" src="{{ MEDIA_URL }}/media/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
+            </div>
+            <div class="card-body">
+              <p class="card-text">E-mail: {{user.email}}</p>
+              <p class="card-text">Budget: {{user.budget}}</p>
+              <p class="card-text">Games: {{user.games}}</p>
+              <p class="card-text">Goals: {{user.goals}}</p>
+            </div>
+        </div>
+
+      </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="centered">
+        <ul id="ul" class="list-group">
+          {% if user.team_set.all %}
+            {% for team in user.team_set.all %}
+              <a href="/teams/profile/{{team.id}}/">
+                  <li class="groupList list-group-item">{{team.name}}</li>
+              </a>
+              <a href="/tournaments/profile/{{team.tournament.id}}/">
+                  <li class="groupList list-group-item">{{team.tournament.name}}</li>
+              </a>
+            {% endfor %}
+          {% else %}
+              <li class="groupList list-group-item">No Teams and Tournaments found</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="centered">
+        <table class="table table-bordered table-striped table-hover" style="margin-top: 50px;">
+          <thead class="thead-dark">
+            <tr>
+              <th>Most recent games:</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr>
+              <th>TEAM: {{user.team_set.first}}</th>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+      </div>
+
+    </div>
+  </div>
+
+
+<!--
+  profile photo
+  view team button
+  view tournament button
+  recent games
+-->
 
 {% endblock %}

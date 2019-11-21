@@ -10,6 +10,9 @@
 
     {% fontawesome_5_static %}
     <meta charset="utf-8">
+
+    <script src="{% static 'js/changeDivContent.js' %}"></script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap  -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -29,20 +32,32 @@
         <div class="container-fluid">
             <ul class=" nav navbar-nav navbar-left">
                 <li class="nav-item">
-                    <a href="/"><img class="logoNavBar" src="{% static 'assets/UniLeague_logo.png' %}" ></a>
+                    <a href="/"><img class="logoNavBar" src="{% static 'assets/UniLeague_logo.png' %}"></a>
                 </li>
             </ul>
             <ul class=" navbar-left nav navbar-nav ">
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#"> Tournaments </a>
+                    <a class="nav-link text-white" href="/tournaments/list/"> Tournaments </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#"> Teams </a>
+                    <a class="nav-link text-white" href="/teams/list/"> Teams </a>
                 </li>
                 {% if user.is_authenticated %}
-                {% if user.team_set.all %}
+                {% if user.teamuser_set.all %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/teams/profile/captain/"> My Team </a>
+                  <div class="dropdown">
+                <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Teams
+                  <span class="caret"></span></button>
+                <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
+                  {%for elem in user.teamuser_set.all %}
+                  <li><a class="text-muted"  href="/teams/profile/{{elem.team.id}}/">{{elem.team.name}}</a></li>
+                  {% endfor%}
+                   <div class="dropdown-divider"></div>
+                   <li><a class="text-muted"  href="/teams/create/">Create Team</a></li>
+                   
+                </ul>
+              </div>
+                    <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
                 {% else %}
                 <li class="nav-item">
@@ -51,16 +66,28 @@
                 {% endif %}
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#"> Go to Team from PLayer </a>
+                    <a class="nav-link text-white" href="/users/goToTeam/"> Go to Team from PLayer </a>
                 </li>
                 {% endif %}
                 {% if user.is_authenticated %}
+                {% if user.isTournamentManager %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="">My Tournaments </a>
+                </li>
+                {% else %}
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/tournaments/create/">Create Tournaments </a>
                 </li>
                 {% endif %}
+
+
+
+
+                {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="help.html"> Help </a>
+
+                    <a class="nav-link text-white" href="/help/"> Help </a>
+
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -87,4 +114,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
+
+
 </html>
