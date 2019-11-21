@@ -6,25 +6,30 @@
 
 {% block body %}
 {% csrf_token %}
-<h1 id="myProfile" style="text-align: center; margin-bottom: 50px; margin-top: 50px" name="{{user.name}}"> NAME {{user.first_name}} {{user.last_name}} </h1>
-<div class="container">
+<h1 id="myProfile" > NAME {{user.first_name}} {{user.last_name}} </h1>
+
   <div class="row">
-    <div class="split left">
-      <div class="centered">
-        <div class="card bg-dark rounded-lg background-color: #0B0C10;" style="width: 30rem;">
-          <div class="embed-responsive embed-responsive-4by3">
+
+    <div class="col-lg-4 ">
+      <div class="row text-center">
+        <div class="col-lg-7">
+
+          <div class=" bg-dark rounded-lg background-color: #0B0C10;">
+            <div class="embed-responsive embed-responsive-4by3">
               <img id="profileImg" src="{{ MEDIA_URL }}/media/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
-          </div>
-          <div class="card-body">
+            </div>
+            <div class="card-body">
               <p class="card-text">E-mail: {{user.email}}</p>
               <p class="card-text">Budget: {{user.budget}}</p>
               <p class="card-text">Games: {{user.games}}</p>
               <p class="card-text">Goals: {{user.goals}}</p>
-          </div>
+            </div>
         </div>
+
       </div>
+        </div>
     </div>
-    <div class="split right">
+    <div class="col-lg-4">
       <div class="centered">
         <ul id="ul" class="list-group">
           {% if user.team_set.all %}
@@ -42,7 +47,7 @@
         </ul>
       </div>
     </div>
-    <div class="split middle">
+    <div class="col-lg-4">
       <div class="centered">
         <table class="table table-bordered table-striped table-hover" style="margin-top: 50px;">
           <thead class="thead-dark">
@@ -51,7 +56,7 @@
             </tr>
           </thead>
           <tbody>
-          
+
             <tr>
               <th>TEAM: {{user.team_set.first}}</th>
             </tr>
@@ -62,7 +67,6 @@
 
     </div>
   </div>
-</div>
 
 
 <!--
