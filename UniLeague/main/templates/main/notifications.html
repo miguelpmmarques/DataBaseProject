@@ -26,21 +26,37 @@
   <div class="col-4">
     <div class="list-group" id="list-tab" role="tablist">
         {% for not in  notifications %}
+        {% if forloop.counter == 1 %}
+        <a class="list-group-item list-group-item-action active"  data-toggle="list" href="#{{not.title}}" role="tab" aria-controls="home">
+          [{{not.sendDate}}]  {{not.title}}</a>
+        {% else %}
         <a class="list-group-item list-group-item-action"  data-toggle="list" href="#{{not.title}}" role="tab" aria-controls="home">
           [{{not.sendDate}}]  {{not.title}}</a>
-
+          {% endif %}
         {% endfor %}
         </div>
   </div>
   <div class="col-8">
     <div class="tab-content" id="nav-tabContent">
+
+
+
       {% for not in  notifications %}
-      <div class="tab-pane fade show" id="{{not.title}}" role="tabpanel" aria-labelledby="list-home-list">
+      {% if forloop.counter == 1 %}
+      <div class="tab-pane fade show show active" id="{{not.title}}" role="tabpanel" aria-labelledby="list-home-list">
       <h1><b>{{not.title}}</b></h1>
       <h4>At {{not.sendDate}}</h1>
-      <h3>{{not.description}}</h3>
+      {{not.description|safe }}
       <h4><i>by {{not.origin}}</i></h4>
       </div>
+      {% else %}
+      <div class="tab-pane fade show " id="{{not.title}}" role="tabpanel" aria-labelledby="list-home-list">
+      <h1><b>{{not.title}}</b></h1>
+      <h4>At {{not.sendDate}}</h1>
+      {{not.description|safe }}
+      <h4><i>by {{not.origin}}</i></h4>
+      </div>
+        {% endif %}
 
       {% endfor %}
     </div>

@@ -111,19 +111,9 @@ class GoToTeamFromPlayer(generic.DetailView):
 
     def get(self, request):
 
-        teamuser = TeamUser.objects.all()
-        usersToSend = []
-        for elem in teamuser:
-            usersToSend.append(elem.player)
-        """users = CustomUser.objects.all()
-        print(users)
-        for elem in users:
-            print(len(elem.team_set.all()))
-            if len(elem.team_set.all()) != 0:
-                usersToSend.append(elem)
-                # print(elem.team_set.all())"""
+        teamuser = TeamUser.objects.all().order_by("-player")
         return render(
-            request, template_name=self.template_name, context={"users": usersToSend},
+            request, template_name=self.template_name, context={"users": teamuser},
         )
 
 
@@ -291,14 +281,15 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                 ).save()
                 Notifications.objects.create(
                     title="OH CAPTAIN MY CAPTAIN",
-                    description=request.user.first_name
+                    description="<h3>"
+                    + request.user.first_name
                     + " "
                     + request.user.last_name
                     + " you just became the captain of the team "
                     + new_team.name
-                    + "in the tournament: "
+                    + " in the tournament: "
                     + new_team.tournament.name
-                    + ". I wish you the best of luck in the matches!",
+                    + ". I wish you the best of luck in the matches!</h3>",
                     user_send=request.user,
                     origin="Tournament Manager",
                 ).save()
@@ -307,6 +298,21 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                 print("\n\n" + team.errors)
         TeamUser.objects.create(
             isCaptain=False, player=request.user, team=team_exists, position=position,
+        ).save()
+        Notifications.objects.create(
+            title="WELCOME TO MY TEAM PARTER",
+            description="<h3>"
+            + request.user.first_name
+            + " "
+            + request.user.last_name
+            + " you just joined the team "
+            + team_exists.name
+            + " in the tournament: "
+            + team_exists.tournament.name
+            + ". Please check out our team calendar and add capital to your "
+            + "budget by sending money to this IBAN 0095 1666 1223 1233 2. We gonna win this!</h3>",
+            user_send=request.user,
+            origin="Captain",
         ).save()
         print(request.data["position"])
 
@@ -321,8 +327,12 @@ def profileOtherView(request, user_selected):
 def profileTeamOtherView(request, team_selected):
     print("Chegou aqui")
     team = Team.objects.get(name=team_selected)
+    teamuser = TeamUser.objects.filter(team__name=team_selected)
+    print(teamuser)
     return render(
-        request, template_name="main/profileTeam.html", context={"myTeam": team}
+        request,
+        template_name="main/profileTeam.html",
+        context={"myTeam": team, "teamuser": teamuser},
     )
 
 
@@ -331,8 +341,8 @@ class LandingPageView(generic.TemplateView):
 
     def get(self, request):
         try:
-            tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
-            teams = TeamSerializer(Team.objects.all(), many=True).data
+            tournaments = Tournament.objects.all()
+            teams = Team.objects.all()
             return render(
                 request,
                 template_name=self.template_name,
@@ -404,7 +414,8 @@ class LoginView(generic.CreateView):
             data = request.POST
             return HttpResponseRedirect(data.get("next", "/"))
         else:
-            raise Http404
+            messages.error(request, "Invalid username or password")
+            return HttpResponseRedirect("")
 
 
 class RegisterView(generic.CreateView):
@@ -428,6 +439,20 @@ class RegisterView(generic.CreateView):
                 return HttpResponse(
                     "Critical database error\nUnable to save your user\nPlease try again"
                 )
+            superuser = CustomUser.objects.get(is_superuser=True)
+            Notifications.objects.create(
+                title="NEW USER",
+                description="<h3>The user "
+                + user.username
+                + " as know as "
+                + user.first_name
+                + " "
+                + user.last_name
+                + " has registered and would like to become a member of Unileague</h3><br><h3>"
+                + "</h3> <button class='btn btn-light btn-outline-secondary' id='changeCaptain'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
+                user_send=superuser,
+                origin="System",
+            ).save()
             Notifications.objects.create(
                 title="WELCOME TO UNILEAGUE",
                 description="Welcome "
@@ -457,6 +482,23 @@ class RegisterView(generic.CreateView):
             )
         print(form.errors)
         return HttpResponse("Please Fill all Fields")
+
+
+"""<h1>The User {{user.username}} has registered and would like to become a member of Unileague</h1>
+<br>
+<h2>{{user.first_name}} {{user.last_name}}</h2>
+<ul id="user_info_{{user.pk}}">
+    {% for k,v in user.items %}
+    {% ifnotequal k 'id' %}
+    {% ifnotequal k 'first_name' %}
+    {% ifnotequal k 'last_name' %}
+    <li>{{k}}: {{v}}</li>
+    {% endifnotequal %}
+    {% endifnotequal %}
+    {% endifnotequal %}
+    {% endfor %}
+</ul>
+"""
 
 
 class HelpView(generic.TemplateView):

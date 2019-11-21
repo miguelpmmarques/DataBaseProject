@@ -12,15 +12,14 @@
 
   </head>
   <body class="background text-white">
-    <header>
-    </header>
-    <nav></nav>
-    <!-- <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign In</button>
-    </form>
-<p><a href="/register/">Don't have an account yet?</a></p> -->
+    {% if messages %}
+      {% for men in messages %}
+      <div class="alert alert-danger" role="alert">
+        {{men}}
+      </div>
+      {% endfor%}
+    {% endif %}
+
     <div class="row">
         <div class="col mt-auto text-center"></div>
 

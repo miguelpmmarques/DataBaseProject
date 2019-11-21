@@ -25,7 +25,6 @@ class CustomUserAdmin(admin.ModelAdmin):
         "citizen_card",
         "email",
         "phone",
-        "budget",
         "hierarchy",
         "image",
         "isConfirmed",

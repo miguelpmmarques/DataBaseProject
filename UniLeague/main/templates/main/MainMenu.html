@@ -151,47 +151,42 @@
     <br>
     <div class="row">
         <div class="col-sm-6 text-center">
-            <h2 class="text-center">SEARCH FOR TEAMS</h2>
+            <h2 class="text-center">TEAMS IN NEED FOR PLAYERS</h2>
             <form class="form-inline d-flex justify-content-center" id="teams">
                 <i class="fas fa-search" aria-hidden="true"></i>
                 <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
             </form>
-            <br>
-            {% if teams %}
             <ul id="ul_teams" class="list-group margin">
                 {% if teams.all %}
                 {% for team in teams.all %}
                 <a href="/teams/profile/{{team.id}}/">
-                    <li class="groupList list-group-item">{{team.name}}</li>
+                    <li class="groupList list-group-item">{{team.name}} has {{team.teamuser_set.count}}/16 players</li>
                 </a>
                 {% endfor %}
                 {% else %}
                 <li class="groupList list-group-item">No Teams found</li>
                 {% endif %}
-                {% else %}
-                <li class="groupList list-group-item">No Teams found</li>
             </ul>
-            {% endif %}
         </div>
         <div class="col-sm-6 text-center">
-            <h2 class="text-center">SEARCH FOR TOURNAMENTS</h2>
+            <h2 class="text-center">TOURNAMENTS ABOUT TO START</h2>
             <form class="form-inline d-flex justify-content-center" id="tournaments">
                 <i class="fas fa-search" aria-hidden="true"></i>
                 <input id="input_tournaments" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
             </form>
-            <br>
-            {% if tournaments.all %}
             <ul id="ul_tournaments" class="list-group margin">
-                {% for tournament in tournaments.all %}
-                <li class="groupList list-group-item">{{tournament.name}}</li>
+                {% if tournaments.all %}
+                {% for tournament in tournaments %}
+                <li class="groupList list-group-item">{{tournament.name}} starts<i> in {{tournament.beginTournament}}</i></li>
                 {% empty %}
                 <li class="groupList list-group-item">No Tournaments found</li>
 
                 {% endfor %}
+                {% else %}
+                <li class="groupList list-group-item">No Tournaments found</li>
+                {% endif %}
             </ul>
-            {% else %}
-            <li class="groupList list-group-item">No Tournaments found</li>
-            {% endif %}
+
         </div>
     </div>
     {% endif %}
