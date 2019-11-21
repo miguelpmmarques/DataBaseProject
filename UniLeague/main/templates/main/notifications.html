@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>MAIN MENU</title>  
+    <title>MAIN MENU</title>
     <script type="text/javascript">
     $('#myList a').on('click', function (e) {
       e.preventDefault()
@@ -37,8 +37,9 @@
       {% for not in  notifications %}
       <div class="tab-pane fade show" id="{{not.title}}" role="tabpanel" aria-labelledby="list-home-list">
       <h1><b>{{not.title}}</b></h1>
-      <h4>At {{not.sendDate}} <i>by {{not.origin}}</i></h1>
+      <h4>At {{not.sendDate}}</h1>
       <h3>{{not.description}}</h3>
+      <h4><i>by {{not.origin}}</i></h4>
       </div>
 
       {% endfor %}

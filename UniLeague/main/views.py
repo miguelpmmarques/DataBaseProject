@@ -290,7 +290,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     position=position,
                 ).save()
                 Notifications.objects.create(
-                    title="WELCOME TO UNILEAGUE",
+                    title="OH CAPTAIN MY CAPTAIN",
                     description=request.user.first_name
                     + " "
                     + request.user.last_name
