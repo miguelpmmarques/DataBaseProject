@@ -1,5 +1,7 @@
 .background {
-    background-image: radial-gradient(circle, #2ba84a, #2aa145, #299941, #27923c, #268b38, #18823d, #0a7a41, #007143, #006449, #0f564a, #214844, #2d3a3a);
+    /* background-image: radial-gradient(circle, #2ba84a, #2aa145, #299941, #27923c, #268b38, #18823d, #0a7a41, #007143, #006449, #0f564a, #214844, #2d3a3a); */
+    background-image: radial-gradient(circle, #ff785a, #c7576a, #834363, #433146, #191919);
+
     overflow-x: hidden;
 }
 

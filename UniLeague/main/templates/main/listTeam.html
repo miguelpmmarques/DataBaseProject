@@ -34,16 +34,13 @@
             </form>
             <br>
             <ul id="ul_teams" class="list-group margin">
-                {% if teams %}
-                {% if teams %}
-                {% for team in teams %}
+                {% if teams.all %}
+                {% for team in teams.all %}
+
                 <a href="/teams/profile/{{team.id}}/">
                     <li class="groupList list-group-item">{{team.name}}</li>
                 </a>
                 {% endfor %}
-                {% else %}
-                <li class="groupList list-group-item">No Teams found</li>
-                {% endif %}
                 {% else %}
                 <li class="groupList list-group-item">No Teams found</li>
                 {% endif %}
