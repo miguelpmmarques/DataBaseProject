@@ -17,11 +17,13 @@
 
     {% if user.is_authenticated %}
       <!-- CAPTAIN -->
+
       <!-- { # if user.isCaptain #}
         <div class="row">
           <div class="col-3 text-center mt-5">
             <button type="button" onclick="window.location.href='/teams/profile/captain/';" class="btn-lg">My team</button>
             <br>
+
             <label class="label label-default mt-5">Next Game</label>
 
           </div>
@@ -56,11 +58,13 @@
           <div class="col-3">
 
 
+
           </div>
         </div> -->
 
       <!-- TOURNAMENT MANAGER (nao sei bem o que preciso de meter aqui)-->
       {% if user.isTournamentManager %}
+
         <div class="row">
           <div class="col">
             <h2 class="text-center">TEAM CAPTAINS</h2>
@@ -127,6 +131,7 @@
         <div class="row">
 
 
+
           <div class="col-sm-2 text-center">
             <div class="text-center mt-4">
               <h1><b>GAMES THIS WEEK</b></h1>
@@ -140,6 +145,7 @@
             
             </div>
           </div>
+
 
 
         </div>

@@ -25,6 +25,7 @@
           {% for player in myTeam.players.all %}
           {% if player.pk == captain.pk %}
           <option value="{{player.pk}}" selected="selected"><b>Captain: {{player.first_name}} {{player.last_name}} - {{player.username}}</b></option>
+
           {% else %}
           <option value="{{player.pk}}">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
           {% endif %}
@@ -43,12 +44,14 @@
     <h3 id="numberPlayer">Number of players: {{players.all.count}}/16</h3>
     <div id="playerList">
       <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
+
         {% for elem in player_position %}
         <li class="groupList list-group-item">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
           <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
             <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
             Replace with substitute
           </button>
+
           {% if user.pk == captain.pk %}
           <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
           {% endif %}
@@ -57,6 +60,7 @@
       </ul>
     </div>
     {% if myTeam not in user.team_set.all or not user.is_authenticated%}
+
     <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
       <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
       Change Positions
@@ -67,6 +71,7 @@
       Join Team
     </button>
     {% endif %}
+
 
     <p id="tournament">Tournament: {{myTeam.tournament.name}}</p>
     <p id="tactic">Tactic: {{myTeam.tactic}}</p>
@@ -131,15 +136,18 @@
               {% endfor %}
             </div>
 
+
           </div>
           <div class="row">
             <div class="col-lg-11 col-centered text-center">
               {% for position in tactic.positions.all %}
               {% if "Striker" in  position.name and position.start == True %}
               {% if position.id in positionsOcupied %}
+
               <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
               {% else %}
               <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
               {% endif %}
               {% endif %}
               {% endfor %}
@@ -154,9 +162,11 @@
                 {% for position in tactic.positions.all %}
                 {% if "Guarda" in  position.name and position.start == False %}
                 {% if position.id in positionsOcupied %}
+
                 <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
                 {% else %}
                 <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
                 {% endif %}
                 {% endif %}
                 {% endfor %}
@@ -170,9 +180,11 @@
                 {% for position in tactic.positions.all %}
                 {% if "Defesa" in  position.name and position.start == False %}
                 {% if position.id in positionsOcupied %}
+
                 <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
                 {% else %}
                 <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
                 {% endif %}
                 {% endif %}
                 {% endfor %}
@@ -185,10 +197,12 @@
               <div class="row ">
                 {% for position in tactic.positions.all %}
                 {% if "Medio" in  position.name and position.start == False %}
+
                 {% if position.id in positionsOcupied %}
                 <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
                 {% else %}
                 <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
                 {% endif %}
                 {% endif %}
                 {% endfor %}
@@ -202,9 +216,11 @@
                 {% for position in tactic.positions.all %}
                 {% if "Avancado" in  position.name and position.start == False %}
                 {% if position.id in positionsOcupied %}
+
                 <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
                 {% else %}
                 <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
                 {% endif %}
                 {% endif %}
                 {% endfor %}
@@ -225,6 +241,7 @@
                 {% endif %}
                 {% endfor %}
                 <h1>Striker</h1>
+
               </div>
             </div>
           </div>

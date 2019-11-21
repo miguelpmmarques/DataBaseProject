@@ -36,6 +36,7 @@
             <ul id="ul_teams" class="list-group margin">
                 {% if teams.all %}
                 {% for team in teams.all %}
+
                 <a href="/teams/profile/{{team.id}}/">
                     <li class="groupList list-group-item">{{team.name}}</li>
                 </a>
