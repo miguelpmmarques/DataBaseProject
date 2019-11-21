@@ -17,6 +17,7 @@ urlpatterns = [
     path("", views.LandingPageView.as_view(), name="landing-page"),
     path("logout/", views.log_out_request, name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
+    path("notifications/", views.NotificationsView.as_view(), name="notification"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),

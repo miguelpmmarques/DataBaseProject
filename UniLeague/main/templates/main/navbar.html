@@ -94,7 +94,7 @@
             <ul class="nav navbar-nav navbar-right">
               {% if user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link text-white" href="#"> Notifications </a>
+                <a class="nav-link text-white" href="/notifications/"> Notifications <span class="dot text-center">{{user.notifications_set.count}}</span>  </a>
               </li>
               {% endif %}
 

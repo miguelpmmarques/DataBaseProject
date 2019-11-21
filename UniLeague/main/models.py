@@ -48,13 +48,11 @@ class CustomUser(AbstractUser):
     # Privilegies
     email = models.EmailField(unique=True)
     isTournamentManager = models.BooleanField(null=False, default=False)
-    # is_superuser(admin) is already
     # Atributes
     citizen_card = models.BigIntegerField(null=False, default=0, blank=False)
     first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
     last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
     phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
-    budget = models.BigIntegerField(null=False, default=0)
     hierarchy = models.IntegerField(null=False, default=0)
     image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
 
@@ -73,8 +71,9 @@ class CustomUser(AbstractUser):
 class Notifications(models.Model):
     title = models.CharField(max_length=512, unique=False, null=True, blank=False)
     description = models.CharField(max_length=512, unique=False, null=True, blank=False)
-    sendDate = models.DateTimeField(null=True)
-    user = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    sendDate = models.DateTimeField(auto_now_add=True, null=True)
+    user_send = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    origin = models.CharField(max_length=512, unique=False, null=True, blank=False)
 
     class Meta:
         db_table = "Notifications"
@@ -261,6 +260,7 @@ class TeamUser(models.Model):
     player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
     team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
     position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
+    budget = models.BigIntegerField(null=False, default=0)
 
     class Meta:
         db_table = "TeamUser"

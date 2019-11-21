@@ -185,6 +185,27 @@ class TeamView(generic.DetailView):
         raise Http404
 
 
+class NotificationsView(generic.DetailView):
+    template_name = "main/notifications.html"
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            notification = Notifications.objects.filter(
+                user_send=request.user
+            ).order_by("-sendDate")
+            return render(
+                request,
+                template_name=self.template_name,
+                context={"notifications": notification},
+            )
+        return HttpResponseRedirect(reverse("main:login"))
+
+
+class ProfileView(generic.DetailView):
+    template_name = "main/profile.html"
+    model = CustomUser
+
+
 class ProfileView(generic.DetailView):
     template_name = "main/profile.html"
     model = CustomUser
@@ -267,6 +288,19 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     player=request.user,
                     team=new_team,
                     position=position,
+                ).save()
+                Notifications.objects.create(
+                    title="WELCOME TO UNILEAGUE",
+                    description=request.user.first_name
+                    + " "
+                    + request.user.last_name
+                    + " you just became the captain of the team "
+                    + new_team.name
+                    + "in the tournament: "
+                    + new_team.tournament.name
+                    + ". I wish you the best of luck in the matches!",
+                    user_send=request.user,
+                    origin="Tournament Manager",
                 ).save()
                 return Response("success")
             else:
@@ -394,6 +428,16 @@ class RegisterView(generic.CreateView):
                 return HttpResponse(
                     "Critical database error\nUnable to save your user\nPlease try again"
                 )
+            Notifications.objects.create(
+                title="WELCOME TO UNILEAGUE",
+                description="Welcome "
+                + user.first_name
+                + " "
+                + user.last_name
+                + " to the best soccer app in the world, join/create a team a start playing!",
+                user_send=user,
+                origin="System",
+            ).save()
             current_site = get_current_site(request)
             mail_subject = "Activate your UniLeague account."
             message = render_to_string(
