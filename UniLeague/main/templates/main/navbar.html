@@ -52,9 +52,11 @@
                   {%for elem in user.teamuser_set.all %}
                   <li><a class="text-muted"  href="/teams/profile/{{elem.team.id}}/">{{elem.team.name}}</a></li>
                   {% endfor%}
+
                    <div class="dropdown-divider"></div>
                    <li><a class="text-muted"  href="/teams/create/">Create Team</a></li>
                    
+
                 </ul>
               </div>
                     <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->

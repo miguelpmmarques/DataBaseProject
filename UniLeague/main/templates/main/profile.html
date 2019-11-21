@@ -4,6 +4,7 @@
 {% load fontawesome_5 %}
 {% fontawesome_5_static %}
 
+
 {% block body %}
 {% csrf_token %}
 <h1 id="myProfile" > NAME {{user.first_name}} {{user.last_name}} </h1>
@@ -67,6 +68,15 @@
 
     </div>
   </div>
+
+
+<!--
+  profile photo
+  view team button
+  view tournament button
+  recent games
+-->
+
 
 
 <!--
