@@ -70,6 +70,22 @@ class CustomUser(AbstractUser):
         return self.username
 
 
+class Notifications(models.Model):
+    title = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    description = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    sendDate = models.DateTimeField(null=True)
+    user = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "Notifications"
+        verbose_name = "Notificacao"
+        verbose_name_plural = "Notificacoes"
+        ordering = ["-sendDate"]
+
+    def __str__(self):
+        return str(self.title)
+
+
 # foreign keys done, I think
 class Position(models.Model):
     name = models.CharField(max_length=512, unique=True, null=False, default="")

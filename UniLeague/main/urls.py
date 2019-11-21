@@ -35,7 +35,6 @@ urlpatterns = [
     path("users/rest/list/", views.RestUsersList.as_view()),
     path(
         "team/apply/<int:pk>/",
-
         views.ChoosePositionView.as_view(),
         name="choosePosition",
     ),
@@ -62,7 +61,6 @@ urlpatterns = [
     path("teams/rest/<int:pk>/", views.RestTeams.as_view()),
     path("teams/rest/list/", views.RestTeamsList.as_view()),
     path("games/calendar/<year>/", views.CalendarView.as_view(), name="main-calendar"),
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # path("teams/<int:pk>/", views.),

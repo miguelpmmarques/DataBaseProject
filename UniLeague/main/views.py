@@ -77,9 +77,8 @@ from .models import Field
 from .models import Team
 from .models import TeamUser
 from .models import Tactic
-
+from .models import Notifications
 from .models import Position
-
 from .models import Result
 from .models import Game
 from .models import TimeSlot
