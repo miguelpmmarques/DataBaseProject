@@ -186,7 +186,6 @@ class TeamView(generic.DetailView):
         raise Http404
 
 
-
 class ProfileView(generic.DetailView):
     template_name = "main/profile.html"
     model = CustomUser
@@ -215,7 +214,6 @@ class CreateTeam(generic.CreateView):
             if form.is_valid():
                 team = form.save(commit=False)
                 request.session["team_form"] = TeamSerializer(team).data
-
                 return redirect("/team/apply/0/")
 
             return HttpResponse("Please Fill all Fields")
@@ -299,8 +297,6 @@ class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
 
     def get(self, request):
-        print(TeamUser.objects.filter(player__pk=request.user.pk))
-        print(request.user.teamuser_set.all().first())
         try:
             tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
             teams = TeamSerializer(Team.objects.all(), many=True).data
@@ -341,7 +337,6 @@ class CreateTeamView(generic.TemplateView):
         print(team)
         return render(
             request, template_name=self.template_name, context={"teams": team},
-
         )
 
 
@@ -599,7 +594,7 @@ def validateMultiple(request):
     if users.exists():
         return render(
             request,
-            queryset = CustomUser.objects.all(),
+            queryset=CustomUser.objects.all(),
             template_name="main/admin_validation_multiple.html",
             context={"users": serializer.data},
         )
@@ -844,7 +839,6 @@ class GameView(generic.DetailView):
     model = Game
     template_name = "main/game.html"
 
-
     def get(self, request, pk):
         try:
             pk = int(param)
@@ -852,7 +846,7 @@ class GameView(generic.DetailView):
         except ValueError:
             team_selected = None
 
-        selected_game = Game.objects.filter(pk = pk).first()
+        selected_game = Game.objects.filter(pk=pk).first()
         final_score = selected_game.result_set
 
         if final_score.first() == final_score.last():
@@ -861,13 +855,10 @@ class GameView(generic.DetailView):
                 return render(
                     request,
                     template_name=self.template_name,
-                    context={
-                        "game": selected_game,
-                        "result": final_score
-                    }
+                    context={"game": selected_game, "result": final_score},
                 )
                 raise Http404
 
         else:
-            #mandar notify ao admin
+            # mandar notify ao admin
             return HttpResponse("Aguardar resposta do tournament manager")
