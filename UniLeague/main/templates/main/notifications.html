@@ -10,6 +10,7 @@
     <meta charset="utf-8">
     <title>MAIN MENU</title>
     <script src="{% static 'js/activateUser.js' %}"></script>
+    <script src="{% static 'js/activateMultipleUsers.js' %}"></script>
     <script type="text/javascript">
 
     $('#myList a').on('click', function (e) {
@@ -21,6 +22,8 @@
 
 <body>
     {% block body %}
+    {% csrf_token %}
+    
 
     <h1 class="text-center"><b>NOTIFICATIONS</b></h1>
 

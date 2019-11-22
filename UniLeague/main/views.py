@@ -412,6 +412,7 @@ class LoginView(generic.CreateView):
                 request, user
             )  # Loggin already implemented by Django, lo sign in a user
             data = request.POST
+            messages.error(request, "Logged in successfully")
             return HttpResponseRedirect(data.get("next", "/"))
         else:
             messages.error(request, "Invalid username or password")
@@ -477,11 +478,10 @@ class RegisterView(generic.CreateView):
             to_email = form.cleaned_data.get("email")
             email = EmailMessage(mail_subject, message, to=[to_email])
             email.send()
-            return HttpResponse(
-                "Please confirm your email address to complete the registration"
-            )
-        print(form.errors)
-        return HttpResponse("Please Fill all Fields")
+            messages.error(request, "Waiting for admin's confirmation...")
+            return HttpResponseRedirect("")
+        messages.error(request, form.errors)
+        return HttpResponseRedirect(reverse("main:landing-page"))
 
 
 """<h1>The User {{user.username}} has registered and would like to become a member of Unileague</h1>

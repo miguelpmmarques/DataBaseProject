@@ -3,6 +3,13 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
+  {% if messages %}
+    {% for men in messages %}
+    <div class="alert alert-danger" role="alert">
+      {{men}}
+    </div>
+    {% endfor%}
+    {% endif %}
   <div class="row mb-5">
       <div class="col mt-auto text-center"></div>
 

@@ -14,7 +14,13 @@
 <body>
     {% block body %}
     <script src="{% static 'js/adminMenu.js' %}"></script>
-
+    {% if messages %}
+      {% for men in messages %}
+      <div class="alert alert-success" role="alert">
+        {{men}}
+      </div>
+      {% endfor%}
+    {% endif %}
     {% if user.is_authenticated %}
       <!-- CAPTAIN -->
       <!-- { # if user.isCaptain #}
