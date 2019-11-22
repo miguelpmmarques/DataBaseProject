@@ -4,5 +4,35 @@
 {% fontawesome_5_static %}
 
 {% block body %}
-  <p> GAMEPAGE </p>
+  <div class="row">
+    <div class="col">
+      <!-- home_team logo and name -->
+      <p class="text-center">HOME</p>
+      <p class="text-center">{{result.home_team.name}}</p>
+    </div>
+    <div class="col-6">
+      <!-- game info -->
+      {% if result %}
+        <div class="container text-center">
+          <!-- tournament and logo -->
+          <h1>tournament: {{game.tournament.name}}</h1>
+          <br>
+          <h2>{{game.gameDate}}</h2>
+          <br>
+          <h3>Field: {{game.field}}</h3>
+          <br>
+          <h5>cost:{{game.cost}}</h5>
+          <br>
+
+        </div>
+
+      {% else %}
+
+      {% endif %}
+    </div>
+    <div class="col">
+      <!-- away_team logo and name -->
+      <p class="text-center">AWAY</p>
+    </div>
+  </div>
 {% endblock %}
