@@ -16,7 +16,28 @@
 
         <form class="mt-4" method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            <!-- {{ form.as_p }} -->
+            <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br>
+
+           <select name="tournament" class="mt-4" required id="id_tournament">
+             <option value="" selected="">Select a tournament</option>
+
+               {% for t in tournaments.all %}
+
+                 <option>{{t.name}}</option>
+               {% endfor %}
+
+           </select><br>
+           
+           <input type="file" class="mt-4" name="teamLogo" accept="image/*" id="id_teamLogo">
+
+           <select name="tactic" class="mt-4" required id="id_tactic">
+             <option value="" selected="">Choose a tactic</option>
+             {% for tactic in tactics.all %}
+               <option value="">{{tactic.name}}</option>
+             {% endfor %}
+           </select>
+
             <div class="text-center mt-4">
                 <button type="submit">Create Team</button>
             </div>
