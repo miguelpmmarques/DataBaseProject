@@ -927,15 +927,12 @@ class GameView(generic.DetailView):
     def get(self, request, pk):
         try:
             pk = int(pk)
-            selected_game = Game.objects.filter(pk = pk).first()
+            selected_game = Game.objects.filter(pk=pk).first()
         except ValueError:
             team_selected = None
 
-<<<<<<< HEAD
-
-=======
         selected_game = Game.objects.filter(pk=pk).first()
->>>>>>> 0b714f2344bd169d038045f097e6e21760f88bec
+
         final_score = selected_game.result_set
 
         if final_score.first() == final_score.last():
