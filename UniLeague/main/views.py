@@ -373,13 +373,17 @@ class CreateTournamentListView(generic.TemplateView):
 
 
 class CreateTeamView(generic.TemplateView):
-    template_name = "main/listTeam.html"
+    template_name = "main/createTeam.html"
 
     def get(self, request):
         team = Team.objects.all()
-        print(team)
+        tactics = Tactic.objects.all()
+        tournaments = Tournament.objects.all()
+        # print(tournaments)
+        # print(tactics)
+        # print(team)
         return render(
-            request, template_name=self.template_name, context={"teams": team},
+            request, template_name=self.template_name, context={"tournaments": tournaments, "tactics":tactics},
         )
 
 
@@ -932,7 +936,10 @@ class GameView(generic.DetailView):
             team_selected = None
 
         selected_game = Game.objects.filter(pk=pk).first()
+<<<<<<< HEAD
+=======
 
+>>>>>>> 6b0291b086b7f6066fde113c91a1ee3af7a5133b
         final_score = selected_game.result_set
 
         if final_score.first() == final_score.last():
