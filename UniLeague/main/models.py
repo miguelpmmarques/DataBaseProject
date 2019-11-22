@@ -196,48 +196,6 @@ class TimeSlot(models.Model):
         return str(self.start_time)
 
 
-class Game(models.Model):
-    cost = models.IntegerField(null=False, default=0)
-    gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
-    tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
-    # timeslot not sure if ok
-    timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
-    # field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
-    home_team = models.ForeignKey(
-        Team, on_delete=models.PROTECT, related_name="home_team"
-    )
-    away_team = models.ForeignKey(
-        Team, on_delete=models.PROTECT, related_name="away_team"
-    )
-
-    class Meta:
-        db_table = "Game"
-        verbose_name = "Jogo"
-        verbose_name_plural = "Jogos"
-        ordering = ["-gameDate"]
-
-    def __str__(self):
-        return str(self.home_team) + " vs " + str(self.away_team)
-
-
-class Result(models.Model):
-    home_score = models.IntegerField(null=False, default=0)
-    away_score = models.IntegerField(null=False, default=0)
-    home_team = models.CharField(max_length=512, null=False, default="")
-    away_team = models.CharField(max_length=512, null=False, default="")
-    game = models.ForeignKey(Game, null=True, on_delete=models.PROTECT)
-    player_scores = models.ManyToManyField(CustomUser)
-
-    class Meta:
-        db_table = "Result"
-        verbose_name = "Resultado"
-        verbose_name_plural = "Resultados"
-        ordering = ["-home_score"]
-
-    def __str__(self):
-        return str(self.home_score) + " - " + str(self.away_score)
-
-
 # foreign keys done
 class Tactic(models.Model):
     # Atributes
@@ -287,3 +245,45 @@ class TeamUser(models.Model):
 
     def __str__(self):
         return self.player.username + " - " + self.team.name
+
+
+class Game(models.Model):
+    cost = models.IntegerField(null=False, default=0)
+    gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
+    tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
+    # timeslot not sure if ok
+    timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
+    # field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
+    home_team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name="home_team"
+    )
+    away_team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name="away_team"
+    )
+
+    class Meta:
+        db_table = "Game"
+        verbose_name = "Jogo"
+        verbose_name_plural = "Jogos"
+        ordering = ["-gameDate"]
+
+    def __str__(self):
+        return str(self.home_team) + " vs " + str(self.away_team)
+
+
+class Result(models.Model):
+    home_score = models.IntegerField(null=False, default=0)
+    away_score = models.IntegerField(null=False, default=0)
+    home_team = models.CharField(max_length=512, null=False, default="")
+    away_team = models.CharField(max_length=512, null=False, default="")
+    game = models.ForeignKey(Game, null=True, on_delete=models.PROTECT)
+    player_scores = models.ManyToManyField(CustomUser)
+
+    class Meta:
+        db_table = "Result"
+        verbose_name = "Resultado"
+        verbose_name_plural = "Resultados"
+        ordering = ["-home_score"]
+
+    def __str__(self):
+        return str(self.home_score) + " - " + str(self.away_score)
