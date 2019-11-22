@@ -14,8 +14,51 @@ DATA BASE MODELS CRIATION
 """
 
 
+class GameWeekDay(models.Model):
+    DAYS_OF_WEEK = (
+        ("0", "Monday"),
+        ("1", "Tuesday"),
+        ("2", "Wednesday"),
+        ("3", "Thursday"),
+        ("4", "Friday"),
+        ("5", "Saturday"),
+        ("6", "Sunday"),
+    )
+
+    week_day = models.CharField(
+        max_length=2, choices=DAYS_OF_WEEK, null=False, default=0
+    )
+
+    class Meta:
+        db_table = "WeekDay"
+        verbose_name = "Dia de Semana"
+        verbose_name_plural = "Dias de Semana"
+        ordering = ["-week_day"]
+
+    def get_week_day(self):
+        return str(self.DAYS_OF_WEEK[int(self.week_day)][1])
+
+    def __str__(self):
+        return self.get_week_day()
+
+
+class RegularSlot(models.Model):
+    week_day = models.OneToOneField(GameWeekDay, on_delete=models.PROTECT)
+    slots = ArrayField(models.TimeField())
+
+    class Meta:
+        db_table = "RegularSlots"
+        verbose_name = "Hora de Jogo por Campo"
+        verbose_name_plural = "Horas de Jogo por Campo"
+        ordering = ["-week_day"]
+
+    def __str__(self):
+        return str(self.week_day)
+
+
 class Field(models.Model):
     name = models.CharField(max_length=512, null=False, default="")
+    regular_slots = models.ManyToManyField(RegularSlot)
 
     class Meta:
         db_table = "Field"
@@ -25,8 +68,6 @@ class Field(models.Model):
 
     def __str__(self):
         return self.name
-
-        # foreign keys done i think
 
 
 class Day(models.Model):
@@ -100,34 +141,6 @@ class Position(models.Model):
         return self.name
 
 
-class GameWeekDay(models.Model):
-    DAYS_OF_WEEK = (
-        ("0", "Monday"),
-        ("1", "Tuesday"),
-        ("2", "Wednesday"),
-        ("3", "Thursday"),
-        ("4", "Friday"),
-        ("5", "Saturday"),
-        ("6", "Sunday"),
-    )
-
-    week_day = models.CharField(
-        max_length=2, choices=DAYS_OF_WEEK, null=False, default=0
-    )
-
-    class Meta:
-        db_table = "WeekDay"
-        verbose_name = "Dia de Semana"
-        verbose_name_plural = "Dias de Semana"
-        ordering = ["-week_day"]
-
-    def get_week_day(self):
-        return str(self.DAYS_OF_WEEK[int(self.week_day)][1])
-
-    def __str__(self):
-        return self.get_week_day()
-
-
 class Tournament(models.Model):
     name = models.CharField(max_length=512, null=False, unique=True, default="")
     beginTournament = models.DateTimeField(null=True)
@@ -183,14 +196,19 @@ class TimeSlot(models.Model):
         return str(self.start_time)
 
 
-# foreign keys done i think
 class Game(models.Model):
     cost = models.IntegerField(null=False, default=0)
     gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
     # timeslot not sure if ok
     timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
-    field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
+    # field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
+    home_team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name="home_team"
+    )
+    away_team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name="away_team"
+    )
 
     class Meta:
         db_table = "Game"
@@ -199,7 +217,7 @@ class Game(models.Model):
         ordering = ["-gameDate"]
 
     def __str__(self):
-        return str(self.gameDate) + "Cost - " + str(self.cost)
+        return str(self.home_team) + " vs " + str(self.away_team)
 
 
 class Result(models.Model):

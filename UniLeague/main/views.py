@@ -3,6 +3,9 @@ import json
 from operator import itemgetter
 import calendar
 from datetime import datetime, date, timedelta
+from random import choice, randint
+from time import sleep
+import math
 
 from django.shortcuts import render
 from django.views.generic import View
@@ -31,6 +34,7 @@ from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.db import transaction
@@ -78,20 +82,18 @@ from .models import Team
 from .models import TeamUser
 from .models import Tactic
 from .models import Notifications
+from .models import RegularSlot
 from .models import Position
 from .models import Result
 from .models import Game
 from .models import TimeSlot
 
 from .utils import Calendar
-from django.utils.safestring import mark_safe
-
-
-from time import sleep
 
 from django.views.generic.dates import YearArchiveView
 
-from .models import Game
+
+TIME_SLOT_DURATION = timedelta(minutes=90)
 
 # TINYURL.COM/SISTEMAS19
 
@@ -340,6 +342,8 @@ class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
 
     def get(self, request):
+        if request.user.is_superuser:
+            return HttpResponseRedirect("administration/")
         try:
             tournaments = Tournament.objects.all()
             teams = Team.objects.all()
@@ -383,7 +387,9 @@ class CreateTeamView(generic.TemplateView):
         # print(tactics)
         # print(team)
         return render(
-            request, template_name=self.template_name, context={"tournaments": tournaments, "tactics":tactics},
+            request,
+            template_name=self.template_name,
+            context={"tournaments": tournaments, "tactics": tactics},
         )
 
 
@@ -486,23 +492,6 @@ class RegisterView(generic.CreateView):
             return HttpResponseRedirect("")
         messages.error(request, form.errors)
         return HttpResponseRedirect(reverse("main:landing-page"))
-
-
-"""<h1>The User {{user.username}} has registered and would like to become a member of Unileague</h1>
-<br>
-<h2>{{user.first_name}} {{user.last_name}}</h2>
-<ul id="user_info_{{user.pk}}">
-    {% for k,v in user.items %}
-    {% ifnotequal k 'id' %}
-    {% ifnotequal k 'first_name' %}
-    {% ifnotequal k 'last_name' %}
-    <li>{{k}}: {{v}}</li>
-    {% endifnotequal %}
-    {% endifnotequal %}
-    {% endifnotequal %}
-    {% endfor %}
-</ul>
-"""
 
 
 class HelpView(generic.TemplateView):
@@ -608,6 +597,156 @@ class CreateTournamentView(APIView):
             return Response({"errors": serializer.errors})
         else:
             return HttpResponseRedirect(reverse("main:landing-page"))
+
+
+class CreateGames(generic.CreateView):
+    def get(self, request, tournament_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+            return render(request, "main/createGames.html", {"tournament": tournament})
+        except Tournament.DoesNotExist:
+            raise Http404
+
+    def post(self, request, tournament_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+            self.generateTimeSlots(tournament)
+            return JsonResponse({"sucess": True})
+        except Tournament.DoesNotExist:
+            raise Http404
+
+    def generateTimeSlots(self, tournament):
+        number_of_teams = tournament.number_teams
+        number_of_hands = tournament.number_of_hands
+        num_games = nCr(number_of_teams, 2) * number_of_hands
+        fields = tournament.fields.all()
+        number_of_days = tournament.endTournament - tournament.beginTournament
+        day = tournament.beginTournament
+        # going through all the days in the interval specified for the tournament to take place in
+        for i in range(number_of_days.days):
+            # checking if this day is was not forbidden by the tournament creator to have any games
+            if tournament.days_without_games.filter(day=day).count() == 0:
+                # checking if this day is a game week day
+                if (
+                    tournament.game_week_days.filter(week_day=day.weekday()).count()
+                    != 0
+                ):
+                    # going through all the fields chosen by the administrator
+                    for field in tournament.fields.all():
+                        # getting the filed's timetable
+                        timetable = RegularSlot.objects.filter(
+                            week_day=day.weekday()
+                        ).first()
+                        if timetable:
+                            slots = timetable.slots
+                            for i in range(len(slots) - 1):
+                                hour = slots[i].hour
+                                minute = slots[i].minute
+                                second = slots[i].second
+                                aux_day = day.replace(
+                                    hour=hour, minute=minute, second=second
+                                )
+                                try:
+                                    TimeSlot.objects.create(
+                                        title="",
+                                        description="",
+                                        start_time=aux_day,
+                                        end_time=aux_day + TIME_SLOT_DURATION,
+                                        cost="0",
+                                        isFree=True,
+                                        field=field,
+                                        tournament=tournament,
+                                    )
+                                except IntegrityError:
+                                    pass
+
+            day = day + timedelta(days=1)
+        number_of_timeslots = TimeSlot.objects.filter(
+            tournament__pk=tournament.pk
+        ).count()
+        print("NUMBER OF TIMESLOTS===", number_of_timeslots)
+        print("NUMBER OF GAMES TO PLAY===", num_games)
+        if number_of_timeslots >= num_games:
+            self.generate_games(tournament)
+        return
+
+    # ficaste aqui verifica o n de jogos jogados
+    def generate_games(self, tournament):
+        teams = tournament.team_set.all()
+        print("teams_count===", teams.count())
+        try:
+            with transaction.atomic():
+                for k in range(tournament.number_of_hands):
+                    for i in range(teams.count() - 1):
+                        # getting the number of games team_a already has, by checking how many times
+                        # team_a is registered as home_team or away_team in this tournament
+                        num_games_team_a = tournament.game_set.filter(
+                            Q(home_team__pk=teams[i].pk) | Q(away_team__pk=teams[i].pk)
+                        ).count()
+                        # checking if team_a already has all it's games scheduled
+                        if num_games_team_a < (
+                            (teams.count() - 1) * tournament.number_of_hands
+                        ):
+                            for j in range(i + 1, teams.count()):
+                                print("j=", j)
+                                num_games_team_b = tournament.game_set.filter(
+                                    Q(home_team__pk=teams[j].pk)
+                                    | Q(away_team__pk=teams[j].pk)
+                                ).count()
+                                if num_games_team_b < (
+                                    (teams.count() - 1) * tournament.number_of_hands
+                                ):
+                                    random_timeslots = (
+                                        TimeSlot.objects.filter(
+                                            tournament__pk=tournament.pk
+                                        )
+                                        .filter(isFree=True)
+                                        .order_by("?")
+                                    )
+                                    if random_timeslots.count() > 0:
+                                        timeslot = random_timeslots.first()
+                                        timeslot.isFree = False
+                                        timeslot.title = (
+                                            "Slot for the game between teams"
+                                            + str(teams[i])
+                                            + " and "
+                                            + str(teams[j])
+                                        )
+                                        timeslot.description = (
+                                            "Field="
+                                            + str(timeslot.field)
+                                            + "\nGame Date= "
+                                            + str(timeslot.start_time.day)
+                                            + "\nGame Time= "
+                                            + str(timeslot.start_time.time)
+                                            + " : "
+                                            + str(timeslot.end_time.time)
+                                        )
+                                        timeslot.save()
+                                        aux_choice = randint(0, 1)
+                                        if aux_choice == 0:
+                                            home_team = teams[i]
+                                            away_team = teams[j]
+                                        else:
+                                            home_team = teams[j]
+                                            away_team = teams[i]
+                                        print("DAY===", timeslot.start_time.day)
+                                        aux_day = Day.objects.create(
+                                            day=timeslot.start_time
+                                        )
+                                        game = Game.objects.create(
+                                            gameDate=aux_day,
+                                            tournament=tournament,
+                                            timeslot=timeslot,
+                                            home_team=home_team,
+                                            away_team=away_team,
+                                        )
+                                        game.save()
+        except IntegrityError:
+            pass
+        print("ALL CREATED GAMES====", tournament.game_set.all())
+        print("THEIR COUNT===", tournament.game_set.all().count())
+        return
 
 
 class RestTournaments(generics.RetrieveUpdateAPIView):
@@ -883,6 +1022,20 @@ class CalendarView(BaseCalendarView):
     model = TimeSlot
     template_name = "main/calendar.html"
 
+    def get_year(self):
+        """Return the year for which this view should display data."""
+        year = self.year
+        if year is None:
+            try:
+                year = year = date.today().year
+                print("YEAR", year)
+            except KeyError:
+                try:
+                    year = self.request.GET["year"]
+                except KeyError:
+                    raise Http404(_("No year specified"))
+        return year
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -924,6 +1077,11 @@ def get_date(req_day):
     return datetime.today()
 
 
+def nCr(n, r):
+    f = math.factorial
+    return f(n) / f(r) / f(n - r)
+
+
 class GameView(generic.DetailView):
     model = Game
     template_name = "main/game.html"
@@ -936,10 +1094,6 @@ class GameView(generic.DetailView):
             team_selected = None
 
         selected_game = Game.objects.filter(pk=pk).first()
-<<<<<<< HEAD
-=======
-
->>>>>>> 6b0291b086b7f6066fde113c91a1ee3af7a5133b
         final_score = selected_game.result_set
 
         if final_score.first() == final_score.last():

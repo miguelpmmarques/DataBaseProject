@@ -15,7 +15,7 @@ class Calendar(HTMLCalendar):
         events_per_day = events.filter(start_time__day=day)
         d = ""
         for event in events_per_day:
-            d += f"<li id='1'> {event.title} </li>"
+            d += f"<li id='{event.pk}' name='{event.game}'><a href='/games/{event.game.pk}'> {event.title} </a></li>"
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"

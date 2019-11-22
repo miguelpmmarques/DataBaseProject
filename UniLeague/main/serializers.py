@@ -38,9 +38,6 @@ class PartialCustomUserSerializer(serializers.ModelSerializer):
 
 
 class TournamentSerializer(serializers.ModelSerializer):
-    beginTournament = serializers.DateTimeField(format="%d/%m/%YT%H:%M:%S")
-    endTournament = serializers.DateTimeField(format="%d/%m/%YT%H:%M:%S")
-
     class Meta:
         model = Tournament
         fields = "__all__"

@@ -13,6 +13,7 @@ from .models import GameWeekDay
 from .models import Day
 from .models import TeamUser
 from .models import Notifications
+from .models import RegularSlot
 
 
 # Register your models here.
@@ -48,3 +49,4 @@ admin.site.register(GameWeekDay)
 admin.site.register(Day)
 admin.site.register(TeamUser)
 admin.site.register(Notifications)
+admin.site.register(RegularSlot)
