@@ -17,6 +17,7 @@ urlpatterns = [
     path("", views.LandingPageView.as_view(), name="landing-page"),
     path("logout/", views.log_out_request, name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
+    path("notifications/", views.NotificationsView.as_view(), name="notification"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),
@@ -34,7 +35,7 @@ urlpatterns = [
     path("users/rest/list/patch/", views.RestUsersListPatch.as_view()),
     path("users/rest/list/", views.RestUsersList.as_view()),
     path(
-        "team/apply/<str:team_selected>/",
+        "team/apply/<int:pk>/",
         views.ChoosePositionView.as_view(),
         name="choosePosition",
     ),
@@ -61,7 +62,6 @@ urlpatterns = [
     path("teams/rest/<int:pk>/", views.RestTeams.as_view()),
     path("teams/rest/list/", views.RestTeamsList.as_view()),
     path("games/calendar/<year>/", views.CalendarView.as_view(), name="main-calendar"),
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # path("teams/<int:pk>/", views.),

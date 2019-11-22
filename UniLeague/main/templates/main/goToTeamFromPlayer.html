@@ -29,23 +29,22 @@
                 <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
             </form>
             <br>
-            {% if users %}
             <ul id="ul_teams" class="list-group margin">
+
                 {% if users %}
-                {% for user in users %}
-                    <li class="groupList list-group-item">{{user.first_name}} {{user.last_name}} teams:
-                    <ul>
-                      {% for team in user.team_set.all %}
-                      <a href="/teams/profile/{{team.id}}"><li class="groupList list-group-item">{{team.name}}</li></a>
-                      {% endfor %}
-                    </ul>
-                    </li>
+                {% regroup users by player as user_list %}
+                {% for player in user_list %}
+                  <ul class="groupList list-group-item">{{player.grouper.first_name}} {{player.grouper.last_name}} teams:
+                        {% for team in player.list %}
+                          <a href="/teams/profile/{{team.id}}"><li class="groupList list-group-item">{{team.team.name}}</li></a>
+                        {% endfor %}
+                  </ul>
                 {% endfor %}
                 {% else %}
                 <li class="groupList list-group-item">No Teams found</li>
+
                 {% endif %}
             </ul>
-            {% endif %}
         </div>
         <div class="col"></div>
     </div>

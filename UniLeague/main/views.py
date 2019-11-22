@@ -77,9 +77,8 @@ from .models import Field
 from .models import Team
 from .models import TeamUser
 from .models import Tactic
-
+from .models import Notifications
 from .models import Position
-
 from .models import Result
 from .models import Game
 from .models import TimeSlot
@@ -112,19 +111,9 @@ class GoToTeamFromPlayer(generic.DetailView):
 
     def get(self, request):
 
-        teamuser = TeamUser.objects.all()
-        usersToSend = []
-        for elem in teamuser:
-            usersToSend.append(elem.player)
-        """users = CustomUser.objects.all()
-        print(users)
-        for elem in users:
-            print(len(elem.team_set.all()))
-            if len(elem.team_set.all()) != 0:
-                usersToSend.append(elem)
-                # print(elem.team_set.all())"""
+        teamuser = TeamUser.objects.all().order_by("-player")
         return render(
-            request, template_name=self.template_name, context={"users": usersToSend},
+            request, template_name=self.template_name, context={"users": teamuser},
         )
 
 
@@ -132,61 +121,79 @@ class TeamView(generic.DetailView):
     template_name = "main/profileTeam.html"
 
     def get(self, request, pk):
-        teamuser = (
-            TeamUser.objects.all()
-            .filter(team__pk=pk)
-            .filter(player__pk=request.user.id)
-        ).first()
+        print(request.user)
+        if request.user.is_authenticated:
 
-        print(teamuser)
-        if teamuser.isCaptain:
-            print(request.user.teamuser_set.all)
+            teamuser = (
+                TeamUser.objects.all()
+                .filter(team__pk=pk)
+                .filter(player__pk=request.user.id)
+            ).first()
 
-            team_selected = teamuser.team
-        else:
-            try:
-                pk = int(param)
+            print(teamuser)
+            if teamuser == None:
                 team_selected = Team.objects.filter(pk=pk).first()
-            except ValueError:
-                team_selected = None
-        if team_selected:
-            print("__________________________")
-            print(
-                TeamUser.objects.filter(team__pk=team_selected.pk).values_list(
-                    "position", flat=True
-                )
-            )
-            for elem in TeamUser.objects.filter(team__pk=team_selected.pk).values_list(
-                "position", flat=True
-            ):
-                print(elem)
+            else:
+                if teamuser.isCaptain:
+                    print(request.user.teamuser_set.all)
 
+                    team_selected = teamuser.team
+                else:
+                    try:
+                        team_selected = Team.objects.filter(pk=pk).first()
+                    except ValueError:
+                        team_selected = None
+        else:
+            team_selected = Team.objects.get(pk=pk)
+
+        return render(
+            request,
+            template_name=self.template_name,
+            context={
+                "captain": CustomUser.objects.get(
+                    pk__in=list(
+                        TeamUser.objects.filter(team__pk=team_selected.pk)
+                        .filter(isCaptain=True)
+                        .values_list("player", flat=True)
+                    )
+                ),
+                "myTeam": team_selected,
+                "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
+                "players": CustomUser.objects.filter(
+                    pk__in=list(
+                        TeamUser.objects.filter(team__pk=team_selected.pk).values_list(
+                            "player", flat=True
+                        )
+                    )
+                ),
+                "tactic": team_selected.tactic,
+                "positionsOcupied": TeamUser.objects.filter(
+                    team__pk=team_selected.pk
+                ).values_list("position", flat=True),
+            },
+        )
+        raise Http404
+
+
+class NotificationsView(generic.DetailView):
+    template_name = "main/notifications.html"
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            notification = Notifications.objects.filter(
+                user_send=request.user
+            ).order_by("-sendDate")
             return render(
                 request,
                 template_name=self.template_name,
-                context={
-                    "captain": CustomUser.objects.get(
-                        pk__in=list(
-                            TeamUser.objects.filter(team__pk=team_selected.pk)
-                            .filter(isCaptain=True)
-                            .values_list("player", flat=True)
-                        )
-                    ),
-                    "myTeam": team_selected,
-                    "players": CustomUser.objects.filter(
-                        pk__in=list(
-                            TeamUser.objects.filter(
-                                team__pk=team_selected.pk
-                            ).values_list("player", flat=True)
-                        )
-                    ),
-                    "tactic": team_selected.tactic,
-                    "positionsOcupied": TeamUser.objects.filter(
-                        team__pk=team_selected.pk
-                    ).values_list("position", flat=True),
-                },
+                context={"notifications": notification},
             )
-        raise Http404
+        return HttpResponseRedirect(reverse("main:login"))
+
+
+class ProfileView(generic.DetailView):
+    template_name = "main/profile.html"
+    model = CustomUser
 
 
 class ProfileView(generic.DetailView):
@@ -217,15 +224,8 @@ class CreateTeam(generic.CreateView):
             if form.is_valid():
                 team = form.save(commit=False)
                 request.session["team_form"] = TeamSerializer(team).data
-                return redirect("/team/apply/create/")
-                """try:
-                    with transaction.atomic():
-                except IntegrityError as err:
-                    print("Database Integrity error:", err)
-                    return HttpResponse(
-                        "Critical database error\nUnable to save your user\nPlease try again"
-                    )
-                return HttpResponseRedirect("/team/apply/" + team.name)"""
+                return redirect("/team/apply/0/")
+
             return HttpResponse("Please Fill all Fields")
         return HttpResponseRedirect(reverse("main:landing-page"))
 
@@ -235,10 +235,10 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
     allowed_methods = "PATCH"
     serializer_class = PositionSerializer
 
-    def get(self, request, team_selected):
-        if team_selected == "create":
-            print("message==", request.session["team_form"])
-
+    def get(self, request, pk):
+        team_selected = Team.objects.filter(pk=pk).first()
+        print(team_selected)
+        if not team_selected:
             team_serialized = request.session["team_form"]
             tactic = Tactic.objects.get(pk=team_serialized["tactic"])
 
@@ -248,15 +248,28 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                 context={"team": team_serialized, "tactic": tactic},
             )
         else:
-            return HttpResponseBadRequest()
+            return render(
+                request,
+                template_name=self.template_name,
+                context={
+                    "team": team_selected,
+                    "tactic": team_selected.tactic,
+                    "positionsOcupied": TeamUser.objects.filter(
+                        team__pk=team_selected.pk
+                    ).values_list("position", flat=True),
+                },
+            )
 
-    def patch(self, request, team_selected):
-
-        team_serialized = request.session["team_form"]
-        team = TeamSerializer(data=team_serialized)
+    def patch(self, request, pk):
         try:
             position = Position.objects.get(name=request.data["position"])
-            print(team)
+            team_exists = Team.objects.get(pk=pk)
+        except Position.DoesNotExist:
+            raise Http404
+        except Team.DoesNotExist:
+            team_serialized = request.session["team_form"]
+            team = TeamSerializer(data=team_serialized)
+            team_serialized = request.session["team_form"]
             if team.is_valid(raise_exception=True):
                 print("GUARDOU")
                 new_team = team.save()
@@ -266,10 +279,41 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     team=new_team,
                     position=position,
                 ).save()
+                Notifications.objects.create(
+                    title="OH CAPTAIN MY CAPTAIN",
+                    description="<h3>"
+                    + request.user.first_name
+                    + " "
+                    + request.user.last_name
+                    + " you just became the captain of the team "
+                    + new_team.name
+                    + " in the tournament: "
+                    + new_team.tournament.name
+                    + ". I wish you the best of luck in the matches!</h3>",
+                    user_send=request.user,
+                    origin="Tournament Manager",
+                ).save()
+                return Response("success")
             else:
                 print("\n\n" + team.errors)
-        except Position.DoesNotExist:
-            raise Http404
+        TeamUser.objects.create(
+            isCaptain=False, player=request.user, team=team_exists, position=position,
+        ).save()
+        Notifications.objects.create(
+            title="WELCOME TO MY TEAM PARTER",
+            description="<h3>"
+            + request.user.first_name
+            + " "
+            + request.user.last_name
+            + " you just joined the team "
+            + team_exists.name
+            + " in the tournament: "
+            + team_exists.tournament.name
+            + ". Please check out our team calendar and add capital to your "
+            + "budget by sending money to this IBAN 0095 1666 1223 1233 2. We gonna win this!</h3>",
+            user_send=request.user,
+            origin="Captain",
+        ).save()
         print(request.data["position"])
 
         return Response("success")
@@ -283,8 +327,12 @@ def profileOtherView(request, user_selected):
 def profileTeamOtherView(request, team_selected):
     print("Chegou aqui")
     team = Team.objects.get(name=team_selected)
+    teamuser = TeamUser.objects.filter(team__name=team_selected)
+    print(teamuser)
     return render(
-        request, template_name="main/profileTeam.html", context={"myTeam": team}
+        request,
+        template_name="main/profileTeam.html",
+        context={"myTeam": team, "teamuser": teamuser},
     )
 
 
@@ -292,11 +340,9 @@ class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
 
     def get(self, request):
-        print(TeamUser.objects.filter(player__pk=request.user.pk))
-        print(request.user.teamuser_set.all().first())
         try:
-            tournaments = TournamentSerializer(Tournament.objects.all(), many=True).data
-            teams = TeamSerializer(Team.objects.all(), many=True).data
+            tournaments = Tournament.objects.all()
+            teams = Team.objects.all()
             return render(
                 request,
                 template_name=self.template_name,
@@ -330,10 +376,10 @@ class CreateTeamView(generic.TemplateView):
     template_name = "main/listTeam.html"
 
     def get(self, request):
-
-        tournaments = Team.objects.all()
+        team = Team.objects.all()
+        print(team)
         return render(
-            request, template_name=self.template_name, context={"team": tournaments},
+            request, template_name=self.template_name, context={"teams": team},
         )
 
 
@@ -368,7 +414,8 @@ class LoginView(generic.CreateView):
             data = request.POST
             return HttpResponseRedirect(data.get("next", "/"))
         else:
-            raise Http404
+            messages.error(request, "Invalid username or password")
+            return HttpResponseRedirect("")
 
 
 class RegisterView(generic.CreateView):
@@ -392,6 +439,30 @@ class RegisterView(generic.CreateView):
                 return HttpResponse(
                     "Critical database error\nUnable to save your user\nPlease try again"
                 )
+            superuser = CustomUser.objects.get(is_superuser=True)
+            Notifications.objects.create(
+                title="NEW USER",
+                description="<h3>The user "
+                + user.username
+                + " as know as "
+                + user.first_name
+                + " "
+                + user.last_name
+                + " has registered and would like to become a member of Unileague</h3><br><h3>"
+                + "</h3> <button class='btn btn-light btn-outline-secondary' id='activate_user'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
+                user_send=superuser,
+                origin="System",
+            ).save()
+            Notifications.objects.create(
+                title="WELCOME TO UNILEAGUE",
+                description="Welcome "
+                + user.first_name
+                + " "
+                + user.last_name
+                + " to the best soccer app in the world, join/create a team a start playing!",
+                user_send=user,
+                origin="System",
+            ).save()
             current_site = get_current_site(request)
             mail_subject = "Activate your UniLeague account."
             message = render_to_string(
@@ -411,6 +482,23 @@ class RegisterView(generic.CreateView):
             )
         print(form.errors)
         return HttpResponse("Please Fill all Fields")
+
+
+"""<h1>The User {{user.username}} has registered and would like to become a member of Unileague</h1>
+<br>
+<h2>{{user.first_name}} {{user.last_name}}</h2>
+<ul id="user_info_{{user.pk}}">
+    {% for k,v in user.items %}
+    {% ifnotequal k 'id' %}
+    {% ifnotequal k 'first_name' %}
+    {% ifnotequal k 'last_name' %}
+    <li>{{k}}: {{v}}</li>
+    {% endifnotequal %}
+    {% endifnotequal %}
+    {% endifnotequal %}
+    {% endfor %}
+</ul>
+"""
 
 
 class HelpView(generic.TemplateView):
@@ -591,7 +679,7 @@ def validateMultiple(request):
     if users.exists():
         return render(
             request,
-            queryset = CustomUser.objects.all(),
+            queryset=CustomUser.objects.all(),
             template_name="main/admin_validation_multiple.html",
             context={"users": serializer.data},
         )
@@ -836,7 +924,6 @@ class GameView(generic.DetailView):
     model = Game
     template_name = "main/game.html"
 
-
     def get(self, request, pk):
         try:
             pk = int(pk)
@@ -844,7 +931,11 @@ class GameView(generic.DetailView):
         except ValueError:
             team_selected = None
 
+<<<<<<< HEAD
 
+=======
+        selected_game = Game.objects.filter(pk=pk).first()
+>>>>>>> 0b714f2344bd169d038045f097e6e21760f88bec
         final_score = selected_game.result_set
 
         if final_score.first() == final_score.last():
@@ -853,13 +944,10 @@ class GameView(generic.DetailView):
                 return render(
                     request,
                     template_name=self.template_name,
-                    context={
-                        "game": selected_game,
-                        "result": final_score
-                    }
+                    context={"game": selected_game, "result": final_score},
                 )
                 raise Http404
 
         else:
-            #mandar notify ao admin
+            # mandar notify ao admin
             return HttpResponse("Aguardar resposta do tournament manager")
