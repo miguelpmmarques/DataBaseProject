@@ -208,11 +208,14 @@ class CreateTeam(generic.CreateView):
     form_class = TeamCreationForm
 
     def get(self, request):
+        
+        tournaments = Tournament.objects.all()
+        tactics = Tactic.objects.all()
         if request.user.is_authenticated:
             return render(
                 request,
                 template_name=self.template_name,
-                context={"form": self.form_class},
+                context={"form": self.form_class,"tournaments":tournaments, "tactics":tactics},
             )
         return HttpResponseRedirect(reverse("main:landing-page"))
 
