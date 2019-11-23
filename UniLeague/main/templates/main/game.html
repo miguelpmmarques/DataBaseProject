@@ -8,7 +8,7 @@
     <div class="col">
       <!-- home_team logo and name -->
       <p class="text-center">HOME</p>
-      <img src="{{game.home_team.teamLogo}}"> <br>
+      <img src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}"> <br>
       <h2>{{game.home_team.name}}</h2>
     </div>
     <div class="col-6">
@@ -34,7 +34,7 @@
     <div class="col">
       <!-- away_team logo and name -->
       <p class="text-center">AWAY</p>
-      <img src="{{game.away_team.teamLogo}}"> <br>
+      <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}"> <br>
       <h2>{{game.away_team.name}}</h2>
     </div>
   </div>
