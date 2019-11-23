@@ -8,6 +8,7 @@ from .models import Tournament
 from .models import Field
 from .models import Team
 from .models import Position
+from .models import TeamUser
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -46,6 +47,12 @@ class TournamentSerializer(serializers.ModelSerializer):
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
+        fields = "__all__"
+
+
+class TeamUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeamUser
         fields = "__all__"
 
 

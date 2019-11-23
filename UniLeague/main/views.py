@@ -63,6 +63,7 @@ from .serializers import TournamentSerializer
 from .serializers import FieldSerializer
 from .serializers import TeamSerializer
 from .serializers import PositionSerializer
+from .serializers import TeamUserSerializer
 
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
@@ -767,6 +768,43 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
+
+
+class changePos(generics.RetrieveUpdateAPIView):
+    queryset = TeamUser.objects.all()
+    serializer_class = TeamUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        teampk = kwargs.pop("teampk", False)
+        playerpk = kwargs.pop("playerpk", False)
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+
+        instance2 = TeamUser.objects.filter(team=teampk).filter(
+            position__name=instance.position.name.split(" ")[0]
+        )
+        print(instance2)
+
+        if not instance2.exists():
+            getPosition = (
+                Position.objects.filter(start=False)
+                .filter(name=instance.position.name.split(" ")[0])
+                .first()
+            )
+            serializer = self.get_serializer(
+                instance, {"position": getPosition.pk}, partial=True
+            )
+            print(serializer)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+
+            if getattr(instance, "_prefetched_objects_cache", None):
+                # If 'prefetch_related' has been applied to a queryset, we need to
+                # forcibly invalidate the prefetch cache on the instance.
+                instance._prefetched_objects_cache = {}
+
+            return Response("Done")
+        return Response("Fail")
 
 
 class RestListTournaments(generics.ListAPIView):

@@ -56,12 +56,18 @@ urlpatterns = [
         name="tournament-details",
     ),
     path("games/<int:pk>", views.GameView.as_view()),
+    path("positionchange/<int:playerpk>/<int:teampk>/", views.changePos.as_view()),
     path("teams/create/", views.CreateTeam.as_view(), name="createTeam"),
     path("teams/list/", views.CreateTeamView.as_view(), name="listTeam"),
     path("teams/profile/<int:pk>/", views.TeamView.as_view(), name="TeamProfile",),
     path("teams/rest/<int:pk>/", views.RestTeams.as_view()),
     path("teams/rest/list/", views.RestTeamsList.as_view()),
     path("games/calendar/", views.CalendarView.as_view(), name="main-calendar"),
+    path(
+        "games/generate/<int:tournament_pk>/",
+        views.CreateGames.as_view(),
+        name="generate-games",
+    ),
     path(
         "games/generate/<int:tournament_pk>/",
         views.CreateGames.as_view(),
