@@ -1039,6 +1039,7 @@ class TournamentDetailsView(generic.View):
             # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
+            teams.reverse()
             return render(
                 request,
                 template_name="main/tournamentDetails.html",
