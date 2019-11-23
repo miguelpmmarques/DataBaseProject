@@ -609,6 +609,8 @@ class CreateTournamentView(APIView):
             serializer = TournamentSerializer(data=data_copy)
             if serializer.is_valid():
                 serializer.save()
+                request.user.isTournamentManager = True
+                request.user.save()
                 return Response({"sucess": True})
             print(serializer.errors)
             return Response({"errors": serializer.errors})
