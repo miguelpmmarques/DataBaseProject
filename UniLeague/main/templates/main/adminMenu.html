@@ -16,12 +16,11 @@
             <br>
             <ul id="ul_users" class="list-group margin" style="width: 29vw; height: 40vw; overflow: auto;">
                 {% for elem in users %}
-<<<<<<< HEAD
 
-                <li class="groupList list-group-item"><a href="/users/profile/{{elem.id}}/">{{elem.first_name}} {{elem.last_name}} (
-=======
-                <li class="groupList list-group-item">{{elem.first_name}} {{elem.last_name}}
->>>>>>> 2d9f21f828d9c2069229b23288e02b45c062cf60
+
+                <li class="groupList list-group-item"><a href="/users/profile/{{elem.id}}/">{{elem.first_name}} {{elem.last_name}}
+
+    
                     {% if elem.isTournamentManager %}
                     Tournament Manager
                     {% else %}
@@ -34,10 +33,8 @@
 
                     {% endfor %}
                     {% endif %}
-<<<<<<< HEAD
                 </a>
-=======
->>>>>>> 2d9f21f828d9c2069229b23288e02b45c062cf60
+
                 </li>
 
                 {% endfor %}

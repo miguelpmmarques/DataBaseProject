@@ -24,14 +24,28 @@ function main() {
         }
     });
     var changePosition = document.getElementsByClassName('changePos');
-    for (var elem in changePosition) {
-      elem.addEventListener("click",function(e) {
+    for (var i=0; i<changePosition.length;i++) {
+      changePosition[i].addEventListener("click",function(e) {
           changePositionSubs(this.id)
+
       });
     }
 }
 function changePositionSubs(mypk) {
-  console.log(mypk);
+  data = {"replacePk" : this.id}
+  $.ajax({
+          url: urls[elem],
+          type: 'PATCH',
+          timeout: 3000,
+
+          data: data, //, processData:false, contentType = 'application/json'
+          success: function(d) {
+          },
+          data: data[elem]//, processData:false, contentType = 'application/json'
+      })
+      .fail(function() {
+          alert('Error updating this model instance.');
+      });
 }
 function changeCaptainFun(e, old_captain, options) {
     var spinner = document.getElementById('spinner');
