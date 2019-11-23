@@ -460,17 +460,19 @@ class RegisterView(generic.CreateView):
                 + " "
                 + user.last_name
                 + " has registered and would like to become a member of Unileague</h3><br><h3>"
-                + "</h3> <button class='btn btn-light btn-outline-secondary' id='activate_user'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
+                + "</h3> <button name="
+                + user.pk
+                + " class='btn btn-light btn-outline-secondary' id='activate_user'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
                 user_send=superuser,
                 origin="System",
             ).save()
             Notifications.objects.create(
-                title="WELCOME TO UNILEAGUE",
+                title="<h3>WELCOME TO UNILEAGUE",
                 description="Welcome "
                 + user.first_name
                 + " "
                 + user.last_name
-                + " to the best soccer app in the world, join/create a team a start playing!",
+                + " to the best soccer app in the world, join/create a team a start playing!</h3>",
                 user_send=user,
                 origin="System",
             ).save()
@@ -488,7 +490,7 @@ class RegisterView(generic.CreateView):
             to_email = form.cleaned_data.get("email")
             email = EmailMessage(mail_subject, message, to=[to_email])
             email.send()
-            messages.error(request, "Waiting for admin's confirmation...")
+            messages.error(request, "Confirm your account in your mail")
             return HttpResponseRedirect("")
         messages.error(request, form.errors)
         return HttpResponseRedirect(reverse("main:landing-page"))
@@ -833,12 +835,14 @@ def validateMultiple(request):
 class RestUsers(generics.RetrieveUpdateAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
 
 class RestUsersListPatch(APIView):
     allowed_methods = "PATCH"
     # authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAdminUser]
+    queryset = CustomUser.objects.all()
 
     def patch(self, request):
         data = request.data
