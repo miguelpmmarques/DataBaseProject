@@ -38,12 +38,11 @@
         </div>
       </div>
         <div class="card-body">
-          <h5 class="card-text"><b>Team Captain:</b><br> <center>{{captain.first_name}} {{captain.last_name}}</center> </h5>
+          <h5 class="card-text"><b>Team Captain:</b><br> <center>{{captain.first_name}} {{captain.last_name}} AKA {{captain.username}}</center> </h5>
           <h5 class="card-text"><b>Username:</b><br><center>{{captain.username}}</center> </h5>
-          <h5 class="card-text"><b>Tournament:</b><br> <center>{{myTeam.tournament.name}}</center></h5>
           {% if user.pk == captain.pk %}
           <select class=" form-control" id="exampleFormControlSelect1">
-            {% for player in myTeam.players.all %}
+            {% for player in players.all %}
             {% if player.pk == captain.pk %}
             <option value="{{player.pk}}" selected="selected"><b>Captain: {{player.first_name}} {{player.last_name}} - {{player.username}}</b></option>
             {% else %}
@@ -66,7 +65,32 @@
       <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
 
         {% for elem in player_position %}
-        <li class="groupList list-group-item">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
+
+        <div id="myModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+              </div>
+              <div class="modal-body">
+                <h1 class="text-secondary">{{elem.player.first_name}} {{elem.player.last_name}}</h1>
+                <p class="text-secondary">Budget:</p>
+                <input type="number" class="form-control text-center" style="width: 25%; "name="citizen_card" value="{{elem.absences}}" min="-9223372036854775808" max="9223372036854775807">
+
+                <p class="text-secondary">Absences: </p>
+                <input type="number" class="form-control text-center" style="width: 25%; "name="citizen_card" value="{{elem.absences}}" min="-9223372036854775808" max="9223372036854775807">
+
+              </div>
+              <div class="modal-footer">
+                <p class="text-danger">Any changes will be register immediately</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <li class="groupList list-group-item" data-toggle="modal" data-target="#myModal">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
+
           {% if elem.position.start %}
           <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
             <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
@@ -81,7 +105,11 @@
         </li>
         {% endfor %}
       </ul>
-    </div>
+
+
+
+
+</div>
     <img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
   </div>
   <div class="col-lg-6">

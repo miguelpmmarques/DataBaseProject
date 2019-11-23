@@ -37,7 +37,7 @@
                     {% endif %}
                     {% endfor %}
                     {% endif %}
-                    <button type="button" name="button" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban"></i></button>
+                    <button type="button" id="blacklist" name="button" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban"></i></button>
                 </li>
 
                 {% endfor %}
@@ -71,12 +71,12 @@
             <br>
             <ul id="ul_teams" class="list-group margin" style="width: 29vw; height: 60vh; overflow: auto;">
                 {% for team in teams %}
-                <li class="groupList list-group-item" onclick="window.location.href='/teams/profile/{{team.id}}/'"><a >{{team.name}}</a></li>
+                <li class="groupList list-group-item" onclick="window.location.href='/teams/profile/{{team.id}}/'"><a>{{team.name}}</a></li>
                 {% endfor %}
             </ul>
         </div>
     </div>
-  
+
     {% endblock %}
 
 </body>
