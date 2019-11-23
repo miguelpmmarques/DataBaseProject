@@ -8,6 +8,7 @@
 
 <body>
     {% block body %}
+    {% csrf_token %}
     <script src="{% static 'js/adminMenu.js' %}"></script>
     {% if users %}
     <br><br>
@@ -22,8 +23,7 @@
             <ul id="ul_users" class="list-group margin" style="width: 29vw; height: 40vw; overflow: auto;">
                 {% for elem in users %}
 
-
-                <li class="groupList list-group-item" onclick="window.location.href='/users/profile/{{elem.id}}/'">{{elem.first_name}} {{elem.last_name}}
+                <li class="groupList list-group-item" name="users_li" id="{{elem.id}}">{{elem.first_name}} {{elem.last_name}}
 
 
                     {% if elem.isTournamentManager %}
@@ -37,7 +37,11 @@
                     {% endif %}
                     {% endfor %}
                     {% endif %}
-                    <button type="button" id="blacklist" name="button" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban"></i></button>
+                    {% if elem.is_active %}
+                    <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i"></i></button>
+                    {% else %}
+                    <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList" disabled><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i" deactivated></i></button>
+                    {% endif %}
                 </li>
 
                 {% endfor %}

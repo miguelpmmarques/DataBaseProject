@@ -609,6 +609,8 @@ class CreateTournamentView(APIView):
             serializer = TournamentSerializer(data=data_copy)
             if serializer.is_valid():
                 serializer.save()
+                request.user.isTournamentManager = True
+                request.user.save()
                 return Response({"sucess": True})
             print(serializer.errors)
             return Response({"errors": serializer.errors})
@@ -1039,6 +1041,7 @@ class TournamentDetailsView(generic.View):
             # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
+            teams.reverse()
             return render(
                 request,
                 template_name="main/tournamentDetails.html",
