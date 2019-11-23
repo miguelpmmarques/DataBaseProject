@@ -45,14 +45,14 @@
                 </div>
             </div>
             <div class="carousel-item">
-                <div class="container m-auto text-center justify-content-center">
+                <div class="container mx-auto text-center justify-content-center">
                     {% for k, v in labels.items %}
                     {% if k == "beginTournament" %}
-                    <br><label for="{{k}}" class="mt-5 text-center">{{v.value}}:</label><br>
-                    <input type="{{v.type}}" class="mr-5 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
+                    <br><label for="{{k}}" class="mt-5 text-center mx-auto">{{v.value}}:</label><br>
+                    <input type="{{v.type}}" class="mt-2 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
                     {% elif k == "endTournament" %}
                     <br><label for="{{k}}" class="mt-5 text-center">{{v.value}}:</label><br>
-                    <input type="{{v.type}}" class="mr-5 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+                    <input type="{{v.type}}" class="mt-2 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
 
                     {% elif k == "game_week_days" %}
 
@@ -72,19 +72,23 @@
 
                 <div class="row">
                     <div class="col"></div>
-                    <div class="col-2">
+                    <div class="col-2 mx-auto">
                         {% for k, v in labels.items %}
 
                         {% if k == "days_without_games" %}
-                        <br><label for="datepicker" class="mt-2 ">{{v.value}}:</label>
+                        <br><label for="datepicker" class="mt-2 mr-3">{{v.value}}:</label>
 
-                        <div id="datepicker" class="mt-2 datepicker-center inline-block center-block block" name="datepicker">
+                        <div id="datepicker" class="mt-2" name="datepicker">
                           <input type="text" class="form-control" hidden="true" name="{{k}}">
                         </div>
 
                         {% endif %}
                         {% endfor %}
-                        <button type="submit" class="mt-2" id="create">Create Tournament</button>
+                        <!-- <button type="submit" class="mt-2" id="create">Create Tournament</button> -->
+                        <button type="submit" class="btn btn-light btn-outline-secondary" id="create">
+                          <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                          Create Tournament
+                        </button>
                     </div>
                     <div class="col"></div>
                 </div>

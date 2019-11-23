@@ -16,17 +16,19 @@
   {% endfor%}
   {% endif %}
 <div class="row">
-    <div class="col"></div>
+    <div class="col">
+      <img class="mt-5" src="{% static 'assets/UniLeague_logo.png' %}" style="width:90%;height:auto;">
+    </div>
 
     <div class="col">
         <h2 class="text-center">CREATE TEAM</h2>
 
-        <form class="mt-4" method="post">
+        <form class="mt-4 text-center" method="post">
             {% csrf_token %}
             <!-- {{ form.as_p }} -->
-            <input type="text" class="mt-4" name="name" maxlength="512" required id="id_name" placeholder="Name"><br>
+            <input type="text" class="mt-4 rcorners_input" name="name" maxlength="512" required id="id_name" placeholder="Name"><br>
 
-           <select name="tournament" class="mt-4" required id="id_tournament">
+           <select name="tournament" class="mt-4 rcorners_list" required id="id_tournament">
              <option value="" selected>Select a tournament</option>
 
                {% for t in tournaments.all %}
@@ -34,20 +36,26 @@
                  <option value="{{t.pk}}">{{t.name}}</option>
                {% endfor %}
 
-           </select><br>
+           </select>
 
-           <input type="file" class="mt-4" name="teamLogo" accept="image/*" id="id_teamLogo">
-
-           <select name="tactic" class="mt-4" required id="id_tactic">
+           <select name="tactic" class="mt-4 rcorners_list" required id="id_tactic">
              <option value="" selected>Choose a tactic</option>
              {% for tactic in tactics.all %}
 
-               <option value="{{tactic.pk}}">{{tactic.name}}</option>
+             <option value="{{tactic.pk}}">{{tactic.name}}</option>
              {% endfor %}
            </select>
 
+           <input type="file" class="mt-4 rcorners_btn text-center" name="teamLogo" accept="image/*" id="id_teamLogo" style="width:400px;"><br>
+
+
+
             <div class="text-center mt-4">
-                <button type="submit">Create Team</button>
+                <!-- <button type="submit">Create Team</button> -->
+                <button type="submit" class="btn btn-light btn-outline-secondary">
+                  <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                  Create Team
+                </button>
             </div>
 
         </form>
