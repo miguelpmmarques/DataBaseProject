@@ -120,3 +120,29 @@ a:hover {
   transform: translate(-50%, -50%);
   text-align: center;
 }
+
+.rcorners_input {
+  border-radius: 25px;
+  border: 2px;
+  padding: 20px;
+  width: 400px;
+  height: 15px;
+
+}
+
+
+.rcorners_btn{
+  background-color: rgba(115, 115, 115, 0.48);
+  border-radius: 16px;
+}
+
+.rcorners_list{
+  background: none repeat scroll 0 0 #FFFFFF;
+  border: 2px;
+  border-radius: 25px;
+  box-shadow: 0 0 10px #E8E8E8 inset;
+  /* margin: 0 0 0 25px; */
+  width: 200px;
+  height: 50px;
+  /* padding: 20px; */
+}
