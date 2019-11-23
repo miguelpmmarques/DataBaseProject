@@ -7,8 +7,7 @@ if (document.readyState === "complete" ||
 
 function main() {
     var success_helper = function(e) {
-        window.location.href = window.location.origin;
-    }
+console.log("success");    }
     var failure_helper = function(e) {
         console.log(e);
     }

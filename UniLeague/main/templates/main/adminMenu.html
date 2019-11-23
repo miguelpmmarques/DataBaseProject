@@ -16,7 +16,7 @@
             <br>
             <ul id="ul_users" class="list-group margin" style="width: 29vw; height: 40vw; overflow: auto;">
                 {% for elem in users %}
-                <li class="groupList list-group-item">{{elem.first_name}} {{elem.last_name}} (
+                <li class="groupList list-group-item">{{elem.first_name}} {{elem.last_name}}
                     {% if elem.isTournamentManager %}
                     Tournament Manager
                     {% else %}
@@ -29,10 +29,6 @@
 
                     {% endfor %}
                     {% endif %}
-<<<<<<< HEAD
-=======
-
->>>>>>> daa43544f2f7756600e2c59cfad4f58e490d7e9c
                 </li>
 
                 {% endfor %}
@@ -72,7 +68,7 @@
         </div>
     </div>
     <button id="blacklistUsers">BlackList Users</button>
-    
+
     {% endblock %}
 
 </body>

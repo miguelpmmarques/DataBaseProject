@@ -8,6 +8,13 @@
 
 
 {% block body %}
+{% if messages %}
+  {% for men in messages %}
+  <div class="alert alert-danger" role="alert">
+    {{men}}
+  </div>
+  {% endfor%}
+  {% endif %}
 <div class="row">
     <div class="col"></div>
 
@@ -24,17 +31,18 @@
 
                {% for t in tournaments.all %}
 
-                 <option>{{t.name}}</option>
+                 <option value="{{t.pk}}">{{t.name}}</option>
                {% endfor %}
 
            </select><br>
-           
+
            <input type="file" class="mt-4" name="teamLogo" accept="image/*" id="id_teamLogo">
 
            <select name="tactic" class="mt-4" required id="id_tactic">
              <option value="" selected="">Choose a tactic</option>
              {% for tactic in tactics.all %}
-               <option value="">{{tactic.name}}</option>
+
+               <option value="{{tactic.pk}}">{{tactic.name}}</option>
              {% endfor %}
            </select>
 

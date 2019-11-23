@@ -208,14 +208,18 @@ class CreateTeam(generic.CreateView):
     form_class = TeamCreationForm
 
     def get(self, request):
-        
+
         tournaments = Tournament.objects.all()
         tactics = Tactic.objects.all()
         if request.user.is_authenticated:
             return render(
                 request,
                 template_name=self.template_name,
-                context={"form": self.form_class,"tournaments":tournaments, "tactics":tactics},
+                context={
+                    "form": self.form_class,
+                    "tournaments": tournaments,
+                    "tactics": tactics,
+                },
             )
         return HttpResponseRedirect(reverse("main:landing-page"))
 
@@ -231,7 +235,9 @@ class CreateTeam(generic.CreateView):
                 request.session["team_form"] = TeamSerializer(team).data
                 return redirect("/team/apply/0/")
 
-            return HttpResponse("Please Fill all Fields")
+            messages.error(request, form.errors)
+            print(form.errors)
+            return HttpResponseRedirect("")
         return HttpResponseRedirect(reverse("main:landing-page"))
 
 
@@ -246,7 +252,6 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
         if not team_selected:
             team_serialized = request.session["team_form"]
             tactic = Tactic.objects.get(pk=team_serialized["tactic"])
-
             return render(
                 request,
                 template_name=self.template_name,
@@ -268,15 +273,15 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
     def patch(self, request, pk):
         try:
             position = Position.objects.get(name=request.data["position"])
+            print(position)
             team_exists = Team.objects.get(pk=pk)
+            print(team_exists)
         except Position.DoesNotExist:
             raise Http404
         except Team.DoesNotExist:
             team_serialized = request.session["team_form"]
             team = TeamSerializer(data=team_serialized)
-            team_serialized = request.session["team_form"]
             if team.is_valid(raise_exception=True):
-                print("GUARDOU")
                 new_team = team.save()
                 TeamUser.objects.create(
                     isCaptain=True,
@@ -284,6 +289,11 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     team=new_team,
                     position=position,
                 ).save()
+                print(request.user.first_name)
+                print(request.user.last_name)
+                print(new_team.name)
+                print(new_team.tournament.name)
+                print("GUARDOU")
                 Notifications.objects.create(
                     title="OH CAPTAIN MY CAPTAIN",
                     description="<h3>"
@@ -294,7 +304,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     + new_team.name
                     + " in the tournament: "
                     + new_team.tournament.name
-                    + ". I wish you the best of luck in the matches!</h3>",
+                    + " I wish you the best of luck in the matches!</h3> ",
                     user_send=request.user,
                     origin="Tournament Manager",
                 ).save()
@@ -380,19 +390,12 @@ class CreateTournamentListView(generic.TemplateView):
 
 
 class CreateTeamView(generic.TemplateView):
-    template_name = "main/createTeam.html"
+    template_name = "main/listTeam.html"
 
     def get(self, request):
         team = Team.objects.all()
-        tactics = Tactic.objects.all()
-        tournaments = Tournament.objects.all()
-        # print(tournaments)
-        # print(tactics)
-        # print(team)
         return render(
-            request,
-            template_name=self.template_name,
-            context={"tournaments": tournaments, "tactics": tactics},
+            request, template_name=self.template_name, context={"teams": team}
         )
 
 
@@ -523,10 +526,7 @@ class CreateTournamentView(APIView):
         "name": {"value": "Tournament Name", "type": "text"},
         "number_teams": {"value": "Number of Teams", "type": "number"},
         "number_of_hands": {"value": "Number of Hands", "type": "number"},
-        "beginTournament": {
-            "value": "Begining of Tournament",
-            "type": "date",
-        },
+        "beginTournament": {"value": "Begining of Tournament", "type": "date",},
         "endTournament": {"value": "End of Tournament", "type": "date"},
         "fields": {
             "value": "Game Fields",

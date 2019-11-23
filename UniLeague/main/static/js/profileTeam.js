@@ -5,8 +5,8 @@ if (document.readyState === "complete" ||
     document.addEventListener("DOMContentLoaded", main);
 }
 
-
 function main() {
+
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     $.ajaxSetup({
 
@@ -23,8 +23,16 @@ function main() {
             changeCaptainFun(e, captain, options);
         }
     });
+    var changePosition = document.getElementsByClassName('changePos');
+    for (var elem in changePosition) {
+      elem.addEventListener("click",function(e) {
+          changePositionSubs(this.id)
+      });
+    }
 }
-
+function changePositionSubs(mypk) {
+  console.log(mypk);
+}
 function changeCaptainFun(e, old_captain, options) {
     var spinner = document.getElementById('spinner');
     var my_team_id = document.getElementById('myTeam').getAttribute("name");;
@@ -66,9 +74,9 @@ function changeCaptainFun(e, old_captain, options) {
                             spinner.hidden = true;
                             window.location.href = window.location.origin;
                         }
-                    }
+                    },
 
-                    data: data[elem] //, processData:false, contentType = 'application/json'
+                    data: data[elem]//, processData:false, contentType = 'application/json'
                 })
                 .fail(function() {
                     alert('Error updating this model instance.');
