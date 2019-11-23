@@ -472,7 +472,7 @@ class RegisterView(generic.CreateView):
                 + user.last_name
                 + " has registered and would like to become a member of Unileague</h3><br><h3>"
                 + "</h3> <button name="
-                + user.pk
+                + str(user.pk)
                 + " class='btn btn-light btn-outline-secondary' id='activate_user'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
                 user_send=superuser,
                 origin="System",
