@@ -39,9 +39,9 @@
                 </li>
             </ul>
             <ul class=" navbar-left nav navbar-nav ">
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link text-white" href="/tournaments/list/"> Tournaments </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/teams/list/"> Teams </a>
                 </li>
@@ -74,15 +74,43 @@
                 </li>
                 {% endif %}
                 {% if user.is_authenticated %}
-                {% if user.isTournamentManager %}
+                <p>{{user.tournaments_set.all}}</p>
+
+                {% if user.tournaments_set.all or user.teamuser_set.all %}
+
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="">My Tournaments </a>
+
+                  <div class="dropdown">
+                    <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Tournaments
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
+
+                    {%for elem in user.tournaments_set.all %}
+                      <li><a class="text-muted"  href="/tournaments/{{elem.tournament.id}}/">{{elem.tournament.name}}</a></li>
+                    {% endfor%}
+
+                    {%for elem in user.teamuser_set.all %}
+                      <li><a class="text-muted"  href="/tournaments/{{elem.team.tournament.id}}/">{{elem.team.tournament.name}}</a></li>
+                    {% endfor%}
+
+
+                   <div class="dropdown-divider"></div>
+                   {% if user.isTournamentManager%}
+                   <li><a class="text-muted"  href="/tournaments/create/">Create Tournament</a></li>
+                   {% endif %}
+                 </ul>
+                </div>
+                    <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
                 {% else %}
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="/tournaments/create/">Create Tournaments </a>
-                </li>
+                  {% if user.isTournamentManager %}
+                  <li class="nav-item">
+                      <a class="nav-link text-white" href="/tournaments/create/"> Create Tournament </a>
+                  </li>
+                  {% endif %}
                 {% endif %}
+
 
 
 
