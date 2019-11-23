@@ -1,5 +1,10 @@
 {% extends "main/navbar.html" %}
+{% load fontawesome_5 %}
 {% load static %}
+
+{% block imports %}
+{% fontawesome_5_static %}
+{% endblock %}
 
 <body>
     {% block body %}
@@ -30,11 +35,9 @@
                     {% else%}
                     Player in Team {team_user.team.name}
                     {% endif %}
-
                     {% endfor %}
                     {% endif %}
-
-
+                    <button type="button" name="button" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban"></i></button>
                 </li>
 
                 {% endfor %}
@@ -73,8 +76,7 @@
             </ul>
         </div>
     </div>
-    <button id="blacklistUsers">BlackList Users</button>
-
+  
     {% endblock %}
 
 </body>

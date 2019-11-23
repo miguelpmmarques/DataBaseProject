@@ -38,7 +38,13 @@ class PartialCustomUserSerializer(serializers.ModelSerializer):
         )
 
 
+class DaySerializer(serializers.Serializer):
+    day = serializers.DateField(format="%d%m%Y")
+
+
 class TournamentSerializer(serializers.ModelSerializer):
+    days_without_games = DaySerializer(many=True, required=False)
+
     class Meta:
         model = Tournament
         fields = "__all__"

@@ -7,6 +7,8 @@ from random import choice, randint
 from time import sleep
 import math
 
+from django.db.models.query import QuerySet
+from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import render
 from django.views.generic import View
 from rest_framework import generics
@@ -527,7 +529,7 @@ class CreateTournamentView(APIView):
         "name": {"value": "Tournament Name", "type": "text"},
         "number_teams": {"value": "Number of Teams", "type": "number"},
         "number_of_hands": {"value": "Number of Hands", "type": "number"},
-        "beginTournament": {"value": "Begining of Tournament", "type": "date",},
+        "beginTournament": {"value": "Begining of Tournament", "type": "date"},
         "endTournament": {"value": "End of Tournament", "type": "date"},
         "fields": {
             "value": "Game Fields",
@@ -577,7 +579,6 @@ class CreateTournamentView(APIView):
             data_copy = data.copy()
             # ---------------------------------------------------
             # unnecessary once it's fully restfull, but for now, it's premature optimization
-            print("comcmocmo===", data_copy)
             for k in data.keys():
                 if k in self.list_to_send:
                     data_copy.pop(k)
@@ -591,18 +592,25 @@ class CreateTournamentView(APIView):
                 # ------------------------------------------------
                 if k == "days_without_games":
                     dates = data_copy.pop(k)
-                    for elem in dates[0].split(","):
-                        try:
-                            day = Day.objects.get(day=elem)
-                        except Day.DoesNotExist:
-                            day = Day.objects.create(day=elem)
-                        data_copy.update({k: day.pk})
+                    if dates[0] != "":
+                        for elem in dates[0].split(","):
+                            try:
+                                day = Day.objects.get(day=elem)
+                            except Day.DoesNotExist:
+                                day = Day.objects.create(day=elem)
+                            data_copy.update({k: day.pk})
+                if k == "beginTournament" or k == "endTournament":
+                    date = data.get(k)
+                    data_copy.pop(k)
+                    date = date + "T00:00"
+                    data_copy.update({k: date})
             data_copy.update({"tournament_manager": request.user.pk})
             data_copy.update({"fields": 1})
             serializer = TournamentSerializer(data=data_copy)
             if serializer.is_valid():
                 serializer.save()
                 return Response({"sucess": True})
+            print(serializer.errors)
             return Response({"errors": serializer.errors})
         else:
             return HttpResponseRedirect(reverse("main:landing-page"))
@@ -794,17 +802,30 @@ class changePos(generics.RetrieveUpdateAPIView):
             serializer = self.get_serializer(
                 instance, {"position": getPosition.pk}, partial=True
             )
-            print(serializer)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
-
             if getattr(instance, "_prefetched_objects_cache", None):
                 # If 'prefetch_related' has been applied to a queryset, we need to
                 # forcibly invalidate the prefetch cache on the instance.
                 instance._prefetched_objects_cache = {}
+            return Response("Done")
+        else:
+            instance2 = instance2.first()
+            position1 = instance.position
+            position2 = instance2.position
+            serializer = self.get_serializer(
+                instance, {"position": position2.pk}, partial=True
+            )
+
+            serializer2 = self.get_serializer(
+                instance2, {"position": position1.pk}, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            serializer2.is_valid(raise_exception=True)
+            self.perform_update(serializer2)
 
             return Response("Done")
-        return Response("Fail")
 
 
 class RestListTournaments(generics.ListAPIView):
@@ -859,7 +880,8 @@ def validate(request, pk):
             context={"user": serializer.data},
         )
     else:
-        raise Http404
+        messages.error(request, "User Not Found")
+        return render(request, template_name="main/admin_validation.html")
 
 
 def validateMultiple(request):
@@ -873,7 +895,8 @@ def validateMultiple(request):
             context={"users": serializer.data},
         )
     else:
-        raise Http404
+        messages.error(request, "No users Found")
+        return render(request, template_name="main/admin_validation.html")
 
 
 class RestUsers(generics.RetrieveUpdateAPIView):
@@ -1069,6 +1092,68 @@ class TournamentDetailsView(generic.View):
 class CalendarView(BaseCalendarView):
     model = TimeSlot
     template_name = "main/calendar.html"
+    queryset = TimeSlot.objects.all()
+    # year = self.kwargs['year']
+
+    def get_queryset(self):
+        """
+        Return the list of items for this view.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+
+        if self.queryset is not None:
+            # filter o queryset de acordo com os parametros
+            filter = self.kwargs["filter"]
+            print("FILTER===", filter)
+            # se o parametro filter== 'all' e o pk==0, devolver todos os jogos
+            try:
+                if filter != "all":
+                    # se o filter =="team", devolver os jogos da equipa cujo pk==pk
+                    if filter == "team":
+                        pk = int(self.kwargs["pk"])
+                        team_games = Game.objects.filter(
+                            Q(home_team__pk=pk) | Q(away_team__pk=pk)
+                        ).values_list("id")
+                        queryset = TimeSlot.objects.filter(
+                            game__pk__in=team_games
+                        ).order_by("start_time")
+                    elif filter == "tournament":
+                        # se o filter=="tournament", devolver os jogos do tourneio gujo pk==pk
+                        pk = int(self.kwargs["pk"])
+                        tournament_games = Tournament.objects.get(
+                            pk=pk
+                        ).game_set.values_list("id")
+                        queryset = TimeSlot.objects.filter(
+                            game__pk__in=tournament_games
+                        ).order_by("start_time")
+                    else:
+                        raise Http404
+                else:
+                    pk = int(self.kwargs["pk"])
+                    if pk == 0:
+                        queryset = self.queryset
+                    else:
+                        raise Http404
+            except (Tournament.DoesNotExist, Team.DoesNotExist, TimeSlot.DoesNotExist):
+                raise Http404
+            print("OLEOLEOLEOLEO====", queryset)
+            if isinstance(queryset, QuerySet):
+                queryset = queryset.all()
+        elif self.model is not None:
+            queryset = self.model._default_manager.all()
+        else:
+            raise ImproperlyConfigured(
+                "%(cls)s is missing a QuerySet. Define "
+                "%(cls)s.model, %(cls)s.queryset, or override "
+                "%(cls)s.get_queryset()." % {"cls": self.__class__.__name__}
+            )
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+        return queryset
 
     def get_year(self):
         """Return the year for which this view should display data."""
@@ -1077,10 +1162,11 @@ class CalendarView(BaseCalendarView):
             try:
                 year = year = date.today().year
                 print("YEAR", year)
-            except KeyError:
+            except Exception:
                 try:
                     year = self.request.GET["year"]
                 except KeyError:
+                    print("HERE")
                     raise Http404(_("No year specified"))
         return year
 
@@ -1089,6 +1175,8 @@ class CalendarView(BaseCalendarView):
 
         # use today's date for the calendar
         d = get_date(self.request.GET.get("month", None))
+        filter = self.kwargs["filter"]
+        pk = int(self.kwargs["pk"])
         print("DATE===", d)
         # Instantiate our calendar class with today's year and date
         cal = Calendar(d.year, d.month)
@@ -1159,10 +1247,12 @@ class GameView(generic.DetailView):
             Notifications.objects.create(
                 title="Result Conflitc",
                 description="<h3>There was a conflict in the final score of "
-                +selected_game.home_team+" vs "
-                +selected_game.away_team+" in tournament"
-                +selected_game.tournament.name+
-                +"</h3>",
+                + selected_game.home_team
+                + " vs "
+                + selected_game.away_team
+                + " in tournament"
+                + selected_game.tournament.name
+                + +"</h3>",
                 user_send=selected_game.tournament.tournament_manager,
                 origin="Captain",
             ).save()

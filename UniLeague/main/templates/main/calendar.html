@@ -4,9 +4,10 @@
 {% block body %}
 <link rel="stylesheet" href="{% static 'CSS/calendar.css' %}">
 <div class="clearfix">
-    <a class="btn btn-info left" href="{% url 'main:main-calendar'  %}?{{ prev_month }}"> Previous Month </a>
-    <a class="btn btn-info right" href="{% url 'main:main-calendar' %}?{{ next_month }}"> Next Month </a>
+    <a class="btn btn-info left" href="?{{ prev_month }}"> Previous Month </a>
+    <a class="btn btn-info right" href="?{{ next_month }}"> Next Month </a>
 </div>
+
 {% for game in game_list %}
 {{ game.title }} - {{ game.start_time|date:"F j, Y" }}
 {% endfor %}

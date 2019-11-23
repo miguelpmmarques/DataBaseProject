@@ -67,10 +67,14 @@
 
         {% for elem in player_position %}
         <li class="groupList list-group-item">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
+          {% if elem.position.start %}
           <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
             <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
             Replace with substitute
           </button>
+          {% else %}
+          [SUBSTITUTE]
+          {% endif %}
           {% if user.pk == captain.pk %}
           <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
           {% endif %}

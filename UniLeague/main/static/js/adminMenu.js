@@ -6,6 +6,9 @@ if (document.readyState === "complete" ||
 }
 
 function main() {
+    $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
     var success_helper = function(e, type) {
         console.log("DATA:", e);
         console.log("type:", type);
@@ -45,8 +48,8 @@ function main() {
             }
         }
     }
-    var failure_helper = function(e) {
-        console.log(e);;
+    var failure_helper = function(response_data) {
+        console.log(response_data);;
     }
     $("form").submit(function(e) {
         e.preventDefault();

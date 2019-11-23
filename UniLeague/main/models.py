@@ -94,6 +94,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
     last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
     phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
+    # zero indicates players who have been banned
     hierarchy = models.IntegerField(null=False, default=0)
     image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
 
@@ -153,7 +154,7 @@ class Tournament(models.Model):
     )
     fields = models.ManyToManyField(Field)
     game_week_days = models.ManyToManyField(GameWeekDay)
-    days_without_games = models.ManyToManyField(Day)
+    days_without_games = models.ManyToManyField(Day, blank=True)
     tournament_badge = models.ImageField(
         upload_to="users/%Y/%m/%d/", blank=True, null=True
     )
