@@ -62,21 +62,16 @@
           {% endif %}
         </div>
     </div>
-
-
-
-
     <h3 id="numberPlayer">Number of players: {{players.all.count}}/16</h3>
     <div id="playerList">
       <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
 
         {% for elem in player_position %}
         <li class="groupList list-group-item">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
-          <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
+          <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}">
             <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
             Replace with substitute
           </button>
-
           {% if user.pk == captain.pk %}
           <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
           {% endif %}
@@ -84,14 +79,11 @@
         {% endfor %}
       </ul>
     </div>
-
-
     <img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
   </div>
   <div class="col-lg-6">
     <h2>Tactic {{myTeam.tactic}}</h2>
       {% csrf_token %}
-
       <div class="row ">
         <div class="col-sm-6">
           <h1 class="text-center"><b>STARTERS</b></h1>
