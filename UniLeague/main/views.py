@@ -115,7 +115,7 @@ class GoToTeamFromPlayer(generic.DetailView):
 
         teamuser = TeamUser.objects.all().order_by("-player")
         return render(
-            request, template_name=self.template_name, context={"users": teamuser},
+            request, template_name=self.template_name, context={"users": teamuser}
         )
 
 
@@ -299,7 +299,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
             else:
                 print("\n\n" + team.errors)
         TeamUser.objects.create(
-            isCaptain=False, player=request.user, team=team_exists, position=position,
+            isCaptain=False, player=request.user, team=team_exists, position=position
         ).save()
         Notifications.objects.create(
             title="WELCOME TO MY TEAM PARTER",
@@ -444,6 +444,8 @@ class RegisterView(generic.CreateView):
                 with transaction.atomic():
                     user = form.save(commit=False)
                     user.is_active = False
+                    if user.pk == 1:
+                        user.is_superuser = True
                     user.save()
             except IntegrityError as err:
                 print("Database Integrity error:", err)
@@ -569,6 +571,7 @@ class CreateTournamentView(APIView):
             data_copy = data.copy()
             # ---------------------------------------------------
             # unnecessary once it's fully restfull, but for now, it's premature optimization
+            print("comcmocmo===", data_copy)
             for k in data.keys():
                 if k in self.list_to_send:
                     data_copy.pop(k)
