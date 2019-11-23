@@ -46,7 +46,6 @@
             {% for player in myTeam.players.all %}
             {% if player.pk == captain.pk %}
             <option value="{{player.pk}}" selected="selected"><b>Captain: {{player.first_name}} {{player.last_name}} - {{player.username}}</b></option>
-
             {% else %}
             <option value="{{player.pk}}">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
             {% endif %}
@@ -68,7 +67,7 @@
 
         {% for elem in player_position %}
         <li class="groupList list-group-item">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
-          <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}">
+          <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
             <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
             Replace with substitute
           </button>

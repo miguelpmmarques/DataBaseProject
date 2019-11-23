@@ -26,22 +26,28 @@ function main() {
     var changePosition = document.getElementsByClassName('changePos');
     for (var i=0; i<changePosition.length;i++) {
       changePosition[i].addEventListener("click",function(e) {
-          changePositionSubs(this.id)
+          changePositionSubs(this.id.split("|"));
 
       });
     }
 }
 function changePositionSubs(mypk) {
-  data = {"replacePk" : this.id}
+  data = {"playerpk" : mypk[0],"teampk" : mypk[1]}
+  console.log(mypk[0]);
+  console.log(mypk[1]);
   $.ajax({
-          url: urls[elem],
+          url: "/positionchange/"+mypk[0]+"/"+mypk[1]+"/",
           type: 'PATCH',
           timeout: 3000,
 
           data: data, //, processData:false, contentType = 'application/json'
           success: function(d) {
+            if (d==="Done"){
+              window.location.href = window.location.href
+
+            }
           },
-          data: data[elem]//, processData:false, contentType = 'application/json'
+          data: data//, processData:false, contentType = 'application/json'
       })
       .fail(function() {
           alert('Error updating this model instance.');
