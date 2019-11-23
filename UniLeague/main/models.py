@@ -238,6 +238,7 @@ class TeamUser(models.Model):
     team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
     position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
     budget = models.BigIntegerField(null=False, default=0)
+    absences = models.BigIntegerField(null=False, default=0)
 
     class Meta:
         db_table = "TeamUser"
