@@ -1034,6 +1034,9 @@ class TournamentDetailsView(generic.View):
                         "name": elem.name,
                         "points": (games_won * 3 + tied_games),
                         "goals_scored": goals_scored,
+                        "games_won": games_won,
+                        "tied_games": tied_games,
+                        "games_lost": lost_games,
                     }
                 )
             # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
