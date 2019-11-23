@@ -130,7 +130,10 @@
               {% for position in tactic.positions.all %}
               {% if "Avancado" in  position.name and position.start == True %}
               {% if position.id in positionsOcupied %}
-              <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+              <div  class="container" style="width: 50px; height: 50px;">
+                <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="" style="width=100%; height=100%">
+                <p style="position:absolute; color: white; right: 0px; top:10px; ">
+              </div>
               {% else %}
               <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
               {% endif %}
@@ -201,7 +204,10 @@
                 {% if "Medio" in  position.name and position.start == False %}
 
                 {% if position.id in positionsOcupied %}
-                <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                <div  class=" mb-3" style="width: 100px; height: 50px;">
+                  <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="" style="width=100%; height=80%">
+                  <p class="text-center" style="font-size:10px;width: 100px;">ASPDJ<p>
+                </div>
                 {% else %}
                 <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
 
