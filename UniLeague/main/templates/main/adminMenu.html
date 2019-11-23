@@ -18,9 +18,9 @@
                 {% for elem in users %}
 
 
-                <li class="groupList list-group-item"><a href="/users/profile/{{elem.id}}/">{{elem.first_name}} {{elem.last_name}}
+                <li class="groupList list-group-item" onclick="window.location.href='/users/profile/{{elem.id}}/'">{{elem.first_name}} {{elem.last_name}}
 
-    
+
                     {% if elem.isTournamentManager %}
                     Tournament Manager
                     {% else %}
@@ -33,7 +33,7 @@
 
                     {% endfor %}
                     {% endif %}
-                </a>
+
 
                 </li>
 
@@ -52,7 +52,7 @@
             <br>
             <ul id="ul_tournaments" class="list-group margin" style="width: 29vw; height: 40vh; overflow: auto;">
                 {% for tournament in tournaments %}
-                <li class="groupList list-group-item"><a href='/tournaments/{{tournament.id}}/'>{{tournament.name}}</a></li>
+                <li class="groupList list-group-item" onclick="window.location.href='/tournaments/{{tournament.id}}/'">{{tournament.name}}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -68,7 +68,7 @@
             <br>
             <ul id="ul_teams" class="list-group margin" style="width: 29vw; height: 60vh; overflow: auto;">
                 {% for team in teams %}
-                <li class="groupList list-group-item"><a href="/teams/profile/{{team.id}}/">{{team.name}}</a></li>
+                <li class="groupList list-group-item" onclick="window.location.href='/teams/profile/{{team.id}}/'"><a >{{team.name}}</a></li>
                 {% endfor %}
             </ul>
         </div>

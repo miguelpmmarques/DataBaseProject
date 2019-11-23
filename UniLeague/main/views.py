@@ -1118,4 +1118,13 @@ class GameView(generic.DetailView):
 
         else:
             # mandar notify ao admin
-            return HttpResponse("Aguardar resposta do tournament manager")
+            Notifications.objects.create(
+                title="Result Conflitc",
+                description="<h3>There was a conflict in the final score of "
+                +selected_game.home_team+" vs "
+                +selected_game.away_team+" in tournament"
+                +selected_game.tournament.name+
+                +"</h3>",
+                user_send=selected_game.tournament.tournament_manager,
+                origin="Captain",
+            ).save()

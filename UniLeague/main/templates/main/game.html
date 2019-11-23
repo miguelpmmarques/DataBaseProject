@@ -8,8 +8,10 @@
     <div class="col">
       <!-- home_team logo and name -->
       <p class="text-center">HOME</p>
-      <img src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}"> <br>
-      <h2>{{game.home_team.name}}</h2>
+      <div class="container mx-auto mt-5" style="width: 100px; height:100px;">
+        <img src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" style="width:100%;height:100%;"> <br>
+      </div>
+      <h2 class="text-center mt-5">{{game.home_team.name}}</h2>
     </div>
     <div class="col-6">
       <!-- game info -->
@@ -34,8 +36,11 @@
     <div class="col">
       <!-- away_team logo and name -->
       <p class="text-center">AWAY</p>
-      <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}"> <br>
-      <h2>{{game.away_team.name}}</h2>
+      <div class="container mx-auto mt-5" style="width: 200px; height:200px;">
+        <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:100%;height:100%;"> <br>
+      </div>
+      <h2 class="text-center mt-5">{{game.away_team.name}}</h2>
+
     </div>
   </div>
 {% endblock %}
