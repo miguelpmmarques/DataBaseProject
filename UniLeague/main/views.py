@@ -518,9 +518,9 @@ class CreateTournamentView(APIView):
         "number_of_hands": {"value": "Number of Hands", "type": "number"},
         "beginTournament": {
             "value": "Begining of Tournament",
-            "type": "datetime-local",
+            "type": "date",
         },
-        "endTournament": {"value": "End of Tournament", "type": "datetime-local"},
+        "endTournament": {"value": "End of Tournament", "type": "date"},
         "fields": {
             "value": "Game Fields",
             "type": "select",

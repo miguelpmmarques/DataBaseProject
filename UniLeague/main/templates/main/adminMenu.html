@@ -27,12 +27,14 @@
                     Player in Team {team_user.team.name}
                     {% endif %}
                     {% endfor %}
+                    {% endif %}
                 </li>
+
                 {% endfor %}
             </ul>
         </div>
         {% endif %}
-        {% if tournaments %}
+
         <div class="col-sm-4 text-center">
             <h1>Tournaments:</h1>
             <br>
@@ -47,8 +49,8 @@
                 {% endfor %}
             </ul>
         </div>
-        {% endif %}
-        {% if teams %}
+
+
         <div class="col-sm-4 text-center">
             <h1>Teams:</h1>
             <br>
@@ -65,7 +67,7 @@
         </div>
     </div>
     <button id="blacklistUsers">BlackList Users</button>
-    {% endif %}
+    
     {% endblock %}
 
 </body>
