@@ -57,11 +57,7 @@ urlpatterns = [
     ),
     path("games/<int:pk>/", views.GameView.as_view()),
     path("positionchange/<int:playerpk>/<int:teampk>/", views.changePos.as_view()),
-
-    path(
-        "updateTeamUserInfo/<int:playerpk>/<int:teampk>/", views.changeInfo.as_view(),
-    ),
-
+    path("updateTeamUserInfo/<int:playerpk>/<int:teampk>/", views.changeInfo.as_view()),
     path("teams/create/", views.CreateTeam.as_view(), name="createTeam"),
     path("teams/list/", views.CreateTeamView.as_view(), name="listTeam"),
     path("teams/profile/<int:pk>/", views.TeamView.as_view(), name="TeamProfile"),
@@ -72,6 +68,7 @@ urlpatterns = [
         views.CalendarView.as_view(),
         name="main-calendar",
     ),
+    path("teamusers/rest/<int:pk>/", views.RestTeamUserView.as_view()),
     path(
         "games/generate/<int:tournament_pk>/",
         views.CreateGames.as_view(),

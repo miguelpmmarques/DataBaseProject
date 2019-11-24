@@ -38,9 +38,9 @@
                 </li>
             </ul>
             <ul class=" navbar-left nav navbar-nav ">
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link text-white" href="/tournaments/list/"> Tournaments </a>
-                </li> 
+                </li>
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/teams/list/"> Teams </a>
                 </li>
@@ -48,23 +48,23 @@
                 {% if user.teamuser_set.all %}
                 <li class="nav-item">
 
-                  <div class="dropdown">
-                <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Teams
-                  <span class="caret"></span></button>
-                <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
-                  {%for elem in user.teamuser_set.all %}
-                  <li><a class="text-muted"  href="/teams/profile/{{elem.team.id}}/">{{elem.team.name}}
-                  {% if user == elem.player and elem.isCaptain %}
-                  (c)
-                  {% endif %}
-                  </a></li>
-                  {% endfor%}
+                    <div class="dropdown">
+                        <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Teams
+                            <span class="caret"></span></button>
+                        <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
+                            {%for elem in user.teamuser_set.all %}
+                            <li><a class="text-muted" href="/teams/profile/{{elem.team.id}}/">{{elem.team.name}}
+                                    {% if user == elem.player and elem.isCaptain %}
+                                    (c)
+                                    {% endif %}
+                                </a></li>
+                            {% endfor%}
 
-                   <div class="dropdown-divider"></div>
-                   <li><a class="text-muted"  href="/teams/create/">Create Team</a></li>
+                            <div class="dropdown-divider"></div>
+                            <li><a class="text-muted" href="/teams/create/">Create Team</a></li>
 
-                </ul>
-              </div>
+                        </ul>
+                    </div>
 
                     <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
@@ -86,45 +86,39 @@
                 <li class="nav-item">
 
 
-                  <div class="dropdown">
-                    <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Tournaments
-                      <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
+                    <div class="dropdown">
+                        <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Tournaments
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
 
-                    {%for elem in user.tournaments_set.all %}
-                      <li><a class="text-muted"  href="/tournaments/{{elem.tournament.id}}/">{{elem.tournament.name}}</a></li>
-                    {% endfor%}
+                            {%for elem in user.tournaments_set.all %}
+                            <li><a class="text-muted" href="/tournaments/{{elem.tournament.id}}/">{{elem.tournament.name}}</a></li>
+                            {% endfor%}
 
-                    {%for elem in user.teamuser_set.all %}
-                      <li><a class="text-muted"  href="/tournaments/{{elem.team.tournament.id}}/">{{elem.team.tournament.name}}</a></li>
-                    {% endfor%}
+                            {%for elem in user.teamuser_set.all %}
+                            <li><a class="text-muted" href="/tournaments/{{elem.team.tournament.id}}/">{{elem.team.tournament.name}}</a></li>
+                            {% endfor%}
 
 
-                   <div class="dropdown-divider"></div>
-                   {% if user.isTournamentManager%}
-                   <li><a class="text-muted"  href="/tournaments/create/">Create Tournament</a></li>
-                   {% endif %}
-                 </ul>
-                </div>
+                            <div class="dropdown-divider"></div>
+                            {% if user.isTournamentManager%}
+                            <li><a class="text-muted" href="/tournaments/create/">Create Tournament</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
                     <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
                 {% else %}
-                  {% if user.isTournamentManager %}
-                  <li class="nav-item">
-                      <a class="nav-link text-white" href="/tournaments/create/"> Create Tournament </a>
-                  </li>
-                  {% endif %}
+                {% if user.isTournamentManager %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/tournaments/create/"> Create Tournament </a>
+                </li>
+                {% endif %}
 
                 {% endif %}
                 {% endif %}
 
-
-
-
-
-
-                {% endif %}
                 <li class="nav-item">
 
                     <a class="nav-link text-white" href="/help/"> Help </a>
@@ -133,11 +127,11 @@
             </ul>
             <ul class="nav navbar-nav navbar-right">
 
-              {% if user.is_authenticated %}
-              <li class="nav-item">
-                <a class="nav-link text-white" href="/notifications/"> Notifications <span class="dot text-center">{{user.notifications_set.count}}</span>  </a>
-              </li>
-              {% endif %}
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/notifications/"> Notifications <span class="dot text-center">{{user.notifications_set.count}}</span> </a>
+                </li>
+                {% endif %}
 
 
                 <li>
@@ -162,4 +156,3 @@
 </body>
 
 </html>
-

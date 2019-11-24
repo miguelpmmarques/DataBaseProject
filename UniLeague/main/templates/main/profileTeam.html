@@ -11,295 +11,301 @@
 {% block body %}
 {% csrf_token %}
 <div class="row">
-<div class="col-lg-5">
-<div class="card bg-dark col-lg-10 ">
-<h1 id="myTeam" name="{{myTeam.pk}}"><b>Team: {{myTeam.name}}</b>
-{% if not user in players or not user.is_authenticated%}
-<button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
-<span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-Join Team
-</button>
-{% else %}
-<button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
-<span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-Leave Team
-</button>
-{% endif %}
-</h1>
-<div class="row">
-<div class="col-lg-2">
-</div>
-<div class="card bg-dark col-lg-8 ">
-<div class="embed-responsive embed-responsive-4by3">
-<img id="captainImg" src="{{ MEDIA_URL }}/media/{{captain.image}}" class="card-img-top embed-responsive-item" alt="...">
-</div>
-</div>
-<div class="col-lg-2">
-</div>
-</div>
-<div class="card-body">
-<h5 class="card-text"><b>Team Captain:</b><br> <center>{{captain.first_name}} {{captain.last_name}} AKA {{captain.username}}</center> </h5>
-<h5 class="card-text"><b>Username:</b><br><center>{{captain.username}}</center> </h5>
-{% if user.pk == captain.pk %}
-<select class=" form-control" id="exampleFormControlSelect1">
-{% for player in players.all %}
-{% if player.pk == captain.pk %}
-<option value="{{player.pk}}" selected="selected"><b>Captain: {{player.first_name}} {{player.last_name}} - {{player.username}}</b></option>
-{% else %}
-<option value="{{player.pk}}">{{player.first_name}} {{player.last_name}} - {{player.username}}</option>
-{% endif %}
-{% endfor %}
-</select>
-<br>
-<div class=" d-flex justify-content-center">
-<button class="btn btn-light btn-outline-secondary" id="changeCaptain">
-<span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-Change Captain
-</button>
-</div>
-{% endif %}
-</div>
-</div>
-<h3 id="numberPlayer">Number of players: {{players.all.count}}/16</h3>
-<div id="playerList">
-<ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
-
-    {% for elem in player_position %}
-
-
-    <li class="groupList list-group-item" >{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
-
-      <div id="daStuff{{elem.player.pk}}|{{elem.team.pk}}" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-          <!-- Modal content-->
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-
+    <div class="col-lg-5">
+        <div class="card bg-dark col-lg-10 ">
+            <h1 id="myTeam" name="{{myTeam.pk}}"><b>Team: {{myTeam.name}}</b>
+                {% if not user in players or not user.is_authenticated%}
+                <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
+                    <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                    Join Team
+                </button>
+                {% else %}
+                <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
+                    <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                    Leave Team
+                </button>
+                {% endif %}
+            </h1>
+            <div class="row">
+                <div class="col-lg-2">
+                </div>
+                <div class="card bg-dark col-lg-8 ">
+                    <div class="embed-responsive embed-responsive-4by3">
+                        <img id="captainImg" src="{{ MEDIA_URL }}/media/{{captain.image}}" class="card-img-top embed-responsive-item" alt="...">
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                </div>
             </div>
-            <div class="modal-body">
-              <h1 class="text-secondary">{{elem.player.first_name}} {{elem.player.last_name}}</h1>
-              <p class="text-secondary">Budget:</p>
-              <input type="number" class="form-control text-center" id="budget|{{elem.player.pk}}|{{elem.team.pk}}" style="width: 25%; "name="citizen_card" value="{{elem.budget}}" min="-9223372036854775808" max="9223372036854775807">
-
-              <p class="text-secondary">Absences: </p>
-              <input type="number" class="form-control text-center" id="absences|{{elem.player.pk}}|{{elem.team.pk}}" style="width: 25%;  "name="citizen_card" value="{{elem.absences}}" min="-9223372036854775808" max="9223372036854775807">
-
+            <div class="card-body">
+                <h5 class="card-text"><b>Team Captain:</b><br>
+                    <center>{{captain.first_name}} {{captain.last_name}} AKA {{captain.username}}</center>
+                </h5>
+                <h5 class="card-text"><b>Username:</b><br>
+                    <center>{{captain.username}}</center>
+                </h5>
+                {% if user.pk == captain.pk %}
+                <select class=" form-control" id="exampleFormControlSelect1">
+                    {% for elem in player_position %}
+                    {% if elem.player.pk == captain.pk %}
+                    <option value="{{elem.pk}}" selected="selected"><b>Captain: {{elem.player.first_name}} {{elem.player.last_name}} - {{elem.player.username}}</b></option>
+                    {% else %}
+                    <option value="{{elem.pk}}">{{elem.player.first_name}} {{elem.player.last_name}} - {{elem.player.username}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                <br>
+                <div class=" d-flex justify-content-center">
+                    <button class="btn btn-light btn-outline-secondary" id="changeCaptain">
+                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                        Change Captain
+                    </button>
+                </div>
+                {% endif %}
             </div>
-            <div class="modal-footer">
-              <button type="button" id="{{elem.player.pk}}|{{elem.team.pk}}" class="btn btn-default saveInfo" data-dismiss="modal">
-                Save</button>
-              </div>
-            </div>
-          </div>
         </div>
-      {% if elem.position.start %}
-      [STARTER]
-      {% else %}
-      [SUBSTITUTE]
-      {% endif %}
-      {% if thisUser.player.pk == captain.pk %}
-      <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
-        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-        Replace with
-        {% if elem.position.start %}
-        substitute
-        {% else %}
-        starter
-        {% endif %}
-      </button>
-      <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
-        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-        View user info
-      </button>
-      <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
-      {% elif thisUser == elem %}
-      <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
-        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-        Request captain to change position
-      </button>
-      <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
-      {% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-</div>
-<img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
-</div>
-<div id = "showPositions" class="col-lg-6">
-<h2>Tactic {{myTeam.tactic}}</h2>
-{% csrf_token %}
-<div class="row ">
-<div class="col-sm-6">
-<h1 class="text-center"><b>STARTERS</b></h1>
-<div class="row ">
-<div class="col-lg-11 col-centered text-center">
-{% for position in tactic.positions.all %}
-{% if "Guarda" in position.name and position.start == True %}
-{% if position.id in positionsOcupied %}
-<img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-{% else %}
-<img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-{% endif %}
-{% endif %}
-{% endfor %}
-</div>
-</div>
-<div class="row">
-<div class="col-lg-11 col-centered text-center">
-{% for position in tactic.positions.all %}
-{% if "Defesa" in position.name and position.start == True %}
-{% if position.id in positionsOcupied %}
-<img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-{% else %}
-<img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-{% endif %}
-{% endif %}
-{% endfor %}
-</div>
-</div>
-<div class="row">
-<div class="col-lg-11 col-centered text-center">
-{% for position in tactic.positions.all %}
-{% if "Medio" in position.name and position.start == True %}
-{% if position.id in positionsOcupied %}
-<img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-{% else %}
-<img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-{% endif %}
-{% endif %}
-{% endfor %}
-</div>
-</div>
-<div class="row">
-<div class="col-lg-11 col-centered text-center">
-{% for position in tactic.positions.all %}
-{% if "Avancado" in position.name and position.start == True %}
-{% if position.id in positionsOcupied %}
+        <h3 id="numberPlayer">Number of players: {{players.all.count}}/16</h3>
+        <div id="playerList">
+            <ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">
 
-          <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" >
+                {% for elem in player_position %}
 
-          {% else %}
-          <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-          {% endif %}
-          {% endif %}
-          {% endfor %}
+
+                <li class="groupList list-group-item">{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
+
+                    <div id="daStuff{{elem.player.pk}}|{{elem.team.pk}}" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                                </div>
+                                <div class="modal-body">
+                                    <h1 class="text-secondary">{{elem.player.first_name}} {{elem.player.last_name}}</h1>
+                                    <p class="text-secondary">Budget:</p>
+                                    <input type="number" class="form-control text-center" id="budget|{{elem.player.pk}}|{{elem.team.pk}}" style="width: 25%; " name="citizen_card" value="{{elem.budget}}" min="-9223372036854775808"
+                                        max="9223372036854775807">
+
+                                    <p class="text-secondary">Absences: </p>
+                                    <input type="number" class="form-control text-center" id="absences|{{elem.player.pk}}|{{elem.team.pk}}" style="width: 25%;  " name="citizen_card" value="{{elem.absences}}" min="-9223372036854775808"
+                                        max="9223372036854775807">
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="{{elem.player.pk}}|{{elem.team.pk}}" class="btn btn-default saveInfo" data-dismiss="modal">
+                                        Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if elem.position.start %}
+                    [STARTER]
+                    {% else %}
+                    [SUBSTITUTE]
+                    {% endif %}
+                    {% if thisUser.player.pk == captain.pk %}
+                    <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
+                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                        Replace with
+                        {% if elem.position.start %}
+                        substitute
+                        {% else %}
+                        starter
+                        {% endif %}
+                    </button>
+                    <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
+                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                        View user info
+                    </button>
+                    <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+                    {% elif thisUser == elem %}
+                    <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
+                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                        Request captain to change position
+                    </button>
+                    <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-
-
-      </div>
-      <div class="row">
-        <div class="col-lg-11 col-centered text-center">
-          {% for position in tactic.positions.all %}
-          {% if "Striker" in  position.name and position.start == True %}
-          {% if position.id in positionsOcupied %}
-
-          <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-          {% else %}
-          <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-
-          {% endif %}
-          {% endif %}
-          {% endfor %}
-        </div>
-      </div>
+        <img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
     </div>
-    <div class="col-sm-5">
-      <h1><b>SUBSTITUTES</b></h1>
-      <div class="row ">
-        <div class="col-lg-11 col-centered text-center">
-          <div class="row ">
-            {% for position in tactic.positions.all %}
-            {% if "Guarda" in  position.name and position.start == False %}
-            {% if position.id in positionsOcupied %}
+    <div id="showPositions" class="col-lg-6">
+        <h2>Tactic {{myTeam.tactic}}</h2>
+        {% csrf_token %}
+        <div class="row ">
+            <div class="col-sm-6">
+                <h1 class="text-center"><b>STARTERS</b></h1>
+                <div class="row ">
+                    <div class="col-lg-11 col-centered text-center">
+                        {% for position in tactic.positions.all %}
+                        {% if "Guarda" in position.name and position.start == True %}
+                        {% if position.id in positionsOcupied %}
+                        <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                        {% else %}
+                        <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        {% for position in tactic.positions.all %}
+                        {% if "Defesa" in position.name and position.start == True %}
+                        {% if position.id in positionsOcupied %}
+                        <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                        {% else %}
+                        <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        {% for position in tactic.positions.all %}
+                        {% if "Medio" in position.name and position.start == True %}
+                        {% if position.id in positionsOcupied %}
+                        <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                        {% else %}
+                        <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        {% for position in tactic.positions.all %}
+                        {% if "Avancado" in position.name and position.start == True %}
+                        {% if position.id in positionsOcupied %}
 
-            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-            {% else %}
-            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+                        <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}">
 
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            <h1>Goalkeeper</h1>
-          </div>
+                        {% else %}
+                        <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        {% for position in tactic.positions.all %}
+                        {% if "Striker" in  position.name and position.start == True %}
+                        {% if position.id in positionsOcupied %}
+
+                        <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                        {% else %}
+                        <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <h1><b>SUBSTITUTES</b></h1>
+                <div class="row ">
+                    <div class="col-lg-11 col-centered text-center">
+                        <div class="row ">
+                            {% for position in tactic.positions.all %}
+                            {% if "Guarda" in  position.name and position.start == False %}
+                            {% if position.id in positionsOcupied %}
+
+                            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                            {% else %}
+                            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            <h1>Goalkeeper</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        <div class="row ">
+                            {% for position in tactic.positions.all %}
+                            {% if "Defesa" in  position.name and position.start == False %}
+                            {% if position.id in positionsOcupied %}
+
+                            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                            {% else %}
+                            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            <h1>Defender</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        <div class="row ">
+                            {% for position in tactic.positions.all %}
+                            {% if "Medio" in  position.name and position.start == False %}
+
+                            {% if position.id in positionsOcupied %}
+
+                            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+
+                            {% else %}
+                            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            <h1>Midfielder</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        <div class="row ">
+                            {% for position in tactic.positions.all %}
+                            {% if "Avancado" in  position.name and position.start == False %}
+                            {% if position.id in positionsOcupied %}
+
+                            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                            {% else %}
+                            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            <h1>Forward</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-11 col-centered text-center">
+                        <div class="row ">
+                            {% for position in tactic.positions.all %}
+                            {% if "Striker" in  position.name and position.start == False %}
+                            {% if position.id in positionsOcupied %}
+                            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
+                            {% else %}
+                            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            <h1>Striker</h1>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-11 col-centered text-center">
-          <div class="row ">
-            {% for position in tactic.positions.all %}
-            {% if "Defesa" in  position.name and position.start == False %}
-            {% if position.id in positionsOcupied %}
-
-            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-            {% else %}
-            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            <h1>Defender</h1>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-11 col-centered text-center">
-          <div class="row ">
-            {% for position in tactic.positions.all %}
-            {% if "Medio" in  position.name and position.start == False %}
-
-            {% if position.id in positionsOcupied %}
-
-            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-
-            {% else %}
-            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            <h1>Midfielder</h1>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-11 col-centered text-center">
-          <div class="row ">
-            {% for position in tactic.positions.all %}
-            {% if "Avancado" in  position.name and position.start == False %}
-            {% if position.id in positionsOcupied %}
-
-            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-            {% else %}
-            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            <h1>Forward</h1>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-11 col-centered text-center">
-          <div class="row ">
-            {% for position in tactic.positions.all %}
-            {% if "Striker" in  position.name and position.start == False %}
-            {% if position.id in positionsOcupied %}
-            <img class="shirt" src="{% static 'assets/tshirtOccupied.png' %}" alt="">
-            {% else %}
-            <img class="shirt" src="{% static 'assets/tshirt.png' %}" alt="">
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-            <h1>Striker</h1>
-
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 </div>
 
 {% endblock %}

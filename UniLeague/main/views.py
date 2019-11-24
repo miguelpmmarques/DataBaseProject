@@ -163,11 +163,9 @@ class TeamView(generic.DetailView):
                     )
                 ),
                 "myTeam": team_selected,
-
                 "thisUser": TeamUser.objects.filter(team__pk=team_selected.pk)
                 .filter(player=request.user)
                 .first(),
-
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
                 "players": CustomUser.objects.filter(
                     pk__in=list(
@@ -736,7 +734,6 @@ class CreateGames(generic.CreateView):
                                         timeslot.isFree = False
                                         timeslot.title = (
                                             str(teams[i]) + " vs " + str(teams[j])
-
                                         )
                                         timeslot.description = (
                                             "Field="
@@ -786,6 +783,7 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
 
+
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
@@ -802,7 +800,7 @@ class changeInfo(generics.RetrieveUpdateAPIView):
 
         instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
         serializer = self.get_serializer(
-            instance, {"budget": budget, "absences": absences}, partial=True,
+            instance, {"budget": budget, "absences": absences}, partial=True
         )
 
         Notifications.objects.create(
@@ -898,7 +896,6 @@ class changePos(generics.RetrieveUpdateAPIView):
         else:
             instance2 = instance2.first()
 
-
             position1 = instance.position
             position2 = instance2.position
 
@@ -940,7 +937,6 @@ class RestTeamUserView(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
     permission_classes = [IsAuthenticated]
-
 
 
 class RestListTournaments(generics.ListAPIView):

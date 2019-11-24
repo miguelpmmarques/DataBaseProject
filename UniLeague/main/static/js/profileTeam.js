@@ -25,116 +25,123 @@ function main() {
     });
 
     var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-    for (var i=0; i<changePosition.length;i++) {
+    for (var i = 0; i < changePosition.length; i++) {
 
-      changePosition[i].addEventListener("click",function(e) {
-          e.preventDefault();
-          console.log("Clicou");
-          changePositionSubs(this.id.split("|"));
+        changePosition[i].addEventListener("click", function(e) {
+            e.preventDefault();
+            console.log("Clicou");
+            changePositionSubs(this.id.split("|"));
 
-      });
+        });
     }
 
     var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-    for (var i=0; i<saveInfo.length;i++) {
+    for (var i = 0; i < saveInfo.length; i++) {
 
-      saveInfo[i].addEventListener("click",function(e) {
-          e.preventDefault();
+        saveInfo[i].addEventListener("click", function(e) {
+            e.preventDefault();
 
-          saveBudgetAbsences(this.id);
+            saveBudgetAbsences(this.id);
 
-      });
+        });
     }
 }
+
 function saveBudgetAbsences(mypk) {
-  var budget = document.getElementById("budget|"+mypk).value
-  var absences = document.getElementById("absences|"+mypk).value
-  console.log(budget);
-  console.log(absences);
+    var budget = document.getElementById("budget|" + mypk).value
+    var absences = document.getElementById("absences|" + mypk).value
+    console.log(budget);
+    console.log(absences);
 
-  mypk = mypk.split("|")
-  data = {"budget" : budget,"absences" : absences}
-  $.ajax({
-          url: "/updateTeamUserInfo/"+mypk[0]+"/"+mypk[1]+"/",
-          type: 'PATCH',
-          timeout: 3000,
+    mypk = mypk.split("|")
+    data = {
+        "budget": budget,
+        "absences": absences
+    }
+    $.ajax({
+            url: "/updateTeamUserInfo/" + mypk[0] + "/" + mypk[1] + "/",
+            type: 'PATCH',
+            timeout: 3000,
 
-          data: data,
-          success: function(d) {
-            if (d==="Done"){
-              $('#ul_users').load(' #ul_users > *',function(responseText, textStatus, XMLHttpRequest){
-                var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-                for (var i=0; i<changePosition.length;i++) {
+            data: data,
+            success: function(d) {
+                if (d === "Done") {
+                    $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
+                        var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+                        for (var i = 0; i < changePosition.length; i++) {
 
-                  changePosition[i].addEventListener("click",function(e) {
-                      e.preventDefault();
-                      console.log("Clicou");
-                      changePositionSubs(this.id.split("|"));
+                            changePosition[i].addEventListener("click", function(e) {
+                                e.preventDefault();
+                                console.log("Clicou");
+                                changePositionSubs(this.id.split("|"));
 
-                  });
+                            });
+                        }
+                        var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+                        for (var i = 0; i < saveInfo.length; i++) {
+
+                            saveInfo[i].addEventListener("click", function(e) {
+                                e.preventDefault();
+
+                                saveBudgetAbsences(this.id);
+
+                            });
+                        }
+
+                    });
+
                 }
-                var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-                for (var i=0; i<saveInfo.length;i++) {
-
-                  saveInfo[i].addEventListener("click",function(e) {
-                      e.preventDefault();
-
-                      saveBudgetAbsences(this.id);
-
-                  });
-                }
-
-              });
-
-            }
-          },
-          data: data//, processData:false, contentType = 'application/json'
-      })
-      .fail(function() {
-          alert('Error updating this model instance.');
-      });
+            },
+            data: data //, processData:false, contentType = 'application/json'
+        })
+        .fail(function() {
+            alert('Error updating this model instance.');
+        });
 }
 
 function changePositionSubs(mypk) {
-  data = {"playerpk" : mypk[0],"teampk" : mypk[1]}
+    data = {
+        "playerpk": mypk[0],
+        "teampk": mypk[1]
+    }
 
-  $.ajax({
-          url: "/positionchange/"+mypk[0]+"/"+mypk[1]+"/",
-          type: 'PATCH',
-          timeout: 3000,
+    $.ajax({
+            url: "/positionchange/" + mypk[0] + "/" + mypk[1] + "/",
+            type: 'PATCH',
+            timeout: 3000,
 
-          data: data, //, processData:false, contentType = 'application/json'
-          success: function(d) {
-            if (d==="Done"){
-              $('#showPositions').fadeOut('fast').load(' #showPositions > *').fadeIn("fast");
-              $('#ul_users').load(' #ul_users > *',function(responseText, textStatus, XMLHttpRequest){
-                var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-                for (var i=0; i<changePosition.length;i++) {
+            data: data, //, processData:false, contentType = 'application/json'
+            success: function(d) {
+                if (d === "Done") {
+                    $('#showPositions').fadeOut('fast').load(' #showPositions > *').fadeIn("fast");
+                    $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
+                        var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+                        for (var i = 0; i < changePosition.length; i++) {
 
-                  changePosition[i].addEventListener("click",function(e) {
-                      e.preventDefault();
-                      changePositionSubs(this.id.split("|"));
+                            changePosition[i].addEventListener("click", function(e) {
+                                e.preventDefault();
+                                changePositionSubs(this.id.split("|"));
 
-                  });
+                            });
+                        }
+                        var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+                        for (var i = 0; i < saveInfo.length; i++) {
+
+                            saveInfo[i].addEventListener("click", function(e) {
+                                e.preventDefault();
+                                saveBudgetAbsences(this.id);
+
+                            });
+                        }
+
+                    });
                 }
-                var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-                for (var i=0; i<saveInfo.length;i++) {
-
-                  saveInfo[i].addEventListener("click",function(e) {
-                      e.preventDefault();
-                      saveBudgetAbsences(this.id);
-
-                  });
-                }
-
-              });
-            }
-          },
-          data: data
-      })
-      .fail(function() {
-          alert('Error updating this model instance.');
-      });
+            },
+            data: data
+        })
+        .fail(function() {
+            alert('Error updating this model instance.');
+        });
 }
 
 function changeCaptainFun(e, old_captain, options) {
@@ -143,6 +150,9 @@ function changeCaptainFun(e, old_captain, options) {
     var selected = options.value;
     var data = [];
     var urls = [];
+    console.log("HERERER");
+    console.log(selected);
+    console.log(old_captain);
     if (selected !== old_captain) {
         console.log(selected);
         spinner.hidden = false;
@@ -155,9 +165,9 @@ function changeCaptainFun(e, old_captain, options) {
         data.push({
             isCaptain: true
         })
-        urls.push(`${window.location.origin}/users/rest/${old_captain}/`);
+        urls.push(`${window.location.origin}/teamusers/rest/${old_captain}/`);
         urls.push(`${window.location.origin}/teams/rest/${my_team_id}/`);
-        urls.push(`${window.location.origin}/users/rest/${selected}/`)
+        urls.push(`${window.location.origin}/teamusers/rest/${selected}/`)
         console.log("data===", data);
         console.log("urls===", urls);
         for (elem in urls) {
@@ -176,11 +186,11 @@ function changeCaptainFun(e, old_captain, options) {
                         if (elem == 2) {
                             console.log("HEREREREER");
                             spinner.hidden = true;
-                            window.location.href = window.location.origin;
+                            window.location.href = "";
                         }
                     },
 
-                    data: data[elem]//, processData:false, contentType = 'application/json'
+                    data: data[elem] //, processData:false, contentType = 'application/json'
                 })
                 .fail(function() {
                     alert('Error updating this model instance.');
