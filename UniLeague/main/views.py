@@ -163,11 +163,9 @@ class TeamView(generic.DetailView):
                     )
                 ),
                 "myTeam": team_selected,
-
                 "thisUser": TeamUser.objects.filter(team__pk=team_selected.pk)
                 .filter(player=request.user)
                 .first(),
-
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
                 "players": CustomUser.objects.filter(
                     pk__in=list(
@@ -236,10 +234,24 @@ class CreateTeam(generic.CreateView):
         overriding native post method, for e-mail sending with token verification
         """
         user = request.user
+
         if user.is_authenticated:
             form = TeamCreationForm(request.POST)
+            already_has_team = True
+
+            team_user_set = TeamUser.objects.filter(player__pk=user.pk)
+
             if form.is_valid():
                 team = form.save(commit=False)
+
+                for user in team_user_set:
+                    if user.team.tournament.pk == team.tournament.pk:
+
+                        messages.error(
+                            request, "Já está inscrito numa equipa deste torneio"
+                        )
+                        return redirect("/teams/create/")
+
                 request.session["team_form"] = TeamSerializer(team).data
                 return redirect("/team/apply/0/")
 
@@ -736,7 +748,6 @@ class CreateGames(generic.CreateView):
                                         timeslot.isFree = False
                                         timeslot.title = (
                                             str(teams[i]) + " vs " + str(teams[j])
-
                                         )
                                         timeslot.description = (
                                             "Field="
@@ -785,6 +796,7 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
+
 
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
@@ -898,7 +910,6 @@ class changePos(generics.RetrieveUpdateAPIView):
         else:
             instance2 = instance2.first()
 
-
             position1 = instance.position
             position2 = instance2.position
 
@@ -940,7 +951,6 @@ class RestTeamUserView(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
     permission_classes = [IsAuthenticated]
-
 
 
 class RestListTournaments(generics.ListAPIView):
@@ -1136,25 +1146,30 @@ class TournamentDetailsView(generic.View):
 
             teams = []
             tournament = Tournament.objects.get(pk=pk)
-            for elem in teams_data:
-                (
-                    games_won,
-                    goals_scored,
-                    tied_games,
-                    lost_games,
-                ) = self.get_games_won_goals_scored(elem, tournament)
-                teams.append(
-                    {
-                        "id": elem.pk,
-                        "name": elem.name,
-                        "points": (games_won * 3 + tied_games),
-                        "goals_scored": goals_scored,
-                        "games_won": games_won,
-                        "tied_games": tied_games,
-                        "games_lost": lost_games,
-                    }
-                )
-            # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
+            if tournament.game_set.all().count() > 0:
+                for elem in teams_data:
+                    (
+                        games_won,
+                        goals_scored,
+                        tied_games,
+                        lost_games,
+                        goals_conceded,
+                    ) = self.get_games_won_goals_scored(elem, tournament)
+                    # print(elem.name)
+                    teams.append(
+                        {
+                            "id": elem.pk,
+                            "name": elem.name,
+                            "points": (games_won * 3 + tied_games),
+                            "goals_scored": goals_scored,
+                            "games_won": games_won,
+                            "tied_games": tied_games,
+                            "games_lost": lost_games,
+                            "goals_conceded": goals_conceded,
+                        }
+                    )
+                # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
+                scorers = self.get_top_scorers(tournament)
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
             teams.reverse()
@@ -1171,15 +1186,21 @@ class TournamentDetailsView(generic.View):
     def get_games_won_goals_scored(self, team, tournament):
         games_won = 0
         goals_scored = 0
+        goals_conceded = 0
         tied_games = 0
-        lost_games = 0
+        games_lost = 0
         games = tournament.game_set.all()
         for elem in games:
+
             res_set = elem.result_set.all()
             home = False
             away = False
             first_res = res_set.first()
             second_res = res_set.last()
+
+            if first_res == None or second_res == None:
+                return games_won, goals_scored, tied_games, games_lost, goals_conceded
+
             if first_res.home_team == team.name and second_res.home_team == team.name:
                 home = True
             elif first_res.away_team == team.name and second_res.away_team == team.name:
@@ -1191,6 +1212,7 @@ class TournamentDetailsView(generic.View):
                 ):
                     if home:
                         goals_scored += first_res.home_score
+                        goals_conceded += first_res.away_score
                         if first_res.home_score > first_res.away_score:
                             games_won += 1
                         elif first_res.home_score < first_res.away_score:
@@ -1199,13 +1221,27 @@ class TournamentDetailsView(generic.View):
                             tied_games += 1
                     elif away:
                         goals_scored += first_res.away_score
+                        goals_conceded += first_res.home_score
                         if first_res.away_score > first_res.home_score:
                             games_won += 1
                         elif first_res.away_score < first_res.home_score:
                             games_lost += 1
                         else:
                             tied_games += 1
-        return games_won, goals_scored, tied_games, lost_games
+        return games_won, goals_scored, tied_games, games_lost, goals_conceded
+
+    def get_top_scorers(self, tournament):
+        teams_pks = Team.objects.filter(tournament__pk=tournament.pk).values_list("pk")
+        tournament_users = TeamUser.objects.filter(team__pk__in=teams_pks)
+
+        # create lists and order them by count
+        # ordered_list = sorted(tournament_users, key=tournament_users.goal_set.all().count())
+        ordered_list = {}
+        for user in tournament_users:
+            ordered_list[user.player.username] = user.goal_set.all().count()
+        ordered_list = dict(sorted(ordered_list.items()))
+        print(ordered_list)
+        return ordered_list
 
 
 class CalendarView(BaseCalendarView):

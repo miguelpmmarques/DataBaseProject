@@ -14,6 +14,7 @@ from .models import Day
 from .models import TeamUser
 from .models import Notifications
 from .models import RegularSlot
+from .models import Goal
 
 
 # Register your models here.
@@ -50,3 +51,4 @@ admin.site.register(Day)
 admin.site.register(TeamUser)
 admin.site.register(Notifications)
 admin.site.register(RegularSlot)
+admin.site.register(Goal)
