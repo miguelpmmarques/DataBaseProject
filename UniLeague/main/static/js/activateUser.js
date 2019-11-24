@@ -1,3 +1,4 @@
+
 if (document.readyState === "complete" ||
     (document.readyState !== "loading" && !document.documentElement.doScroll)) {
     main();
@@ -23,7 +24,8 @@ function activateThisUser(e) {
     }
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     try {
-        fetch(`${window.location.origin}/users/rest/${usr_id}`, {
+      console.log(activate_user.name);
+        fetch(`${window.location.origin}/users/rest/${activate_user.name}/`, {
             method: "PATCH",
             credentials: "include",
             headers: {
@@ -31,9 +33,11 @@ function activateThisUser(e) {
                 "X-Requested-With": "XMLHttpRequest",
                 "Content-Type": "application/json"
             },
+
             body: JSON.stringify(reqData),
         }).then(response => {
             response.json().then(data => {
+              console.log(activate_user.name);
                 console.log("Data:", data);
                 this.loading = false;
             });

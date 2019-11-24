@@ -14,23 +14,27 @@
 <body>
     {% block body %}
     <script src="{% static 'js/adminMenu.js' %}"></script>
-
+    {% if messages %}
+      {% for men in messages %}
+      <div class="alert alert-success" role="alert">
+        {{men}}
+      </div>
+      {% endfor%}
+    {% endif %}
     {% if user.is_authenticated %}
       <!-- CAPTAIN -->
-      {% if user.isCaptain %}
+      <!-- { # if user.isCaptain #}
         <div class="row">
           <div class="col-3 text-center mt-5">
-            <!-- MANAGE TEAM BUTTON -->
             <button type="button" onclick="window.location.href='/teams/profile/captain/';" class="btn-lg">My team</button>
             <br>
-            <!-- NEXT GAME INFO PLACEHOLDER -->
             <label class="label label-default mt-5">Next Game</label>
 
           </div>
 
           <div class="col-6 text-center">
             <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
-              <!-- PLAYERS FROM TEAM PLACEHOLDER -->
+
               <form class="form-inline justify-content-center mt-5" style="text-align: center;"id="teams">
                   <i class="fas fa-search" aria-hidden="true"></i>
                   <input id="input_players_team" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
@@ -41,7 +45,7 @@
               </ul>
               <br>
 
-              <!-- CHANGE_PRIORITIES GIVE_PENALTY MAKE _CAPTAIN buttons -->
+
 
               <div class="text-center mr-3">
                 <a href="#" class="btn btn-primary">Change Priority</a>
@@ -49,20 +53,20 @@
                 <a href="#" class="btn btn-primary">Make Captain</a>
               </div>
 
-              <!-- BUDGET PLACEHOLDER -->
+
               <br>
               <label class="label label-default mt-5 t">Current Budget</label>
 
           </div>
 
           <div class="col-3">
-            <!-- LOGO -->
+
 
           </div>
-        </div>
+        </div> -->
 
       <!-- TOURNAMENT MANAGER (nao sei bem o que preciso de meter aqui)-->
-      {% elif user.isTournamentManager %}
+      {% if user.isTournamentManager %}
         <div class="row">
           <div class="col">
             <h2 class="text-center">TEAM CAPTAINS</h2>
@@ -97,8 +101,8 @@
             <br>
             {% if teams %}
             <ul id="teams_tournament" class="list-group margin">
-                {% if teams %}
-                {% for team in teams %}
+                {% if teams.all %}
+                {% for team in teams.all %}
                 <a href="/teams/profile/{{team.id}}/">
                     <li class="groupList list-group-item">{{team.name}}</li>
                 </a>
@@ -127,23 +131,22 @@
       {% else %}
 
         <div class="row">
-          <div class="col">
-            <!-- IF PLAYER HAS TEAM THIS APPEARS -->
 
-          </div>
-
-          <div class="col">
+          <div class="col-sm-2 text-center">
             <div class="text-center mt-4">
-              <a href="#" class="btn btn-primary mt-4 menuButton">My Calendar</a>
-              <a href="#" class="btn btn-primary mt-4 menuButton">Find Tournament</a>
-              <a href="#" class="btn btn-primary mt-4 menuButton">Create Team</a>
+              <h1><b>GAMES THIS WEEK</b></h1>
+
             </div>
           </div>
 
-          <div class="col">
-            <!-- LOGO -->
-            <!-- CURRENT TIME -->
+          <div class="col-sm-10 text-center">
+            <div class="text-center mt-4">
+              <h1><b>MY CALENDAR</b></h1>
+
+            </div>
           </div>
+
+
         </div>
       {% endif %}
 
@@ -154,43 +157,42 @@
     <br>
     <div class="row">
         <div class="col-sm-6 text-center">
-            <h2 class="text-center">SEARCH FOR TEAMS</h2>
+            <h2 class="text-center">TEAMS IN NEED FOR PLAYERS</h2>
             <form class="form-inline d-flex justify-content-center" id="teams">
                 <i class="fas fa-search" aria-hidden="true"></i>
                 <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
             </form>
-            <br>
-            {% if teams %}
             <ul id="ul_teams" class="list-group margin">
-                {% if teams %}
-                {% for team in teams %}
+                {% if teams.all %}
+                {% for team in teams.all %}
                 <a href="/teams/profile/{{team.id}}/">
-                    <li class="groupList list-group-item">{{team.name}}</li>
+                    <li class="groupList list-group-item">{{team.name}} has {{team.teamuser_set.count}}/16 players</li>
                 </a>
                 {% endfor %}
                 {% else %}
                 <li class="groupList list-group-item">No Teams found</li>
                 {% endif %}
             </ul>
-            {% endif %}
         </div>
         <div class="col-sm-6 text-center">
-            <h2 class="text-center">SEARCH FOR TOURNAMENTS</h2>
+            <h2 class="text-center">TOURNAMENTS ABOUT TO START</h2>
             <form class="form-inline d-flex justify-content-center" id="tournaments">
                 <i class="fas fa-search" aria-hidden="true"></i>
                 <input id="input_tournaments" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
             </form>
-            <br>
-            {% if tournaments %}
             <ul id="ul_tournaments" class="list-group margin">
+                {% if tournaments.all %}
                 {% for tournament in tournaments %}
-                <li class="groupList list-group-item">{{tournament.name}}</li>
+                <li class="groupList list-group-item">{{tournament.name}} starts<i> in {{tournament.beginTournament}}</i></li>
                 {% empty %}
                 <li class="groupList list-group-item">No Tournaments found</li>
 
                 {% endfor %}
+                {% else %}
+                <li class="groupList list-group-item">No Tournaments found</li>
+                {% endif %}
             </ul>
-            {% endif %}
+
         </div>
     </div>
     {% endif %}

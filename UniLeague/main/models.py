@@ -14,79 +14,6 @@ DATA BASE MODELS CRIATION
 """
 
 
-class Field(models.Model):
-    name = models.CharField(max_length=512, null=False, default="")
-
-    class Meta:
-        db_table = "Field"
-        verbose_name = "Campo"
-        verbose_name_plural = "Campos"
-        ordering = ["-name"]
-
-    def __str__(self):
-        return self.name
-
-        # foreign keys done i think
-
-
-class Day(models.Model):
-    day = models.DateField(null=True)
-
-    class Meta:
-        db_table = "Day"
-        verbose_name = "Dia"
-        verbose_name_plural = "Dias"
-        ordering = ["-day"]
-
-    def __str__(self):
-        return str(self.day)
-
-
-class CustomUser(AbstractUser):
-    # has confirmed by email
-    isConfirmed = models.BooleanField(null=False, default=True)
-    # Privilegies
-    email = models.EmailField(unique=True)
-    isCaptain = models.BooleanField(null=False, default=False)
-    isTournamentManager = models.BooleanField(null=False, default=False)
-    # is_superuser(admin) is already
-    # Atributes
-    citizen_card = models.BigIntegerField(null=False, default=0, blank=False)
-    first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
-    last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
-    phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
-    budget = models.BigIntegerField(null=False, default=0)
-    hierarchy = models.IntegerField(null=False, default=0)
-    image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
-
-    # missing games and goals
-
-    class Meta:
-        db_table = "CustomUser"
-        verbose_name = "Utilizador"
-        verbose_name_plural = "Utilizadores"
-        ordering = ["-username"]
-
-    def __str__(self):
-        return self.username
-
-
-# foreign keys done, I think
-class Position(models.Model):
-    name = models.CharField(max_length=512, unique=True, null=False, default="")
-    start = models.BooleanField()
-    users = models.ManyToManyField(CustomUser)
-
-    class Meta:
-        db_table = "Position"
-        verbose_name = "Posicao"
-        verbose_name_plural = "Posicoes"
-        ordering = ["-name"]
-
-    def __str__(self):
-        return self.name
-
-
 class GameWeekDay(models.Model):
     DAYS_OF_WEEK = (
         ("0", "Monday"),
@@ -115,6 +42,106 @@ class GameWeekDay(models.Model):
         return self.get_week_day()
 
 
+class RegularSlot(models.Model):
+    week_day = models.OneToOneField(GameWeekDay, on_delete=models.PROTECT)
+    slots = ArrayField(models.TimeField())
+
+    class Meta:
+        db_table = "RegularSlots"
+        verbose_name = "Hora de Jogo por Campo"
+        verbose_name_plural = "Horas de Jogo por Campo"
+        ordering = ["-week_day"]
+
+    def __str__(self):
+        return str(self.week_day)
+
+
+class Field(models.Model):
+    name = models.CharField(max_length=512, null=False, default="")
+    regular_slots = models.ManyToManyField(RegularSlot)
+
+    class Meta:
+        db_table = "Field"
+        verbose_name = "Campo"
+        verbose_name_plural = "Campos"
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Day(models.Model):
+    day = models.DateField(null=True)
+
+    class Meta:
+        db_table = "Day"
+        verbose_name = "Dia"
+        verbose_name_plural = "Dias"
+        ordering = ["-day"]
+
+    def __str__(self):
+        return str(self.day)
+
+
+class CustomUser(AbstractUser):
+    # has confirmed by email
+    isConfirmed = models.BooleanField(null=False, default=True)
+    # Privilegies
+    email = models.EmailField(unique=True)
+    isTournamentManager = models.BooleanField(null=False, default=False)
+    # Atributes
+    citizen_card = models.BigIntegerField(null=False, default=0, blank=False)
+    first_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    last_name = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    phone = PhoneNumberField(null=False, blank=True, unique=False, region="PT")
+    # zero indicates players who have been banned
+    hierarchy = models.IntegerField(null=False, default=0)
+    image = models.ImageField(upload_to="users/%Y/%m/%d/", null=True, blank=True)
+
+    # missing games and goals
+
+    class Meta:
+        db_table = "CustomUser"
+        verbose_name = "Utilizador"
+        verbose_name_plural = "Utilizadores"
+        ordering = ["-username"]
+
+    def __str__(self):
+        return self.username
+
+
+class Notifications(models.Model):
+    title = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    description = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    sendDate = models.DateTimeField(auto_now_add=True, null=True)
+    user_send = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    origin = models.CharField(max_length=512, unique=False, null=True, blank=False)
+
+    class Meta:
+        db_table = "Notifications"
+        verbose_name = "Notificacao"
+        verbose_name_plural = "Notificacoes"
+        ordering = ["-sendDate"]
+
+    def __str__(self):
+        return str(self.title)
+
+
+# foreign keys done, I think
+class Position(models.Model):
+    name = models.CharField(max_length=512, unique=True, null=False, default="")
+    start = models.BooleanField()
+
+    class Meta:
+        db_table = "Position"
+        verbose_name = "Posicao"
+        verbose_name_plural = "Posicoes"
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Tournament(models.Model):
     name = models.CharField(max_length=512, null=False, unique=True, default="")
     beginTournament = models.DateTimeField(null=True)
@@ -127,7 +154,7 @@ class Tournament(models.Model):
     )
     fields = models.ManyToManyField(Field)
     game_week_days = models.ManyToManyField(GameWeekDay)
-    days_without_games = models.ManyToManyField(Day)
+    days_without_games = models.ManyToManyField(Day, blank=True)
     tournament_badge = models.ImageField(
         upload_to="users/%Y/%m/%d/", blank=True, null=True
     )
@@ -170,43 +197,6 @@ class TimeSlot(models.Model):
         return str(self.start_time)
 
 
-# foreign keys done i think
-class Game(models.Model):
-    cost = models.IntegerField(null=False, default=0)
-    gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
-    tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
-    # timeslot not sure if ok
-    timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
-    field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
-
-    class Meta:
-        db_table = "Game"
-        verbose_name = "Jogo"
-        verbose_name_plural = "Jogos"
-        ordering = ["-gameDate"]
-
-    def __str__(self):
-        return str(self.gameDate) + "Cost - " + str(self.cost)
-
-
-class Result(models.Model):
-    home_score = models.IntegerField(null=False, default=0)
-    away_score = models.IntegerField(null=False, default=0)
-    home_team = models.CharField(max_length=512, null=False, default="")
-    away_team = models.CharField(max_length=512, null=False, default="")
-    game = models.ForeignKey(Game, null=True, on_delete=models.PROTECT)
-    player_scores = models.ManyToManyField(CustomUser)
-
-    class Meta:
-        db_table = "Result"
-        verbose_name = "Resultado"
-        verbose_name_plural = "Resultados"
-        ordering = ["-home_score"]
-
-    def __str__(self):
-        return str(self.home_score) + " - " + str(self.away_score)
-
-
 # foreign keys done
 class Tactic(models.Model):
     # Atributes
@@ -226,8 +216,7 @@ class Team(models.Model):
     name = models.CharField(max_length=512, null=False, default="")
     numberPlayers = models.IntegerField(null=True, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
-    players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
-    captain = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    # players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
     tactic = models.ForeignKey(Tactic, null=True, on_delete=models.PROTECT)
     teamLogo = models.ImageField(
         upload_to="images/", null=True, verbose_name="teamLogo", blank=True
@@ -241,3 +230,62 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name + str(self.teamLogo)
+
+
+class TeamUser(models.Model):
+    isCaptain = models.BooleanField(null=False, default=True)
+    player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
+    position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
+    budget = models.BigIntegerField(null=False, default=0)
+    absences = models.BigIntegerField(null=False, default=0)
+
+    class Meta:
+        db_table = "TeamUser"
+        verbose_name = "EquipaUtilizador"
+        verbose_name_plural = "EquipaUtilizadores"
+
+    def __str__(self):
+        return self.player.username + " - " + self.team.name
+
+
+class Game(models.Model):
+    cost = models.IntegerField(null=False, default=0)
+    gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
+    tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
+    # timeslot not sure if ok
+    timeslot = models.OneToOneField(TimeSlot, null=False, on_delete=models.PROTECT)
+    # field = models.ForeignKey(Field, null=True, on_delete=models.PROTECT)
+    home_team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name="home_team"
+    )
+    away_team = models.ForeignKey(
+        Team, on_delete=models.PROTECT, related_name="away_team"
+    )
+
+    class Meta:
+        db_table = "Game"
+        verbose_name = "Jogo"
+        verbose_name_plural = "Jogos"
+        ordering = ["-gameDate"]
+
+    def __str__(self):
+        return str(self.home_team) + " vs " + str(self.away_team)
+
+
+class Result(models.Model):
+    home_score = models.IntegerField(null=False, default=0)
+    away_score = models.IntegerField(null=False, default=0)
+    home_team = models.CharField(max_length=512, null=False, default="")
+    away_team = models.CharField(max_length=512, null=False, default="")
+    game = models.ForeignKey(Game, null=True, on_delete=models.PROTECT)
+    player_scores = models.ManyToManyField(CustomUser)
+
+    class Meta:
+        db_table = "Result"
+        verbose_name = "Resultado"
+        verbose_name_plural = "Resultados"
+        ordering = ["-home_score"]
+
+    def __str__(self):
+        return str(self.home_score) + " - " + str(self.away_score)

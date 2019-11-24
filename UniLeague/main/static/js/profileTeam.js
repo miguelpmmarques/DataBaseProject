@@ -5,8 +5,8 @@ if (document.readyState === "complete" ||
     document.addEventListener("DOMContentLoaded", main);
 }
 
-
 function main() {
+
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     $.ajaxSetup({
 
@@ -23,8 +23,36 @@ function main() {
             changeCaptainFun(e, captain, options);
         }
     });
-}
+    var changePosition = document.getElementsByClassName('changePos');
+    for (var i=0; i<changePosition.length;i++) {
+      changePosition[i].addEventListener("click",function(e) {
+          changePositionSubs(this.id.split("|"));
 
+      });
+    }
+}
+function changePositionSubs(mypk) {
+  data = {"playerpk" : mypk[0],"teampk" : mypk[1]}
+  console.log(mypk[0]);
+  console.log(mypk[1]);
+  $.ajax({
+          url: "/positionchange/"+mypk[0]+"/"+mypk[1]+"/",
+          type: 'PATCH',
+          timeout: 3000,
+
+          data: data, //, processData:false, contentType = 'application/json'
+          success: function(d) {
+            if (d==="Done"){
+              window.location.href = window.location.href
+
+            }
+          },
+          data: data//, processData:false, contentType = 'application/json'
+      })
+      .fail(function() {
+          alert('Error updating this model instance.');
+      });
+}
 function changeCaptainFun(e, old_captain, options) {
     var spinner = document.getElementById('spinner');
     var my_team_id = document.getElementById('myTeam').getAttribute("name");;
@@ -52,10 +80,12 @@ function changeCaptainFun(e, old_captain, options) {
             console.log(data[elem]);
             console.log(urls[elem]);
             console.log(elem);
+
             $.ajax({
                     url: urls[elem],
                     type: 'PATCH',
                     timeout: 3000,
+
                     data: data[elem], //, processData:false, contentType = 'application/json'
                     success: function(d) {
                         console.log("INDEX====", elem);
@@ -64,8 +94,9 @@ function changeCaptainFun(e, old_captain, options) {
                             spinner.hidden = true;
                             window.location.href = window.location.origin;
                         }
-                    }
-                    data: data[elem] //, processData:false, contentType = 'application/json'
+                    },
+
+                    data: data[elem]//, processData:false, contentType = 'application/json'
                 })
                 .fail(function() {
                     alert('Error updating this model instance.');

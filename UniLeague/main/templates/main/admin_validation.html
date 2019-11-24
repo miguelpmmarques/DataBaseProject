@@ -9,7 +9,18 @@
 {% csrf_token %}
 <h1>The User {{user.username}} has registered and would like to become a member of Unileague</h1>
 <br>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+        {% endfor %}
+</ul>
+{% else %}
+{% if user.hierarchy == 0 %}
+<h2>{{user.first_name}} {{user.last_name}} -- BANNED</h2>
+{% else %}
 <h2>{{user.first_name}} {{user.last_name}}</h2>
+{% endif %}
 <ul id="user_info_{{user.pk}}">
     {% for k,v in user.items %}
     {% ifnotequal k 'id' %}
@@ -22,4 +33,5 @@
     {% endfor %}
 </ul>
 <button id="activate_user">ACTIVATE</button>
+{% endif %}
 {% endblock %}

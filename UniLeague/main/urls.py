@@ -13,11 +13,11 @@ não é preciso fazer nenhum get, fazes só request.user
 """
 urlpatterns = [
     path("administration/", views.AdminMenuView.as_view(), name="admin-menu"),
-
-    path("help/",views.HelpView.as_view(), name="help-page"),
+    path("help/", views.HelpView.as_view(), name="help-page"),
     path("", views.LandingPageView.as_view(), name="landing-page"),
     path("logout/", views.log_out_request, name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
+    path("notifications/", views.NotificationsView.as_view(), name="notification"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),
@@ -35,7 +35,7 @@ urlpatterns = [
     path("users/rest/list/patch/", views.RestUsersListPatch.as_view()),
     path("users/rest/list/", views.RestUsersList.as_view()),
     path(
-        "team/apply/<str:team_selected>",
+        "team/apply/<int:pk>/",
         views.ChoosePositionView.as_view(),
         name="choosePosition",
     ),
@@ -55,12 +55,28 @@ urlpatterns = [
         views.TournamentDetailsView.as_view(),
         name="tournament-details",
     ),
+    path("games/<int:pk>/", views.GameView.as_view()),
+    path("positionchange/<int:playerpk>/<int:teampk>/", views.changePos.as_view()),
     path("teams/create/", views.CreateTeam.as_view(), name="createTeam"),
     path("teams/list/", views.CreateTeamView.as_view(), name="listTeam"),
-    path("teams/profile/<str:param>/", views.TeamView.as_view(), name="TeamProfile"),
+    path("teams/profile/<int:pk>/", views.TeamView.as_view(), name="TeamProfile"),
     path("teams/rest/<int:pk>/", views.RestTeams.as_view()),
     path("teams/rest/list/", views.RestTeamsList.as_view()),
-    path("games/calendar/<year>/", views.CalendarView.as_view(), name="main-calendar"),
+    path(
+        "games/calendar/<str:filter>/<int:pk>/",
+        views.CalendarView.as_view(),
+        name="main-calendar",
+    ),
+    path(
+        "games/generate/<int:tournament_pk>/",
+        views.CreateGames.as_view(),
+        name="generate-games",
+    ),
+    path(
+        "games/generate/<int:tournament_pk>/",
+        views.CreateGames.as_view(),
+        name="generate-games",
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # path("teams/<int:pk>/", views.),
