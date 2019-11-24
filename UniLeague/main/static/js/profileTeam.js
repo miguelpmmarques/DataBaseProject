@@ -89,23 +89,7 @@ function saveBudgetAbsences(mypk) {
             data: data,
             success: function(d) {
                 if (d === "Done") {
-                    $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
-                        var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-                        for (var i = 0; i < changePosition.length; i++) {
-                            changePosition[i].addEventListener("click", function(e) {
-                                e.preventDefault();
-                                console.log("Clicou");
-                                changePositionSubs(this.id.split("|"));
-                            });
-                        }
-                        var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-                        for (var i = 0; i < saveInfo.length; i++) {
-                            saveInfo[i].addEventListener("click", function(e) {
-                                e.preventDefault();
-                                saveBudgetAbsences(this.id);
-                            });
-                        }
-                    });
+                    console.log("Done");
                 }
             },
             data: data //, processData:false, contentType = 'application/json'
