@@ -798,15 +798,12 @@ class changePos(generics.RetrieveUpdateAPIView):
         if instance.position.start == False:
             team = Team.objects.get(pk=teampk)
             tactic = Tactic.objects.get(pk=team.tactic.pk)
-
             positions2replace = list(
                 tactic.positions.filter(
                     name__icontains=instance.position.name.split(" ")[0]
                 )
             )
-            print("ppppppppppppppppppppppppppppppppppp")
-            for elem in positions2replace:
-                print(elem)
+
             for user in team.teamuser_set.all():
                 if user.position in positions2replace:
                     for i in range(len(positions2replace)):
@@ -816,32 +813,27 @@ class changePos(generics.RetrieveUpdateAPIView):
             if len(positions2replace) > 0:
                 position_name = positions2replace[0].name
                 instance2 = Position.objects.filter(name="none")
-                print(instance2)
-                print("HA LUGARES PARA MIM FODAS")
             else:
-                instance2 = TeamUser.objects.filter(team=teampk).filter(
-                    position__name=instance.position.name.split(" ")[0]
+                instance2 = (
+                    TeamUser.objects.filter(team=teampk)
+                    .filter(
+                        position__name__contains=instance.position.name.split(" ")[0]
+                    )
+                    .filter(~Q(player=instance.player))
                 )
 
-                print("COLHAO AMARELOOOOOO")
-
-            print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
-            print(positions2replace)
         else:
 
             instance2 = TeamUser.objects.filter(team=teampk).filter(
                 position__name=position_name
             )
-        print(instance.player.username)
 
         if not instance2.exists():
-            print("SPPPPPP" + instance.position.name.split(" ")[0])
             getPosition = (
                 Position.objects.filter(~Q(start=instance.position.start))
                 .filter(name__icontains=position_name)
                 .first()
             )
-            print(getPosition)
             serializer = self.get_serializer(
                 instance, {"position": getPosition.pk}, partial=True
             )
@@ -853,15 +845,14 @@ class changePos(generics.RetrieveUpdateAPIView):
                 instance._prefetched_objects_cache = {}
             return Response("Done")
         else:
-
             instance2 = instance2.first()
-            print("CONATIANNNNNN" + instance2.player.username)
+
             position1 = instance.position
             position2 = instance2.position
+
             serializer = self.get_serializer(
                 instance, {"position": position2.pk}, partial=True
             )
-
             serializer2 = self.get_serializer(
                 instance2, {"position": position1.pk}, partial=True
             )
@@ -869,7 +860,6 @@ class changePos(generics.RetrieveUpdateAPIView):
             self.perform_update(serializer)
             serializer2.is_valid(raise_exception=True)
             self.perform_update(serializer2)
-
             return Response("Done")
 
 
