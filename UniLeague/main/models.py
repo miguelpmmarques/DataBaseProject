@@ -232,23 +232,6 @@ class Team(models.Model):
         return self.name + str(self.teamLogo)
 
 
-class TeamUser(models.Model):
-    isCaptain = models.BooleanField(null=False, default=True)
-    player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
-    team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
-    position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
-    budget = models.BigIntegerField(null=False, default=0)
-    absences = models.BigIntegerField(null=False, default=0)
-
-    class Meta:
-        db_table = "TeamUser"
-        verbose_name = "EquipaUtilizador"
-        verbose_name_plural = "EquipaUtilizadores"
-
-    def __str__(self):
-        return self.player.username + " - " + self.team.name
-
-
 class Game(models.Model):
     cost = models.IntegerField(null=False, default=0)
     gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
@@ -273,13 +256,31 @@ class Game(models.Model):
         return str(self.home_team) + " vs " + str(self.away_team)
 
 
+class TeamUser(models.Model):
+    isCaptain = models.BooleanField(null=False, default=True)
+    player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
+    team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
+    position = models.ForeignKey(Position, null=True, on_delete=models.PROTECT)
+    budget = models.BigIntegerField(null=False, default=0)
+    absences = models.BigIntegerField(null=False, default=0)
+    # goals = models.ForeignKey(Goal, null=False, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "TeamUser"
+        verbose_name = "EquipaUtilizador"
+        verbose_name_plural = "EquipaUtilizadores"
+
+        def __str__(self):
+            return self.player.username + " - " + self.team.name
+
+
 class Result(models.Model):
     home_score = models.IntegerField(null=False, default=0)
     away_score = models.IntegerField(null=False, default=0)
     home_team = models.CharField(max_length=512, null=False, default="")
     away_team = models.CharField(max_length=512, null=False, default="")
     game = models.ForeignKey(Game, null=True, on_delete=models.PROTECT)
-    player_scores = models.ManyToManyField(CustomUser)
+    # player_scores = models.ManyToManyField(CustomUser)
 
     class Meta:
         db_table = "Result"
@@ -289,3 +290,16 @@ class Result(models.Model):
 
     def __str__(self):
         return str(self.home_score) + " - " + str(self.away_score)
+
+
+class Goal(models.Model):
+    result = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
+    scorer = models.ForeignKey(TeamUser, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = "Goal"
+        verbose_name = "Golo"
+        verbose_name_plural = "Golos"
+
+    def __str__(self):
+        return str(result.game.pk)

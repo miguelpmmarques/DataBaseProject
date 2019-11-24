@@ -11,6 +11,11 @@
     <h1>Manager: {{tournament.tournament_manager}}</h1>
     {% endif %}
 
+    <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
+      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+      Tournament Calendar
+    </button>
+
   </div>
 
   <div class="col-sm-9">
@@ -27,18 +32,21 @@
             <th scope="col">Ties</th>
             <th scope="col">Losses</th>
             <th scope="col">Goals Scored</th>
+            <th scope="col">Goals Conceded</th>
           </tr>
         </thead>
         <tbody>
           {% for team in teams %}
           <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
             <th scope="row">{{ forloop.counter }}</th>
+
             <td>{{team.name}}</td>
             <td>{{team.points}}</td>
             <td>{{team.games_won}}</td>
             <td>{{team.tied_games}}</td>
             <td>{{team.games_lost}}</td>
             <td>{{team.goals_scored}}</td>
+            <td>{{team.goals_conceded}}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -53,7 +61,6 @@
     </div>
 
   </div>
-
 
 </div>
 {% endblock %}
