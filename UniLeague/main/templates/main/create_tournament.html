@@ -14,11 +14,13 @@
 <form method="post" class="text-center m-auto" enctype="multipart/form-data">
     <h1><b>CREATE TOURNAMENT</b></h1>
     {% csrf_token %}
+
     <div class="alert alert-warning alert-dismissible fade show" id="alert" role="alert" hidden>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
+
     <!-- TEST CAROUSEL -->
     <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval=false>
         <div class="carousel-inner">
@@ -84,14 +86,17 @@
 
                         <div id="datepicker" class="mt-2" name="datepicker">
                             <input type="text" class="form-control" hidden="true" name="{{k}}">
+
                         </div>
 
                         {% endif %}
                         {% endfor %}
                         <!-- <button type="submit" class="mt-2" id="create">Create Tournament</button> -->
                         <button type="submit" class="btn btn-light btn-outline-secondary" id="create">
+
                             <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                             Create Tournament
+
                         </button>
                     </div>
                     <div class="col"></div>

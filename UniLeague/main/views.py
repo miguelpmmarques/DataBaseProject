@@ -46,7 +46,7 @@ from django.db.models import Value as V
 from django.db.models.functions import Concat
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
-
+from django.db.models import Q
 
 # third party imports
 
@@ -163,6 +163,11 @@ class TeamView(generic.DetailView):
                     )
                 ),
                 "myTeam": team_selected,
+
+                "thisUser": TeamUser.objects.filter(team__pk=team_selected.pk)
+                .filter(player=request.user)
+                .first(),
+
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
                 "players": CustomUser.objects.filter(
                     pk__in=list(
@@ -644,6 +649,7 @@ class CreateGames(generic.CreateView):
             day = datetime.today()
         else:
             day = tournament.beginTournament
+
         # going through all the days in the interval specified for the tournament to take place in
         for i in range(number_of_days.days):
             # checking if this day is was not forbidden by the tournament creator to have any games
@@ -730,6 +736,7 @@ class CreateGames(generic.CreateView):
                                         timeslot.isFree = False
                                         timeslot.title = (
                                             str(teams[i]) + " vs " + str(teams[j])
+
                                         )
                                         timeslot.description = (
                                             "Field="
@@ -779,6 +786,44 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
 
+class changeInfo(generics.RetrieveUpdateAPIView):
+    queryset = TeamUser.objects.all()
+    serializer_class = TeamUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        teampk = kwargs.pop("teampk", False)
+        playerpk = kwargs.pop("playerpk", False)
+        print("------------------------")
+        print(request.data)
+
+        budget = request.data["budget"]
+        absences = request.data["absences"]
+
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+        serializer = self.get_serializer(
+            instance, {"budget": budget, "absences": absences}, partial=True,
+        )
+
+        Notifications.objects.create(
+            title="Change budget and absences in team " + instance.team.name,
+            description="<h3>Hey I'm the captain from "
+            + instance.team.name
+            + ", I just updated your budget to "
+            + budget
+            + " euros and absences to "
+            + absences
+            + ".</h3>",
+            user_send=instance.player,
+            origin="Captain",
+        ).save()
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, "_prefetched_objects_cache", None):
+            instance._prefetched_objects_cache = {}
+        return Response("Done")
+
 
 class changePos(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
@@ -788,40 +833,101 @@ class changePos(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         teampk = kwargs.pop("teampk", False)
         playerpk = kwargs.pop("playerpk", False)
-        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
 
-        instance2 = TeamUser.objects.filter(team=teampk).filter(
-            position__name=instance.position.name.split(" ")[0]
-        )
-        print(instance2)
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+        position_name = instance.position.name.split(" ")[0]
+
+        if instance.position.start == False:
+            team = Team.objects.get(pk=teampk)
+            tactic = Tactic.objects.get(pk=team.tactic.pk)
+            positions2replace = list(
+                tactic.positions.filter(
+                    name__icontains=instance.position.name.split(" ")[0]
+                )
+            )
+
+            for user in team.teamuser_set.all():
+                if user.position in positions2replace:
+                    for i in range(len(positions2replace)):
+                        if user.position.name == positions2replace[i].name:
+                            del positions2replace[i]
+                            break
+            if len(positions2replace) > 0:
+                position_name = positions2replace[0].name
+                instance2 = Position.objects.filter(name="none")
+            else:
+                instance2 = (
+                    TeamUser.objects.filter(team=teampk)
+                    .filter(
+                        position__name__contains=instance.position.name.split(" ")[0]
+                    )
+                    .filter(~Q(player=instance.player))
+                )
+
+        else:
+
+            instance2 = TeamUser.objects.filter(team=teampk).filter(
+                position__name=position_name
+            )
 
         if not instance2.exists():
             getPosition = (
-                Position.objects.filter(start=False)
-                .filter(name=instance.position.name.split(" ")[0])
+                Position.objects.filter(~Q(start=instance.position.start))
+                .filter(name__icontains=position_name)
                 .first()
             )
             serializer = self.get_serializer(
                 instance, {"position": getPosition.pk}, partial=True
             )
+
+            Notifications.objects.create(
+                title="Change Position in team " + instance.team.name,
+                description="<h3>Hey I'm the captain from "
+                + instance.team.name
+                + ", I just changed your position to "
+                + getPosition.name
+                + ".</h3>",
+                user_send=instance.player,
+                origin="Captain",
+            ).save()
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             if getattr(instance, "_prefetched_objects_cache", None):
-                # If 'prefetch_related' has been applied to a queryset, we need to
-                # forcibly invalidate the prefetch cache on the instance.
                 instance._prefetched_objects_cache = {}
             return Response("Done")
         else:
             instance2 = instance2.first()
+
+
             position1 = instance.position
             position2 = instance2.position
+
             serializer = self.get_serializer(
                 instance, {"position": position2.pk}, partial=True
             )
-
             serializer2 = self.get_serializer(
                 instance2, {"position": position1.pk}, partial=True
             )
+            Notifications.objects.create(
+                title="Change Position in team " + instance.team.name,
+                description="<h3>Hey I'm the captain from "
+                + instance.team.name
+                + ", I just changed your position to "
+                + position2.name
+                + ".</h3>",
+                user_send=instance.player,
+                origin="Captain",
+            ).save()
+            Notifications.objects.create(
+                title="Change Position in team " + instance2.team.name,
+                description="<h3>Hey I'm the captain from "
+                + instance2.team.name
+                + ", I just changed your position to "
+                + position1.name
+                + ".</h3>",
+                user_send=instance2.player,
+                origin="Captain",
+            ).save()
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             serializer2.is_valid(raise_exception=True)
@@ -834,6 +940,7 @@ class RestTeamUserView(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
     permission_classes = [IsAuthenticated]
+
 
 
 class RestListTournaments(generics.ListAPIView):
@@ -1042,6 +1149,9 @@ class TournamentDetailsView(generic.View):
                         "name": elem.name,
                         "points": (games_won * 3 + tied_games),
                         "goals_scored": goals_scored,
+                        "games_won": games_won,
+                        "tied_games": tied_games,
+                        "games_lost": lost_games,
                     }
                 )
             # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
@@ -1114,6 +1224,7 @@ class CalendarView(BaseCalendarView):
         if self.queryset is not None:
             # filter o queryset de acordo com os parametros
             filter = self.kwargs["filter"]
+
             # se o parametro filter== 'all' e o pk==0, devolver todos os jogos
             try:
                 if filter != "all":

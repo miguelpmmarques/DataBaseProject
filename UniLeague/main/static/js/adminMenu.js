@@ -26,6 +26,7 @@ function createChildren(text, ul, has_icon = true) {
 
 function main() {
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
+
     const activate_user = document.getElementById("activate_users");
     activate_users.addEventListener("click", function(e) {
         activateMultipleUsers(e, true);
@@ -34,6 +35,7 @@ function main() {
     deactivate_users.addEventListener("click", function(e) {
         activateMultipleUsers(e, false);
     })
+
     $.ajaxSetup({
 
         headers: {
@@ -134,6 +136,7 @@ function main() {
         }
 
     })
+
 }
 
 function activateMultipleUsers(e, param) {
@@ -175,4 +178,5 @@ function activateMultipleUsers(e, param) {
             patch_user_data();
         }, this.loadInterval);
     }
+
 }

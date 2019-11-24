@@ -41,10 +41,12 @@
                     {% endif %}
                     {% if elem.is_active %}
                     <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i"></i></button>
+
                     <input type="checkbox" id="{{elem.id}}" name="act" data-toggle="tooltip" title="Check to Deactivate User"></input>
                     {% else %}
                     <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList" disabled><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i" deactivated></i></button>
                     <input type="checkbox" id="{{elem.id}}" name="deact" data-toggle="tooltip" title="Check to Activate User"></input>
+
                     {% endif %}
                 </li>
 
