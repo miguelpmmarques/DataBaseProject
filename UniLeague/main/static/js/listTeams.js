@@ -25,28 +25,9 @@ function createChildren(text, ul, has_icon = true) {
 }
 
 function main() {
-    const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
-
-    const activate_user = document.getElementById("activate_users");
-    activate_users.addEventListener("click", function(e) {
-        activateMultipleUsers(e, true);
-    })
-    const deactivate_user = document.getElementById("deactivate_users");
-    deactivate_users.addEventListener("click", function(e) {
-        activateMultipleUsers(e, false);
-    })
-
-    $.ajaxSetup({
-
-        headers: {
-            "X-CSRFToken": csrf_token
-        }
-    });
     var lis = document.getElementsByName("users_li");
     for (elem of lis) {
         elem.addEventListener("click", function(e) {
-            console.log("CURRR===", e.currentTarget);
-            console.log("TAR===", e.target.disabled);
 
             if (e.target.getAttribute("name") === "users_li") {
                 window.location.href = `/users/profile/${e.currentTarget.id}/`
@@ -54,7 +35,6 @@ function main() {
             } else if (e.target.disabled === undefined) {
 
                 $(function() {
-                    console.log("EE==", e);
 
                     var data = JSON.stringify({
                         is_active: false,
@@ -78,11 +58,6 @@ function main() {
             }
         });
     }
-    $(document).ready(function() {
-        $('[data-toggle="tooltip"]').tooltip();
-    });
-
-
     var success_helper = function(e, type) {
         var ul = document.getElementById(`ul_${type}`)
         var elements = ul.getElementsByTagName("li");
@@ -136,47 +111,4 @@ function main() {
         }
 
     })
-
-}
-
-function activateMultipleUsers(e, param) {
-    let users_to_activate = document.getElementsByTagName("input");
-    console.log("users_to_activate");
-    console.log("users===", users_to_activate);
-    this.loading = true;
-    let reqData = [];
-    for (elem of users_to_activate) {
-        if (elem.id && elem.checked) {
-            let obj = {};
-            obj[String(elem.id)] = {
-                is_active: param
-            };
-            reqData.push(obj)
-        }
-    }
-    console.log("OLOLE:::>", reqData);
-    const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
-    try {
-        fetch(`http://127.0.0.1:8000/users/rest/list/patch/`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: {
-                "X-CSRFToken": csrf_token,
-                "X-Requested-With": "XMLHttpRequest",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(reqData),
-        }).then(response => {
-            response.json().then(data => {
-                window.location.href = "";
-                this.loading = false;
-            });
-        });
-    } catch (e) {
-        console.log(e, "erro");
-        setTimeout(() => {
-            patch_user_data();
-        }, this.loadInterval);
-    }
-
 }

@@ -21,6 +21,8 @@
             </form>
             <br>
             <ul id="ul_users" class="list-group margin" style="width: 29vw; height: 40vw; overflow: auto;">
+                <button id="activate_users" class="btn btn-dark">ACTIVATE SELECTED USERS</button>
+                <button id="deactivate_users" class="btn btn-dark">DEACTIVATE SELECTED USERS</button>
                 {% for elem in users %}
 
                 <li class="groupList list-group-item" name="users_li" id="{{elem.id}}">{{elem.first_name}} {{elem.last_name}}
@@ -39,8 +41,12 @@
                     {% endif %}
                     {% if elem.is_active %}
                     <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i"></i></button>
+
+                    <input type="checkbox" id="{{elem.id}}" name="act" data-toggle="tooltip" title="Check to Deactivate User"></input>
                     {% else %}
                     <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList" disabled><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i" deactivated></i></button>
+                    <input type="checkbox" id="{{elem.id}}" name="deact" data-toggle="tooltip" title="Check to Activate User"></input>
+
                     {% endif %}
                 </li>
 

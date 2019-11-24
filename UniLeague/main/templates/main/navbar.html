@@ -21,6 +21,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
     {% block imports %}
     {% endblock %}
 
@@ -46,6 +47,7 @@
                 {% if user.is_authenticated %}
                 {% if user.teamuser_set.all %}
                 <li class="nav-item">
+
                   <div class="dropdown">
                 <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Teams
                   <span class="caret"></span></button>
@@ -63,6 +65,7 @@
 
                 </ul>
               </div>
+
                     <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
                 {% else %}
@@ -81,6 +84,7 @@
                 {% if user.tournaments_set.all or user.teamuser_set.all %}
 
                 <li class="nav-item">
+
 
                   <div class="dropdown">
                     <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Tournaments
@@ -111,7 +115,10 @@
                       <a class="nav-link text-white" href="/tournaments/create/"> Create Tournament </a>
                   </li>
                   {% endif %}
+
                 {% endif %}
+                {% endif %}
+
 
 
 
@@ -125,11 +132,13 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+
               {% if user.is_authenticated %}
               <li class="nav-item">
                 <a class="nav-link text-white" href="/notifications/"> Notifications <span class="dot text-center">{{user.notifications_set.count}}</span>  </a>
               </li>
               {% endif %}
+
 
                 <li>
                     {% if user.is_authenticated %}
@@ -150,7 +159,7 @@
     </nav>
     {% block body %}
     {% endblock %}
-
 </body>
 
 </html>
+

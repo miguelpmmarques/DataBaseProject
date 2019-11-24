@@ -23,6 +23,7 @@ function main() {
             changeCaptainFun(e, captain, options);
         }
     });
+
     var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
     for (var i=0; i<changePosition.length;i++) {
 
@@ -33,6 +34,7 @@ function main() {
 
       });
     }
+
     var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
     for (var i=0; i<saveInfo.length;i++) {
 
@@ -83,6 +85,7 @@ function saveBudgetAbsences(mypk) {
                 }
 
               });
+
             }
           },
           data: data//, processData:false, contentType = 'application/json'
@@ -91,6 +94,7 @@ function saveBudgetAbsences(mypk) {
           alert('Error updating this model instance.');
       });
 }
+
 function changePositionSubs(mypk) {
   data = {"playerpk" : mypk[0],"teampk" : mypk[1]}
 
@@ -132,6 +136,7 @@ function changePositionSubs(mypk) {
           alert('Error updating this model instance.');
       });
 }
+
 function changeCaptainFun(e, old_captain, options) {
     var spinner = document.getElementById('spinner');
     var my_team_id = document.getElementById('myTeam').getAttribute("name");;

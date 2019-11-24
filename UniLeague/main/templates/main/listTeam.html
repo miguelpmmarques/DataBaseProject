@@ -13,8 +13,8 @@
 
 <body>
     {% block body %}
-    <script src="{% static 'js/adminMenu.js' %}"></script>
-
+    <script src="{% static 'js/listTeams.js' %}"></script>
+    {% csrf_token %}
     {% if user.is_authenticated %}
     <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
     {% else %}
@@ -24,7 +24,7 @@
     <br>
     <div class="row">
 
-      <div class="col"></div>
+        <div class="col"></div>
 
         <div class="col-sm-10 text-center">
             <h2 class="text-center">SEARCH FOR TEAMS</h2>
@@ -55,3 +55,4 @@
 
 
 </html>
+

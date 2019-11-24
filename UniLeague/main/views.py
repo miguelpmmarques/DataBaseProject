@@ -163,9 +163,11 @@ class TeamView(generic.DetailView):
                     )
                 ),
                 "myTeam": team_selected,
+
                 "thisUser": TeamUser.objects.filter(team__pk=team_selected.pk)
                 .filter(player=request.user)
                 .first(),
+
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
                 "players": CustomUser.objects.filter(
                     pk__in=list(
@@ -643,7 +645,11 @@ class CreateGames(generic.CreateView):
         num_games = nCr(number_of_teams, 2) * number_of_hands
         fields = tournament.fields.all()
         number_of_days = tournament.endTournament - tournament.beginTournament
-        day = tournament.beginTournament
+        if tournament.beginTournament < datetime.today():
+            day = datetime.today()
+        else:
+            day = tournament.beginTournament
+
         # going through all the days in the interval specified for the tournament to take place in
         for i in range(number_of_days.days):
             # checking if this day is was not forbidden by the tournament creator to have any games
@@ -729,10 +735,8 @@ class CreateGames(generic.CreateView):
                                         timeslot = random_timeslots.first()
                                         timeslot.isFree = False
                                         timeslot.title = (
-                                            "Slot for the game between teams"
-                                            + str(teams[i])
-                                            + " and "
-                                            + str(teams[j])
+                                            str(teams[i]) + " vs " + str(teams[j])
+
                                         )
                                         timeslot.description = (
                                             "Field="
@@ -781,7 +785,6 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
-
 
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
@@ -876,6 +879,7 @@ class changePos(generics.RetrieveUpdateAPIView):
             serializer = self.get_serializer(
                 instance, {"position": getPosition.pk}, partial=True
             )
+
             Notifications.objects.create(
                 title="Change Position in team " + instance.team.name,
                 description="<h3>Hey I'm the captain from "
@@ -893,6 +897,7 @@ class changePos(generics.RetrieveUpdateAPIView):
             return Response("Done")
         else:
             instance2 = instance2.first()
+
 
             position1 = instance.position
             position2 = instance2.position
@@ -927,7 +932,15 @@ class changePos(generics.RetrieveUpdateAPIView):
             self.perform_update(serializer)
             serializer2.is_valid(raise_exception=True)
             self.perform_update(serializer2)
+
             return Response("Done")
+
+
+class RestTeamUserView(generics.RetrieveUpdateAPIView):
+    queryset = TeamUser.objects.all()
+    serializer_class = TeamUserSerializer
+    permission_classes = [IsAuthenticated]
+
 
 
 class RestListTournaments(generics.ListAPIView):
@@ -1211,7 +1224,7 @@ class CalendarView(BaseCalendarView):
         if self.queryset is not None:
             # filter o queryset de acordo com os parametros
             filter = self.kwargs["filter"]
-            print("FILTER===", filter)
+
             # se o parametro filter== 'all' e o pk==0, devolver todos os jogos
             try:
                 if filter != "all":
