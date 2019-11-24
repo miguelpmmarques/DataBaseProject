@@ -30,17 +30,25 @@
       </div>
         </div>
     </div>
-    <div class="col-lg-4">
-      <div class="centered">
+    <div class="col-lg-4 " >
+
+      <h1> <b>MY TEAMS</b> </h1>
+      <div style="width: 30vw; height: 30vw; overflow: auto;">
         <ul id="ul" class="list-group">
-          {% if user.team_set.all %}
-            {% for team in user.team_set.all %}
-              <a href="/teams/profile/{{team.id}}/">
-                  <li class="groupList list-group-item">{{team.name}}</li>
-              </a>
-              <a href="/tournaments/profile/{{team.tournament.id}}/">
-                  <li class="groupList list-group-item">{{team.tournament.name}}</li>
-              </a>
+          {% if user.teamuser_set.all %}
+            {% for teamuser in user.teamuser_set.all %}
+              <li class="groupList list-group-item">
+                <a class="text-danger" href="/tournaments/{{teamuser.team.tournament.id}}/">
+                  {{teamuser.team.tournament.name}}
+                </a>
+                <ul>
+                  <a href="/teams/profile/{{teamuser.team.id}}/">
+                    <li class="groupList list-group-item">{{teamuser.team.name}}</li>
+                  </a>
+
+                </ul>
+              </li>
+
             {% endfor %}
           {% else %}
               <li class="groupList list-group-item">No Teams and Tournaments found</li>
