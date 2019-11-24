@@ -797,13 +797,23 @@ class changeInfo(generics.RetrieveUpdateAPIView):
         budget = request.data["budget"]
         absences = request.data["absences"]
 
-        print(budget)
-        print(absences)
-
         instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
         serializer = self.get_serializer(
             instance, {"budget": budget, "absences": absences}, partial=True,
         )
+
+        Notifications.objects.create(
+            title="Change budget and absences in team " + instance.team.name,
+            description="<h3>Hey I'm the captain from "
+            + instance.team.name
+            + ", I just updated your budget to "
+            + budget
+            + " euros and absences to "
+            + absences
+            + ".</h3>",
+            user_send=instance.player,
+            origin="Captain",
+        ).save()
 
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -866,6 +876,16 @@ class changePos(generics.RetrieveUpdateAPIView):
             serializer = self.get_serializer(
                 instance, {"position": getPosition.pk}, partial=True
             )
+            Notifications.objects.create(
+                title="Change Position in team " + instance.team.name,
+                description="<h3>Hey I'm the captain from "
+                + instance.team.name
+                + ", I just changed your position to "
+                + getPosition.name
+                + ".</h3>",
+                user_send=instance.player,
+                origin="Captain",
+            ).save()
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             if getattr(instance, "_prefetched_objects_cache", None):
@@ -883,6 +903,26 @@ class changePos(generics.RetrieveUpdateAPIView):
             serializer2 = self.get_serializer(
                 instance2, {"position": position1.pk}, partial=True
             )
+            Notifications.objects.create(
+                title="Change Position in team " + instance.team.name,
+                description="<h3>Hey I'm the captain from "
+                + instance.team.name
+                + ", I just changed your position to "
+                + position2.name
+                + ".</h3>",
+                user_send=instance.player,
+                origin="Captain",
+            ).save()
+            Notifications.objects.create(
+                title="Change Position in team " + instance2.team.name,
+                description="<h3>Hey I'm the captain from "
+                + instance2.team.name
+                + ", I just changed your position to "
+                + position1.name
+                + ".</h3>",
+                user_send=instance2.player,
+                origin="Captain",
+            ).save()
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             serializer2.is_valid(raise_exception=True)
