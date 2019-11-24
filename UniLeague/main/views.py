@@ -46,7 +46,7 @@ from django.db.models import Value as V
 from django.db.models.functions import Concat
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
-
+from django.db.models import Q
 
 # third party imports
 
@@ -163,6 +163,9 @@ class TeamView(generic.DetailView):
                     )
                 ),
                 "myTeam": team_selected,
+                "thisUser": TeamUser.objects.filter(team__pk=team_selected.pk)
+                .filter(player=request.user)
+                .first(),
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
                 "players": CustomUser.objects.filter(
                     pk__in=list(
@@ -788,19 +791,57 @@ class changePos(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         teampk = kwargs.pop("teampk", False)
         playerpk = kwargs.pop("playerpk", False)
-        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
 
-        instance2 = TeamUser.objects.filter(team=teampk).filter(
-            position__name=instance.position.name.split(" ")[0]
-        )
-        print(instance2)
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+        position_name = instance.position.name.split(" ")[0]
+
+        if instance.position.start == False:
+            team = Team.objects.get(pk=teampk)
+            tactic = Tactic.objects.get(pk=team.tactic.pk)
+
+            positions2replace = list(
+                tactic.positions.filter(
+                    name__icontains=instance.position.name.split(" ")[0]
+                )
+            )
+            print("ppppppppppppppppppppppppppppppppppp")
+            for elem in positions2replace:
+                print(elem)
+            for user in team.teamuser_set.all():
+                if user.position in positions2replace:
+                    for i in range(len(positions2replace)):
+                        if user.position.name == positions2replace[i].name:
+                            del positions2replace[i]
+                            break
+            if len(positions2replace) > 0:
+                position_name = positions2replace[0].name
+                instance2 = Position.objects.filter(name="none")
+                print(instance2)
+                print("HA LUGARES PARA MIM FODAS")
+            else:
+                instance2 = TeamUser.objects.filter(team=teampk).filter(
+                    position__name=instance.position.name.split(" ")[0]
+                )
+
+                print("COLHAO AMARELOOOOOO")
+
+            print("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq")
+            print(positions2replace)
+        else:
+
+            instance2 = TeamUser.objects.filter(team=teampk).filter(
+                position__name=position_name
+            )
+        print(instance.player.username)
 
         if not instance2.exists():
+            print("SPPPPPP" + instance.position.name.split(" ")[0])
             getPosition = (
-                Position.objects.filter(start=False)
-                .filter(name=instance.position.name.split(" ")[0])
+                Position.objects.filter(~Q(start=instance.position.start))
+                .filter(name__icontains=position_name)
                 .first()
             )
+            print(getPosition)
             serializer = self.get_serializer(
                 instance, {"position": getPosition.pk}, partial=True
             )
@@ -812,7 +853,9 @@ class changePos(generics.RetrieveUpdateAPIView):
                 instance._prefetched_objects_cache = {}
             return Response("Done")
         else:
+
             instance2 = instance2.first()
+            print("CONATIANNNNNN" + instance2.player.username)
             position1 = instance.position
             position2 = instance2.position
             serializer = self.get_serializer(

@@ -23,7 +23,7 @@ function main() {
             changeCaptainFun(e, captain, options);
         }
     });
-    var changePosition = document.getElementsByClassName('changePos');
+    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
     for (var i=0; i<changePosition.length;i++) {
       changePosition[i].addEventListener("click",function(e) {
           changePositionSubs(this.id.split("|"));
