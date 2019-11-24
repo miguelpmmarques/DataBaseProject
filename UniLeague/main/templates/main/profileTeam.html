@@ -66,8 +66,33 @@
 
         {% for elem in player_position %}
 
+
         <li class="groupList list-group-item" >{{forloop.counter}} - {{elem.player.first_name}} {{elem.player.last_name}} ({{elem.player.username}}) - {{elem.position}}
 
+          <div id="daStuff{{elem.player.pk}}|{{elem.team.pk}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                </div>
+                <div class="modal-body">
+                  <h1 class="text-secondary">{{elem.player.first_name}} {{elem.player.last_name}}</h1>
+                  <p class="text-secondary">Budget:</p>
+                  <input type="number" class="form-control text-center" id="budget|{{elem.player.pk}}|{{elem.team.pk}}" style="width: 25%; "name="citizen_card" value="{{elem.budget}}" min="-9223372036854775808" max="9223372036854775807">
+
+                  <p class="text-secondary">Absences: </p>
+                  <input type="number" class="form-control text-center" id="absences|{{elem.player.pk}}|{{elem.team.pk}}" style="width: 25%;  "name="citizen_card" value="{{elem.absences}}" min="-9223372036854775808" max="9223372036854775807">
+
+                </div>
+                <div class="modal-footer">
+                  <button type="button" id="{{elem.player.pk}}|{{elem.team.pk}}" class="btn btn-default saveInfo" data-dismiss="modal">
+                    Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           {% if elem.position.start %}
           [STARTER]
           {% else %}
@@ -83,6 +108,10 @@
             starter
             {% endif %}
           </button>
+          <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
+            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+            View user info
+          </button>
           <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
           {% elif thisUser == elem %}
           <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
@@ -97,7 +126,7 @@
 </div>
     <img id="teamLogo" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
   </div>
-  <div class="col-lg-6">
+  <div id = "showPositions" class="col-lg-6">
     <h2>Tactic {{myTeam.tactic}}</h2>
       {% csrf_token %}
       <div class="row ">

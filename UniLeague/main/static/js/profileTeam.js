@@ -25,16 +25,75 @@ function main() {
     });
     var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
     for (var i=0; i<changePosition.length;i++) {
+
       changePosition[i].addEventListener("click",function(e) {
+          e.preventDefault();
+          console.log("Clicou");
           changePositionSubs(this.id.split("|"));
 
       });
     }
+    var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+    for (var i=0; i<saveInfo.length;i++) {
+
+      saveInfo[i].addEventListener("click",function(e) {
+          e.preventDefault();
+
+          saveBudgetAbsences(this.id);
+
+      });
+    }
+}
+function saveBudgetAbsences(mypk) {
+  var budget = document.getElementById("budget|"+mypk).value
+  var absences = document.getElementById("absences|"+mypk).value
+  console.log(budget);
+  console.log(absences);
+
+  mypk = mypk.split("|")
+  data = {"budget" : budget,"absences" : absences}
+  $.ajax({
+          url: "/updateTeamUserInfo/"+mypk[0]+"/"+mypk[1]+"/",
+          type: 'PATCH',
+          timeout: 3000,
+
+          data: data,
+          success: function(d) {
+            if (d==="Done"){
+              $('#ul_users').load(' #ul_users > *',function(responseText, textStatus, XMLHttpRequest){
+                var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+                for (var i=0; i<changePosition.length;i++) {
+
+                  changePosition[i].addEventListener("click",function(e) {
+                      e.preventDefault();
+                      console.log("Clicou");
+                      changePositionSubs(this.id.split("|"));
+
+                  });
+                }
+                var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+                for (var i=0; i<saveInfo.length;i++) {
+
+                  saveInfo[i].addEventListener("click",function(e) {
+                      e.preventDefault();
+
+                      saveBudgetAbsences(this.id);
+
+                  });
+                }
+
+              });
+            }
+          },
+          data: data//, processData:false, contentType = 'application/json'
+      })
+      .fail(function() {
+          alert('Error updating this model instance.');
+      });
 }
 function changePositionSubs(mypk) {
   data = {"playerpk" : mypk[0],"teampk" : mypk[1]}
-  console.log(mypk[0]);
-  console.log(mypk[1]);
+
   $.ajax({
           url: "/positionchange/"+mypk[0]+"/"+mypk[1]+"/",
           type: 'PATCH',
@@ -43,11 +102,31 @@ function changePositionSubs(mypk) {
           data: data, //, processData:false, contentType = 'application/json'
           success: function(d) {
             if (d==="Done"){
-              window.location.href = window.location.href
+              $('#showPositions').fadeOut('fast').load(' #showPositions > *').fadeIn("fast");
+              $('#ul_users').load(' #ul_users > *',function(responseText, textStatus, XMLHttpRequest){
+                var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+                for (var i=0; i<changePosition.length;i++) {
 
+                  changePosition[i].addEventListener("click",function(e) {
+                      e.preventDefault();
+                      changePositionSubs(this.id.split("|"));
+
+                  });
+                }
+                var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+                for (var i=0; i<saveInfo.length;i++) {
+
+                  saveInfo[i].addEventListener("click",function(e) {
+                      e.preventDefault();
+                      saveBudgetAbsences(this.id);
+
+                  });
+                }
+
+              });
             }
           },
-          data: data//, processData:false, contentType = 'application/json'
+          data: data
       })
       .fail(function() {
           alert('Error updating this model instance.');

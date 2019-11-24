@@ -783,6 +783,35 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
 
+class changeInfo(generics.RetrieveUpdateAPIView):
+    queryset = TeamUser.objects.all()
+    serializer_class = TeamUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        teampk = kwargs.pop("teampk", False)
+        playerpk = kwargs.pop("playerpk", False)
+        print("------------------------")
+        print(request.data)
+
+        budget = request.data["budget"]
+        absences = request.data["absences"]
+
+        print(budget)
+        print(absences)
+
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+        serializer = self.get_serializer(
+            instance, {"budget": budget, "absences": absences}, partial=True,
+        )
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, "_prefetched_objects_cache", None):
+            instance._prefetched_objects_cache = {}
+        return Response("Done")
+
+
 class changePos(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
@@ -840,8 +869,6 @@ class changePos(generics.RetrieveUpdateAPIView):
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             if getattr(instance, "_prefetched_objects_cache", None):
-                # If 'prefetch_related' has been applied to a queryset, we need to
-                # forcibly invalidate the prefetch cache on the instance.
                 instance._prefetched_objects_cache = {}
             return Response("Done")
         else:
