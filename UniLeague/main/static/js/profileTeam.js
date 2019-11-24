@@ -45,7 +45,30 @@ function main() {
 
         });
     }
-}
+    var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
+    console.log(convocatoria);
+    convocatoria.addEventListener("click", function(e) {
+
+        e.preventDefault();
+        sendNotifications(this.id);
+    });
+    }
+    function sendNotifications(teampk) {
+    console.log("BATEU "+teampk);
+    $.ajax({
+          url: "/notifyteam/" +teampk+ "/",
+          type: 'PATCH',
+          timeout: 3000,
+          success: function(d) {
+              if (d === "Done") {
+                console.log("Top");
+              }
+          },//, processData:false, contentType = 'application/json'
+      })
+      .fail(function() {
+          alert('Error updating this model instance.');
+      });
+    }
 
 function saveBudgetAbsences(mypk) {
     var budget = document.getElementById("budget|" + mypk).value
@@ -69,27 +92,20 @@ function saveBudgetAbsences(mypk) {
                     $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
                         var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
                         for (var i = 0; i < changePosition.length; i++) {
-
                             changePosition[i].addEventListener("click", function(e) {
                                 e.preventDefault();
                                 console.log("Clicou");
                                 changePositionSubs(this.id.split("|"));
-
                             });
                         }
                         var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
                         for (var i = 0; i < saveInfo.length; i++) {
-
                             saveInfo[i].addEventListener("click", function(e) {
                                 e.preventDefault();
-
                                 saveBudgetAbsences(this.id);
-
                             });
                         }
-
                     });
-
                 }
             },
             data: data //, processData:false, contentType = 'application/json'

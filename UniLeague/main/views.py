@@ -798,6 +798,43 @@ class RestTeams(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
 
+class notifyTeam(generics.RetrieveUpdateAPIView):
+    queryset = TeamUser.objects.all()
+    serializer_class = TeamUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        teampk = kwargs.pop("teampk", False)
+
+        instance = TeamUser.objects.filter(team=teampk)
+        notification_info = '<ul id="ul_users" class="list-group margin" style="width: 45vw; height: 20vw; overflow: auto;">'
+        for i, elem in enumerate(instance):
+            notification_info += (
+                '<li class="groupList list-group-item">'
+                + str(i)
+                + " - "
+                + elem.player.first_name
+                + " "
+                + elem.player.last_name
+                + " "
+                + elem.player.username
+                + " - "
+                + elem.position.name.split(" ")[0]
+                + "</li>"
+            )
+        notification_info += "</ul>"
+        for elem in instance:
+
+            Notifications.objects.create(
+                title="STARTING 11 FOR NEXT GAME IN TEAM " + elem.team.name,
+                description=notification_info,
+                user_send=elem.player,
+                origin="Captain",
+            ).save()
+
+        return Response("Done")
+
+
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
