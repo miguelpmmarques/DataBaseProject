@@ -151,6 +151,12 @@ class TeamView(generic.DetailView):
         else:
             team_selected = Team.objects.get(pk=pk)
 
+
+        if request.user.is_authenticated:
+            thisUser = TeamUser.objects.filter(team__pk=team_selected.pk).filter(player=request.user.pk).first()
+        else:
+            thisUser=None
+
         return render(
             request,
             template_name=self.template_name,
@@ -163,9 +169,7 @@ class TeamView(generic.DetailView):
                     )
                 ),
                 "myTeam": team_selected,
-                "thisUser": TeamUser.objects.filter(team__pk=team_selected.pk)
-                .filter(player=request.user)
-                .first(),
+                "thisUser": thisUser,
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
                 "players": CustomUser.objects.filter(
                     pk__in=list(
@@ -1418,33 +1422,30 @@ class GameView(generic.DetailView):
         try:
             pk = int(pk)
             selected_game = Game.objects.filter(pk=pk).first()
-        except ValueError:
-            team_selected = None
+            if final_score.first() == final_score.last():
 
-        selected_game = Game.objects.filter(pk=pk).first()
-        final_score = selected_game.result_set
-
-        if final_score.first() == final_score.last():
-
-            if selected_game:
-                return render(
+                if selected_game:
+                    return render(
                     request,
                     template_name=self.template_name,
                     context={"game": selected_game, "result": final_score},
-                )
-                raise Http404
+                    )
+                    raise Http404
 
-        else:
-            # mandar notify ao admin
-            Notifications.objects.create(
-                title="Result Conflitc",
-                description="<h3>There was a conflict in the final score of "
-                + selected_game.home_team
-                + " vs "
-                + selected_game.away_team
-                + " in tournament"
-                + selected_game.tournament.name
-                + +"</h3>",
-                user_send=selected_game.tournament.tournament_manager,
-                origin="Captain",
-            ).save()
+                else:
+                    # mandar notify ao admin
+                    Notifications.objects.create(
+                    title="Result Conflitc",
+                    description="<h3>There was a conflict in the final score of "
+                    + selected_game.home_team
+                    + " vs "
+                    + selected_game.away_team
+                    + " in tournament"
+                    + selected_game.tournament.name
+                    + +"</h3>",
+                    user_send=selected_game.tournament.tournament_manager,
+                    origin="Captain",
+                    ).save()
+                    
+        except ValueError:
+            selected_game = None

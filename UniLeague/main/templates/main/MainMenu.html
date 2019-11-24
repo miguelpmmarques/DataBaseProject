@@ -22,50 +22,7 @@
       {% endfor%}
     {% endif %}
     {% if user.is_authenticated %}
-      <!-- CAPTAIN -->
-      <!-- { # if user.isCaptain #}
-        <div class="row">
-          <div class="col-3 text-center mt-5">
-            <button type="button" onclick="window.location.href='/teams/profile/captain/';" class="btn-lg">My team</button>
-            <br>
-            <label class="label label-default mt-5">Next Game</label>
 
-          </div>
-
-          <div class="col-6 text-center">
-            <h1 class="font-weight-bold text-center">Welcome {{user.first_name}} {{user.last_name}} </h1>
-
-              <form class="form-inline justify-content-center mt-5" style="text-align: center;"id="teams">
-                  <i class="fas fa-search" aria-hidden="true"></i>
-                  <input id="input_players_team" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
-              </form>
-
-              <ul id="ul_players_team" class="list-group margin">
-                  <li class="groupList list-group-item" onclick="window.location.href='#'">TEST CASE</li>
-              </ul>
-              <br>
-
-
-
-              <div class="text-center mr-3">
-                <a href="#" class="btn btn-primary">Change Priority</a>
-                <a href="#" class="btn btn-primary">Give Penalty</a>
-                <a href="#" class="btn btn-primary">Make Captain</a>
-              </div>
-
-
-              <br>
-              <label class="label label-default mt-5 t">Current Budget</label>
-
-          </div>
-
-          <div class="col-3">
-
-
-          </div>
-        </div> -->
-
-      <!-- TOURNAMENT MANAGER (nao sei bem o que preciso de meter aqui)-->
       {% if user.isTournamentManager %}
         <div class="row">
           <div class="col">
@@ -183,7 +140,9 @@
             <ul id="ul_tournaments" class="list-group margin">
                 {% if tournaments.all %}
                 {% for tournament in tournaments %}
-                <li class="groupList list-group-item">{{tournament.name}} starts<i> in {{tournament.beginTournament}}</i></li>
+                <a href="/tournaments/{{tournament.id}}/">
+                    <li class="groupList list-group-item">{{tournament.name}} starts<i> in {{tournament.beginTournament}}</i></li>
+                </a>
                 {% empty %}
                 <li class="groupList list-group-item">No Tournaments found</li>
 

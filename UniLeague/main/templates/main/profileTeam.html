@@ -14,8 +14,9 @@
   <div class="col-lg-5">
     <div class="card bg-dark col-lg-10 ">
       <h1 id="myTeam" name="{{myTeam.pk}}"><b>Team: {{myTeam.name}}</b>
+
         {% if not user in players or not user.is_authenticated%}
-        <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
+        <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/login/';">
           <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
           Join Team
         </button>
