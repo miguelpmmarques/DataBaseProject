@@ -151,11 +151,14 @@ class TeamView(generic.DetailView):
         else:
             team_selected = Team.objects.get(pk=pk)
 
-
         if request.user.is_authenticated:
-            thisUser = TeamUser.objects.filter(team__pk=team_selected.pk).filter(player=request.user.pk).first()
+            thisUser = (
+                TeamUser.objects.filter(team__pk=team_selected.pk)
+                .filter(player=request.user.pk)
+                .first()
+            )
         else:
-            thisUser=None
+            thisUser = None
 
         return render(
             request,
@@ -839,6 +842,49 @@ class notifyTeam(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
+class replaceMember(generics.RetrieveUpdateAPIView):
+    queryset = TeamUser.objects.all()
+    serializer_class = TeamUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        teampk = kwargs.pop("teampk", False)
+        user = request.user
+        instance = TeamUser.objects.filter(team=teampk).filter(player=user).first()
+
+        findCaptain = (
+            TeamUser.objects.filter(team=teampk).filter(isCaptain=True).first()
+        )
+        name = request.data["name"]
+        email = request.data["email"]
+        phone = request.data["phone"]
+        until = request.data["until"]
+
+        Notifications.objects.create(
+            title="USER ADD A SUBSTITUTE",
+            description="<h3>The user "
+            + request.user.username
+            + " is going to add an annonimous user to replace him <br>"
+            + " This info is the following:<br>"
+            + "Name: "
+            + name
+            + "<br>"
+            + "Email: "
+            + email
+            + "<br>"
+            + "Phone: "
+            + str(phone)
+            + "<br>"
+            + " He is going to replace untit "
+            + str(until)
+            + "</h3>",
+            user_send=findCaptain.player,
+            origin="Player - " + str(instance.player),
+        ).save()
+
+        return Response("Done")
+
+
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
@@ -1426,26 +1472,26 @@ class GameView(generic.DetailView):
 
                 if selected_game:
                     return render(
-                    request,
-                    template_name=self.template_name,
-                    context={"game": selected_game, "result": final_score},
+                        request,
+                        template_name=self.template_name,
+                        context={"game": selected_game, "result": final_score},
                     )
                     raise Http404
 
                 else:
                     # mandar notify ao admin
                     Notifications.objects.create(
-                    title="Result Conflitc",
-                    description="<h3>There was a conflict in the final score of "
-                    + selected_game.home_team
-                    + " vs "
-                    + selected_game.away_team
-                    + " in tournament"
-                    + selected_game.tournament.name
-                    + +"</h3>",
-                    user_send=selected_game.tournament.tournament_manager,
-                    origin="Captain",
+                        title="Result Conflitc",
+                        description="<h3>There was a conflict in the final score of "
+                        + selected_game.home_team
+                        + " vs "
+                        + selected_game.away_team
+                        + " in tournament"
+                        + selected_game.tournament.name
+                        + +"</h3>",
+                        user_send=selected_game.tournament.tournament_manager,
+                        origin="Captain",
                     ).save()
-                    
+
         except ValueError:
             selected_game = None
