@@ -88,21 +88,31 @@
       {% else %}
 
         <div class="row">
+          <div class="col">
 
-          <div class="col-sm-2 text-center">
+          </div>
+          <div class="col-6 text-center">
             <div class="text-center mt-4">
               <h1><b>GAMES THIS WEEK</b></h1>
-
+              {% if games.all %}
+              <ul id="ul_games" class="list-group margin">
+                {% for game in games %}
+                <a href="/games/{{game.id}}/">
+                    <li class="groupList list-group-item">{{game.home_team.name}} vs {{game.away_team.name}}</li>
+                </a>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <a>
+                  <li class="groupList list-group-item">You have no upcoming games</li>
+              </a>
+              {% endif %}
             </div>
           </div>
 
-          <div class="col-sm-10 text-center">
-            <div class="text-center mt-4">
-              <h1><b>MY CALENDAR</b></h1>
+          <div class="col">
 
-            </div>
           </div>
-
 
         </div>
       {% endif %}

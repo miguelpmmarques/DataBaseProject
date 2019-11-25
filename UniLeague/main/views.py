@@ -94,7 +94,7 @@ from .models import TimeSlot
 from .utils import Calendar
 
 from django.views.generic.dates import YearArchiveView
-
+# import pytz
 
 TIME_SLOT_DURATION = timedelta(minutes=90)
 
@@ -381,18 +381,32 @@ class LandingPageView(generic.TemplateView):
     def get(self, request):
         if request.user.is_superuser:
             return HttpResponseRedirect("administration/")
+
+        if request.user.is_authenticated:
+            games = self.get_week_games(request.user)
+        else:
+            games = None
         try:
             tournaments = Tournament.objects.all()
             teams = Team.objects.all()
             return render(
                 request,
                 template_name=self.template_name,
-                context={"teams": teams, "tournaments": tournaments},
+                context={"teams": teams, "tournaments": tournaments, "games":games},
+
             )
 
         except (Tournament.DoesNotExist, Team.DoesNotExist) as err:
             raise Http404
 
+    def get_week_games(self, user):
+        userTeam = TeamUser.objects.filter(player=user)
+        for q in userTeam:
+            home_games = Game.objects.filter(home_team=q.team)
+            away_games = Game.objects.filter(away_team=q.team)
+            games = home_games | away_games
+        games = games.distinct().order_by('-gameDate')[:10]
+        return games
 
 def log_out_request(request):
     logout(request)
@@ -661,7 +675,9 @@ class CreateGames(generic.CreateView):
         num_games = nCr(number_of_teams, 2) * number_of_hands
         fields = tournament.fields.all()
         number_of_days = tournament.endTournament - tournament.beginTournament
-        if tournament.beginTournament < datetime.today():
+        # tournament_aux = datetime.today().replace(tzinfo=pytz.UTC)
+        # if tournament.beginTournament < tournament_aux:
+        if tournament.beginTournament <datetime.today():
             day = datetime.today()
         else:
             day = tournament.beginTournament
@@ -1422,6 +1438,11 @@ class GameView(generic.DetailView):
         try:
             pk = int(pk)
             selected_game = Game.objects.filter(pk=pk).first()
+
+        except ValueError:
+            selected_game = None
+
+        if not selected_game==None:
             if final_score.first() == final_score.last():
 
                 if selected_game:
@@ -1446,6 +1467,5 @@ class GameView(generic.DetailView):
                     user_send=selected_game.tournament.tournament_manager,
                     origin="Captain",
                     ).save()
-                    
-        except ValueError:
-            selected_game = None
+        else:
+            return HttpResponse("NO GAME DEFINED")

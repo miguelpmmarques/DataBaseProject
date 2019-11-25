@@ -62,3 +62,14 @@ class TournamentCreationForm(ModelForm):
             "game_week_days",
             "days_without_games",
         )
+
+# class ResultCreationForm(ModelForm):
+#     class Meta:
+#         model = Result
+#         fields = (
+#             "home_score",
+#             "away_score",
+#             "home_team",
+#             "away_team",
+#             #find a way to add Goals
+#         )
