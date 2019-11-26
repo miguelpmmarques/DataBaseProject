@@ -7,7 +7,7 @@ Django
 django-celery
 django-celery-beat
 django-celery-results
-django-fontawesome-5=
+django-fontawesome-5
 django-phonenumber-field
 django-rest-framework
 django-timezone-fie
