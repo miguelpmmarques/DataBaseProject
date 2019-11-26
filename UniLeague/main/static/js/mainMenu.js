@@ -59,6 +59,9 @@ function main() {
         });
     }
     var success_helper = function(e, type) {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
         var ul = document.getElementById(`ul_${type}`)
         var elements = ul.getElementsByTagName("li");
         var length = elements.length;
@@ -66,22 +69,33 @@ function main() {
             console.log(i);
             elements[0].remove();
         }
-        if (type == "users") {
-            for (elem of e) {
-                let extra;
-                if (e.isTournamentManager == true) {
-                    extra = "(Tournament Manager)";
-                } else if (e.isCaptain == true) {
-                    extra = "(Captain)";
-                } else {
-                    extra = "(Player)";
-                }
-                createChildren(`${elem.first_name} ${elem.last_name} ${extra}`, ul);
+        if (type == "teams") {
+          for (elem of e) {
+            console.log(elem.teamuser_set.length);
+            if (elem.teamuser_set.length < 16) {
+              createChildren(`${elem.name} has ${elem.teamuser_set.length}/16 players`, ul, false);
+
             }
+
+
+          }
         } else {
 
             for (elem of e) {
-                createChildren(`${elem.name}`, ul, false);
+              console.log(elem);
+                var date = new Date(elem.beginTournament)
+                let hour;
+                let daStuff;
+                if (date.getHours() >= 12){
+                  hour = date.getHours() -12
+                  daStuff = " p.m."
+                }else {
+                  hour = date.getHours()
+                  daStuff = " a.m."
+                }
+                strTOSend= monthNames[date.getMonth()]+". "+date.getDate()+", "+date.getFullYear()+", "+hour+":"+date.getMinutes()+daStuff
+
+                createChildren(`${elem.name} starts in `+strTOSend, ul, false);
             }
         }
     }

@@ -50,15 +50,17 @@ class TournamentSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class TeamSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Team
-        fields = "__all__"
-
-
 class TeamUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamUser
+        fields = "__all__"
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    teamuser_set = TeamUserSerializer(many=True, required=False)
+
+    class Meta:
+        model = Team
         fields = "__all__"
 
 

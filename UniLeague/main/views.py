@@ -48,6 +48,7 @@ from django.db.models.functions import Concat
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
+from django.db.models import Count
 
 # third party imports
 
@@ -393,7 +394,13 @@ class LandingPageView(generic.TemplateView):
             games = None
         try:
             tournaments = Tournament.objects.all()
-            teams = Team.objects.all()
+            # .annotate(team_count=models.Count('article'))[0].article_count
+            # teams = Team.objects.all().order_by(userteam_set__count)
+            teams = (
+                Team.objects.annotate(q_count=Count("teamuser"))
+                .order_by("-q_count")
+                .filter(q_count__lte=15)
+            )
             return render(
                 request,
                 template_name=self.template_name,
@@ -1216,6 +1223,11 @@ class RestTeamsList(generics.ListAPIView):
             if key == "tournament_pk":
                 queryset = queryset.filter(tournament__pk=params[key])
 
+        queryset = (
+            queryset.annotate(q_count=Count("teamuser"))
+            .order_by("-q_count")
+            .filter(q_count__lte=15)
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
