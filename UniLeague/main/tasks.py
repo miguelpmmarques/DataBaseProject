@@ -1,14 +1,40 @@
+from datetime import timedelta
+
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
+from django.utils import timezone
+from django.db import transaction
+from django.db import IntegrityError
 
 
 from UniLeague.celery import app
+from celery.schedules import crontab
 
 from .models import CustomUser
+from .models import TimeSlot
+from .models import Tournament
 from .tokens import account_activation_token
+
+
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        1, erase_timeslots.s(), name="erase useless timeslots every day"
+    )
+
+
+app.conf.beat_schedule = {
+    # Executes every Monday morning at 7:30 a.m.
+    "erase_timeslots": {"task": "erase_timeslots", "schedule": crontab(), "args": ()},
+    "deactivate_ended_tournaments": {
+        "task": "deactivate_ended_tournaments",
+        "schedule": crontab(),
+        "args": (),
+    },
+}
 
 
 @app.task(
@@ -31,3 +57,42 @@ def ask_admin_for_permissions(self, host, pk):
         return email.send()
     except CustomUser.DoesNotExist:
         return self.retry()
+
+
+@app.task(
+    name="erase_timeslots",
+    bind=True,
+    ignore_result=False,
+    task_retries=5,
+    default_retry_delay=60,
+)
+def erase_timeslots(self):
+    try:
+        with transaction.atomic():
+            empty_timeslots = TimeSlot.objects.filter(description="")
+            for empty_slot in empty_timeslots:
+                print("TIEMSLUT====", empty_slot.description)
+                empty_slot.delete()
+    except IntegrityError:
+        raise self.retry()
+
+
+@app.task(
+    name="deactivate_ended_tournaments",
+    bind=True,
+    ignore_result=False,
+    task_retries=5,
+    default_retry_delay=60,
+)
+def deactivate_ended_tournaments(self):
+    try:
+        with transaction.atomic():
+            ended_tournaments = Tournament.objects.filter(
+                endTournament__lte=timezone.now() - timedelta(days=5)
+            )
+            for elem in ended_tournaments:
+                print("ELEM===", elem)
+                elem.is_active = False
+                elem.save()
+    except IntegrityError:
+        raise self.retry()

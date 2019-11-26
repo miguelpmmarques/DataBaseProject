@@ -14,7 +14,16 @@ DATA BASE MODELS CRIATION
 """
 
 
-class GameWeekDay(models.Model):
+class BaseAbstractModel(models.Model):
+    is_active = models.BooleanField()
+    added = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class GameWeekDay(BaseAbstractModel):
     DAYS_OF_WEEK = (
         ("0", "Monday"),
         ("1", "Tuesday"),
@@ -42,7 +51,7 @@ class GameWeekDay(models.Model):
         return self.get_week_day()
 
 
-class RegularSlot(models.Model):
+class RegularSlot(BaseAbstractModel):
     week_day = models.OneToOneField(GameWeekDay, on_delete=models.PROTECT)
     slots = ArrayField(models.TimeField())
 
@@ -56,7 +65,7 @@ class RegularSlot(models.Model):
         return str(self.week_day)
 
 
-class Field(models.Model):
+class Field(BaseAbstractModel):
     name = models.CharField(max_length=512, null=False, default="")
     regular_slots = models.ManyToManyField(RegularSlot)
 
@@ -70,7 +79,7 @@ class Field(models.Model):
         return self.name
 
 
-class Day(models.Model):
+class Day(BaseAbstractModel):
     day = models.DateField(null=True)
 
     class Meta:
@@ -110,7 +119,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-class Notifications(models.Model):
+class Notifications(BaseAbstractModel):
     title = models.CharField(max_length=512, unique=False, null=True, blank=False)
     description = models.CharField(max_length=512, unique=False, null=True, blank=False)
     sendDate = models.DateTimeField(auto_now_add=True, null=True)
@@ -128,7 +137,7 @@ class Notifications(models.Model):
 
 
 # foreign keys done, I think
-class Position(models.Model):
+class Position(BaseAbstractModel):
     name = models.CharField(max_length=512, unique=True, null=False, default="")
     start = models.BooleanField()
 
@@ -142,7 +151,7 @@ class Position(models.Model):
         return self.name
 
 
-class Tournament(models.Model):
+class Tournament(BaseAbstractModel):
     name = models.CharField(max_length=512, null=False, unique=True, default="")
     beginTournament = models.DateTimeField(null=True)
     endTournament = models.DateTimeField(null=True)
@@ -169,7 +178,7 @@ class Tournament(models.Model):
         return self.name
 
 
-class TimeSlot(models.Model):
+class TimeSlot(BaseAbstractModel):
     """
     weekDay = models.CharField(max_length=512, null=False, default="")
     Hour = models.IntegerField(null=False, default=0)
@@ -198,7 +207,7 @@ class TimeSlot(models.Model):
 
 
 # foreign keys done
-class Tactic(models.Model):
+class Tactic(BaseAbstractModel):
     # Atributes
     positions = models.ManyToManyField(Position)
     name = models.CharField(max_length=20, default="tatica")
@@ -212,7 +221,7 @@ class Tactic(models.Model):
 
 
 # foreign keys done
-class Team(models.Model):
+class Team(BaseAbstractModel):
     name = models.CharField(max_length=512, null=False, default="")
     numberPlayers = models.IntegerField(null=True, default=1)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
@@ -232,7 +241,7 @@ class Team(models.Model):
         return self.name + str(self.teamLogo)
 
 
-class Game(models.Model):
+class Game(BaseAbstractModel):
     cost = models.IntegerField(null=False, default=0)
     gameDate = models.OneToOneField(Day, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=False, on_delete=models.PROTECT)
@@ -256,7 +265,7 @@ class Game(models.Model):
         return str(self.home_team) + " vs " + str(self.away_team)
 
 
-class TeamUser(models.Model):
+class TeamUser(BaseAbstractModel):
     isCaptain = models.BooleanField(null=False, default=True)
     player = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
     team = models.ForeignKey(Team, blank=True, on_delete=models.PROTECT)
@@ -270,11 +279,11 @@ class TeamUser(models.Model):
         verbose_name = "EquipaUtilizador"
         verbose_name_plural = "EquipaUtilizadores"
 
-        def __str__(self):
-            return self.player.username + " - " + self.team.name
+    def __str__(self):
+        return self.player.username + " - " + self.team.name
 
 
-class Result(models.Model):
+class Result(BaseAbstractModel):
     home_score = models.IntegerField(null=False, default=0)
     away_score = models.IntegerField(null=False, default=0)
     home_team = models.CharField(max_length=512, null=False, default="")
@@ -292,7 +301,7 @@ class Result(models.Model):
         return str(self.home_score) + " - " + str(self.away_score)
 
 
-class Goal(models.Model):
+class Goal(BaseAbstractModel):
     result = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     scorer = models.ForeignKey(TeamUser, null=True, on_delete=models.PROTECT)
 
@@ -302,4 +311,4 @@ class Goal(models.Model):
         verbose_name_plural = "Golos"
 
     def __str__(self):
-        return str(result.game.pk)
+        return str(self.result.game.pk)
