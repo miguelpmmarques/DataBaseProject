@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.functions import Extract
-
+from django.utils import timezone
 from UniLeague.settings import MEDIA_URL
 
 """
@@ -15,7 +15,7 @@ DATA BASE MODELS CRIATION
 
 
 class BaseAbstractModel(models.Model):
-    is_active = models.BooleanField()
+    is_active = models.BooleanField(default=True)
     added = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -238,7 +238,7 @@ class Team(BaseAbstractModel):
         ordering = ["-name"]
 
     def __str__(self):
-        return self.name + str(self.teamLogo)
+        return self.name
 
 
 class Game(BaseAbstractModel):

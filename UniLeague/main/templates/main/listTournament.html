@@ -45,7 +45,9 @@
                 <li class="groupList list-group-item">No Tournaments found</li>
                 {% endif %}
             </ul>
+            {% if user.is_authenticated %}
             <button id="createTournament" type="button" class="btn btn-dark" onclick="window.location.href=window.location.origin+'/tournaments/create/';">Create New Tournament</button>
+            {% endif %}
         </div>
 
         <div class="col"></div>
@@ -56,4 +58,3 @@
 </body>
 
 </html>
-

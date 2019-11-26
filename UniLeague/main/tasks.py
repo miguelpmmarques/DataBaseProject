@@ -14,8 +14,10 @@ from UniLeague.celery import app
 from celery.schedules import crontab
 
 from .models import CustomUser
+from .models import Notifications
 from .models import TimeSlot
 from .models import Tournament
+from .models import TeamUser
 from .tokens import account_activation_token
 
 
@@ -28,10 +30,19 @@ def setup_periodic_tasks(sender, **kwargs):
 
 app.conf.beat_schedule = {
     # Executes every Monday morning at 7:30 a.m.
-    "erase_timeslots": {"task": "erase_timeslots", "schedule": crontab(), "args": ()},
+    "erase_timeslots": {
+        "task": "erase_timeslots",
+        "schedule": crontab(hour=0, minute=0),
+        "args": (),
+    },
     "deactivate_ended_tournaments": {
         "task": "deactivate_ended_tournaments",
-        "schedule": crontab(),
+        "schedule": crontab(hour=0, minute=0),
+        "args": (),
+    },
+    "send_notification_for_absences": {
+        "task": "send_notification_for_absences",
+        "schedule": crontab(hour=0, minute=0),
         "args": (),
     },
 }
@@ -94,5 +105,80 @@ def deactivate_ended_tournaments(self):
                 print("ELEM===", elem)
                 elem.is_active = False
                 elem.save()
+    except IntegrityError:
+        raise self.retry()
+
+
+@app.task(
+    name="send_notification_for_absences",
+    bind=True,
+    ignore_result=False,
+    task_retries=5,
+    default_retry_delay=60,
+)
+def send_notification_for_absences(self):
+    print("oi atão!")
+    try:
+        with transaction.atomic():
+            absentees = TeamUser.objects.filter(absences__gte=5)
+            for elem in absentees:
+                print(elem)
+                notification = Notifications.objects.filter(
+                    title="The user "
+                    + elem.player.username
+                    + " has "
+                    + str(elem.absences)
+                    + " absences"
+                ).first()
+                if not notification:
+                    notification = Notifications.objects.create(
+                        title="The user "
+                        + elem.player.username
+                        + " has "
+                        + str(elem.absences)
+                        + " absences",
+                        description="<br> Please go to your administration menu if you want to blacklist him/her.",
+                        user_send=CustomUser.objects.get(is_superuser=True),
+                        origin="System",
+                    ).save()
+                print(notification)
+
+    except IntegrityError:
+        raise self.retry()
+
+
+@app.task(
+    name="verify_hierarchy",
+    bind=True,
+    ignore_result=False,
+    task_retries=5,
+    default_retry_delay=60,
+)
+def verify_hierarchy(self):
+    try:
+        with transaction.atomic():
+            absentees = TeamUser.objects.filter(absences__gte=5)
+            for elem in absentees:
+                print(elem)
+                notification = Notifications.objects.filter(
+                    title="The user "
+                    + elem.player.username
+                    + " has "
+                    + str(elem.absences)
+                    + " absences"
+                ).first()
+                if not notification:
+                    notification = Notifications.objects.create(
+                        title="The user "
+                        + elem.player.username
+                        + " has "
+                        + str(elem.absences)
+                        + " absences",
+                        description="<br> Please go to your administration menu if you want to blacklist him/her.",
+                        user_send=CustomUser.objects.get(is_superuser=True),
+                        origin="System",
+                    ).save()
+                print(notification)
+
     except IntegrityError:
         raise self.retry()
