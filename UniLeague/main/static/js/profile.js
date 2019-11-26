@@ -7,7 +7,6 @@ if (document.readyState === "complete" ||
 function main() {
   const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
   $.ajaxSetup({
-
       headers: {
           "X-CSRFToken": csrf_token
       }
