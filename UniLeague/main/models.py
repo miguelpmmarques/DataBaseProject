@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.functions import Extract
-
+from django.utils import timezone
 from UniLeague.settings import MEDIA_URL
 
 """
