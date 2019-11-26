@@ -94,7 +94,7 @@ from .models import TimeSlot
 from .utils import Calendar
 
 from django.views.generic.dates import YearArchiveView
-# import pytz
+import pytz
 
 TIME_SLOT_DURATION = timedelta(minutes=90)
 
@@ -404,10 +404,14 @@ class LandingPageView(generic.TemplateView):
 
     def get_week_games(self, user):
         userTeam = TeamUser.objects.filter(player=user)
+        games = Game.objects.none()
+        next_week = datetime.today() + timedelta(days=7)
         for q in userTeam:
-            home_games = Game.objects.filter(home_team=q.team)
-            away_games = Game.objects.filter(away_team=q.team)
-            games = home_games | away_games
+            home_games = Game.objects.filter(home_team=q.team).filter(gameDate__day__lte = next_week)
+            away_games = Game.objects.filter(away_team=q.team).filter(gameDate__day__lte = next_week)
+
+            temp = home_games | away_games
+            games = games | temp
         games = games.distinct().order_by('-gameDate')[:10]
         return games
 
@@ -678,9 +682,9 @@ class CreateGames(generic.CreateView):
         num_games = nCr(number_of_teams, 2) * number_of_hands
         fields = tournament.fields.all()
         number_of_days = tournament.endTournament - tournament.beginTournament
-        # tournament_aux = datetime.today().replace(tzinfo=pytz.UTC)
-        # if tournament.beginTournament < tournament_aux:
-        if tournament.beginTournament <datetime.today():
+        tournament_aux = datetime.today().replace(tzinfo=pytz.UTC) #RICARDO
+        if tournament.beginTournament < tournament_aux: #RICARDO
+        # if tournament.beginTournament <datetime.today():
             day = datetime.today()
         else:
             day = tournament.beginTournament

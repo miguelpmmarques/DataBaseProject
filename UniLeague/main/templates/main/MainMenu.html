@@ -91,14 +91,14 @@
           <div class="col">
 
           </div>
-          <div class="col-6 text-center">
+          <div class="col-8 text-center">
             <div class="text-center mt-4">
               <h1><b>GAMES THIS WEEK</b></h1>
               {% if games.all %}
               <ul id="ul_games" class="list-group margin">
                 {% for game in games %}
                 <a href="/games/{{game.id}}/">
-                    <li class="groupList list-group-item">{{game.home_team.name}} vs {{game.away_team.name}}</li>
+                    <li class="groupList list-group-item"> <b>{{game.tournament.name}}</b> {{game.home_team.name}} vs {{game.away_team.name}} <i>{{game.gameDate.day}}</i></li>
                 </a>
                 {% endfor %}
               </ul>
