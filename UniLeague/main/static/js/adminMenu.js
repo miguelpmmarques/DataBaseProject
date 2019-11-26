@@ -25,6 +25,7 @@ function createChildren(text, ul, has_icon = true) {
 }
 
 function main() {
+  console.log("Encontrou o js");
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
 
     const activate_user = document.getElementById("activate_users");
@@ -114,6 +115,7 @@ function main() {
         console.log(response_data);;
     }
     $("form").submit(function(e) {
+      console.log("BATEULELELELELELE");
         e.preventDefault();
         var type = this.id;
         if (type !== "blacklist" &&

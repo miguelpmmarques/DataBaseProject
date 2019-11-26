@@ -97,7 +97,6 @@ from .utils import Calendar
 
 from django.views.generic.dates import YearArchiveView
 
-# import pytz
 
 TIME_SLOT_DURATION = timedelta(minutes=90)
 
@@ -410,11 +409,15 @@ class LandingPageView(generic.TemplateView):
 
     def get_week_games(self, user):
         userTeam = TeamUser.objects.filter(player=user)
+        games = Game.objects.none()
+        next_week = datetime.today() + timedelta(days=7)
         for q in userTeam:
-            home_games = Game.objects.filter(home_team=q.team)
-            away_games = Game.objects.filter(away_team=q.team)
-            games = home_games | away_games
-        games = games.distinct().order_by("-gameDate")[:10]
+            home_games = Game.objects.filter(home_team=q.team).filter(gameDate__day__lte = next_week)
+            away_games = Game.objects.filter(away_team=q.team).filter(gameDate__day__lte = next_week)
+
+            temp = home_games | away_games
+            games = games | temp
+        games = games.distinct().order_by('-gameDate')
         return games
 
 
