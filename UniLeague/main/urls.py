@@ -80,11 +80,6 @@ urlpatterns = [
         views.CreateGames.as_view(),
         name="generate-games",
     ),
-    path(
-        "games/generate/<int:tournament_pk>/",
-        views.CreateGames.as_view(),
-        name="generate-games",
-    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # path("teams/<int:pk>/", views.),

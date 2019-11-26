@@ -52,23 +52,24 @@ function main() {
         e.preventDefault();
         sendNotifications(this.id);
     });
-    }
-    function sendNotifications(teampk) {
-    console.log("BATEU "+teampk);
+}
+
+function sendNotifications(teampk) {
+    console.log("BATEU " + teampk);
     $.ajax({
-          url: "/notifyteam/" +teampk+ "/",
-          type: 'PATCH',
-          timeout: 3000,
-          success: function(d) {
-              if (d === "Done") {
-                console.log("Top");
-              }
-          },//, processData:false, contentType = 'application/json'
-      })
-      .fail(function() {
-          alert('Error updating this model instance.');
-      });
-    }
+            url: "/notifyteam/" + teampk + "/",
+            type: 'PATCH',
+            timeout: 3000,
+            success: function(d) {
+                if (d === "Done") {
+                    console.log("Top");
+                }
+            }, //, processData:false, contentType = 'application/json'
+        })
+        .fail(function() {
+            alert('Error updating this model instance.');
+        });
+}
 
 function saveBudgetAbsences(mypk) {
     var budget = document.getElementById("budget|" + mypk).value
