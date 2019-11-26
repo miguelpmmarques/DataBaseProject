@@ -2,7 +2,7 @@ import json
 
 from operator import itemgetter
 import calendar
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from random import choice, randint
 from time import sleep
 import math
@@ -37,6 +37,7 @@ from django.http import HttpResponseRedirect
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.db import transaction
@@ -94,7 +95,7 @@ from .models import TimeSlot
 from .utils import Calendar
 
 from django.views.generic.dates import YearArchiveView
-import pytz
+
 
 TIME_SLOT_DURATION = timedelta(minutes=90)
 
@@ -395,8 +396,7 @@ class LandingPageView(generic.TemplateView):
             return render(
                 request,
                 template_name=self.template_name,
-                context={"teams": teams, "tournaments": tournaments, "games":games},
-
+                context={"teams": teams, "tournaments": tournaments, "games": games},
             )
 
         except (Tournament.DoesNotExist, Team.DoesNotExist) as err:
@@ -412,8 +412,9 @@ class LandingPageView(generic.TemplateView):
 
             temp = home_games | away_games
             games = games | temp
-        games = games.distinct().order_by('-gameDate')[:10]
+        games = games.distinct().order_by('-gameDate')
         return games
+
 
 def log_out_request(request):
     logout(request)
@@ -682,10 +683,12 @@ class CreateGames(generic.CreateView):
         num_games = nCr(number_of_teams, 2) * number_of_hands
         fields = tournament.fields.all()
         number_of_days = tournament.endTournament - tournament.beginTournament
-        tournament_aux = datetime.today().replace(tzinfo=pytz.UTC) #RICARDO
-        if tournament.beginTournament < tournament_aux: #RICARDO
-        # if tournament.beginTournament <datetime.today():
-            day = datetime.today()
+        # tournament_aux = datetime.today().replace(tzinfo=pytz.UTC)
+        # if tournament.beginTournament < tournament_aux:
+        print("NOW===", timezone.now())
+        print("beginTournament===", tournament.beginTournament)
+        if tournament.beginTournament < timezone.now():
+            day = timezone.now()
         else:
             day = tournament.beginTournament
 
@@ -1492,7 +1495,7 @@ class GameView(generic.DetailView):
         except ValueError:
             selected_game = None
 
-        if not selected_game==None:
+        if not selected_game == None:
             final_score = selected_game.result_set.all()
             if final_score.first() == final_score.last():
 
@@ -1518,7 +1521,6 @@ class GameView(generic.DetailView):
                         user_send=selected_game.tournament.tournament_manager,
                         origin="Captain",
                     ).save()
-
 
         else:
             return HttpResponse("NO GAME DEFINED")
