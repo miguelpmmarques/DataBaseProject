@@ -238,7 +238,7 @@ class Team(BaseAbstractModel):
         ordering = ["-name"]
 
     def __str__(self):
-        return self.name + str(self.teamLogo)
+        return self.name
 
 
 class Game(BaseAbstractModel):

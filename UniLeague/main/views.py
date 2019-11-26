@@ -49,6 +49,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
 from django.db.models import Count
+from django.views.generic.dates import timezone_today
 
 # third party imports
 
@@ -140,6 +141,9 @@ class TeamView(generic.DetailView):
             print(teamuser)
             if teamuser == None:
                 team_selected = Team.objects.filter(pk=pk).first()
+                captainTeamUser = (
+                    TeamUser.objects.filter(team__pk=pk).filter(isCaptain=True).first()
+                )
             else:
                 if teamuser.isCaptain:
                     print(request.user.teamuser_set.all)
@@ -150,9 +154,9 @@ class TeamView(generic.DetailView):
                         team_selected = Team.objects.filter(pk=pk).first()
                     except ValueError:
                         team_selected = None
+                captainTeamUser = teamuser
         else:
             team_selected = Team.objects.get(pk=pk)
-
         if request.user.is_authenticated:
             thisUser = (
                 TeamUser.objects.filter(team__pk=team_selected.pk)
@@ -166,6 +170,7 @@ class TeamView(generic.DetailView):
             request,
             template_name=self.template_name,
             context={
+                "captainTeamUser": captainTeamUser,
                 "captain": CustomUser.objects.get(
                     pk__in=list(
                         TeamUser.objects.filter(team__pk=team_selected.pk)
@@ -414,12 +419,16 @@ class LandingPageView(generic.TemplateView):
         games = Game.objects.none()
         next_week = datetime.today() + timedelta(days=7)
         for q in userTeam:
-            home_games = Game.objects.filter(home_team=q.team).filter(gameDate__day__lte = next_week)
-            away_games = Game.objects.filter(away_team=q.team).filter(gameDate__day__lte = next_week)
+            home_games = Game.objects.filter(home_team=q.team).filter(
+                gameDate__day__lte=next_week
+            )
+            away_games = Game.objects.filter(away_team=q.team).filter(
+                gameDate__day__lte=next_week
+            )
 
             temp = home_games | away_games
             games = games | temp
-        games = games.distinct().order_by('-gameDate')
+        games = games.distinct().order_by("-gameDate")
         return games
 
 
@@ -1370,7 +1379,7 @@ class CalendarView(BaseCalendarView):
     model = TimeSlot
     template_name = "main/calendar.html"
     queryset = TimeSlot.objects.all()
-    # year = self.kwargs['year']
+    allow_future = True
 
     def get_queryset(self):
         """
@@ -1414,7 +1423,6 @@ class CalendarView(BaseCalendarView):
                         raise Http404
             except (Tournament.DoesNotExist, Team.DoesNotExist, TimeSlot.DoesNotExist):
                 raise Http404
-            print("OLEOLEOLEOLEO====", queryset)
             if isinstance(queryset, QuerySet):
                 queryset = queryset.all()
         elif self.model is not None:
