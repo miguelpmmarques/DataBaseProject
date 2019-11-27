@@ -67,6 +67,7 @@ from .serializers import GameWeekDaySerializer
 from .serializers import TournamentSerializer
 from .serializers import FieldSerializer
 from .serializers import TeamSerializer
+from .serializers import TeamSerializerCreate
 from .serializers import PositionSerializer
 from .serializers import TeamUserSerializer
 
@@ -119,7 +120,7 @@ class GoToTeamFromPlayer(generic.DetailView):
 
     def get(self, request):
 
-        teamuser = TeamUser.objects.all().order_by("-player")
+        teamuser = TeamUser.objects.all().order_by("player__first_name")
         return render(
             request, template_name=self.template_name, context={"users": teamuser}
         )
@@ -314,7 +315,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
             raise Http404
         except Team.DoesNotExist:
             team_serialized = request.session["team_form"]
-            team = TeamSerializer(data=team_serialized)
+            team = TeamSerializerCreate(data=team_serialized)
             if team.is_valid(raise_exception=True):
                 new_team = team.save()
                 TeamUser.objects.create(
@@ -932,13 +933,18 @@ class changeInfo(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         teampk = kwargs.pop("teampk", False)
         playerpk = kwargs.pop("playerpk", False)
-        print("------------------------")
         print(request.data)
-
         budget = request.data["budget"]
         absences = request.data["absences"]
 
         instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+        try:
+            with transaction.atomic():
+                user = instance.player
+                user.hierarchy += int(absences)
+                user.save()
+        except IntegrityError:
+            pass
         serializer = self.get_serializer(
             instance, {"budget": budget, "absences": absences}, partial=True
         )
@@ -1301,6 +1307,20 @@ class TournamentDetailsView(generic.View):
                     )
                 # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
                 scorers = self.get_top_scorers(tournament)
+            else:
+                for elem in teams_data:
+                    teams.append(
+                        {
+                            "id": elem.pk,
+                            "name": elem.name,
+                            "points": 0,
+                            "goals_scored": 0,
+                            "games_won": 0,
+                            "tied_games": 0,
+                            "games_lost": 0,
+                            "goals_conceded": 0,
+                        }
+                    )
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
             teams.reverse()

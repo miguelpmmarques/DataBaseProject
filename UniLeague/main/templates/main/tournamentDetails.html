@@ -4,6 +4,13 @@
 {% block body %}
 <script src="{% static 'js/tournamentDetails.js' %}"></script>
 
+{% if messages %}
+  {% for men in messages %}
+  <div class="alert alert-success" role="alert">
+    {{men}}
+  </div>
+  {% endfor%}
+{% endif %}
 <div class="row">
   <div class="col-sm-3 mt-4">
     {% if tournament %}

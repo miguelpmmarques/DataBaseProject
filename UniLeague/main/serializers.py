@@ -64,6 +64,12 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class TeamSerializerCreate(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = "__all__"
+
+
 class DaySerializer(serializers.Serializer):
     day = serializers.DateField(format="%d%m%Y")
 
