@@ -74,6 +74,7 @@ urlpatterns = [
         views.CalendarView.as_view(),
         name="main-calendar",
     ),
+    path("games/week/<int:pk>/", views.WeekCalendarView.as_view()),
     path("teamusers/rest/<int:pk>/", views.RestTeamUserView.as_view()),
     path(
         "games/generate/<int:tournament_pk>/",

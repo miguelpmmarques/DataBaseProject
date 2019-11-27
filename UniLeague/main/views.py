@@ -7,6 +7,8 @@ from random import choice, randint
 from time import sleep
 import math
 
+from django import forms
+from django.views.generic.dates import _date_from_string
 from django.db.models.query import QuerySet
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import render
@@ -70,6 +72,8 @@ from .serializers import TeamSerializer
 from .serializers import TeamSerializerCreate
 from .serializers import PositionSerializer
 from .serializers import TeamUserSerializer
+from .serializers import GoalSerializer
+from .serializers import TimeSlotSerializer
 
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
@@ -111,6 +115,86 @@ class BaseCalendarView(YearArchiveView):
     date_field = "start_time"
     make_object_list = True
     template_name = "main/calendar.html"
+
+
+class WeekCalendarView(generic.WeekArchiveView):
+    model = TimeSlot
+    date_field = "start_time"
+    make_object_list = True
+    allow_future = True
+    week = timezone.now().isocalendar()[1]
+    template_name = "main/calendar.html"
+
+    def get_dated_items(self):
+        """Return (date_list, items, extra_context) for this request."""
+        year = timezone.now().year
+        week = self.get_week()
+        date_field = self.get_date_field()
+        week_format = self.get_week_format()
+        print("OLE==", week)
+        week_choices = {"%W": "1", "%U": "0"}
+        try:
+            week_start = week_choices[week_format]
+        except KeyError:
+            raise ValueError(
+                "Unknown week format %r. Choices are: %s"
+                % (week_format, ", ".join(sorted(week_choices)))
+            )
+        date = _date_from_string(
+            year, self.get_year_format(), week_start, "%w", week, week_format
+        )
+        since = self._make_date_lookup_arg(date)
+        until = self._make_date_lookup_arg(self._get_next_week(date))
+        lookup_kwargs = {"%s__gte" % date_field: since, "%s__lt" % date_field: until}
+        qs = self.get_dated_queryset(**lookup_kwargs)
+        return (
+            None,
+            qs,
+            {
+                "week": date,
+                "next_week": self.get_next_week(date),
+                "previous_week": self.get_previous_week(date),
+            },
+        )
+
+    def get_week(self):
+        """Return the week for which this view should display data."""
+        print("OIOI")
+        week = self.week
+        if week is None:
+            try:
+                week = self.kwargs["week"]
+            except KeyError:
+                try:
+                    week = self.request.GET["week"]
+                except KeyError:
+                    raise Http404(_("No week specified"))
+        return week
+
+    def get_queryset(self):
+        """
+        Return the list of items for this view.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        print("HERE")
+        pk = int(self.kwargs.get("pk"))
+        games = Game.objects.filter(
+            Q(home_team__pk=pk) | Q(away_team__pk=pk)
+        ).values_list("pk")
+        return TimeSlot.objects.filter(game__pk__in=games).order_by("start_time")
+
+    def get(self, request, *args, **kwargs):
+        print("OIOI")
+        self.date_list, self.object_list, extra_context = self.get_dated_items()
+        print("oLE")
+        context = self.get_context_data(
+            object_list=self.object_list, date_list=self.date_list, **extra_context
+        )
+        print(context)
+        serializer = TimeSlotSerializer(context["timeslot_list"], many=True)
+
+        return JsonResponse(serializer.data, safe=False)
 
 
 # Create your views here.
@@ -1532,10 +1616,35 @@ def nCr(n, r):
     return f(n) / f(r) / f(n - r)
 
 
-class GameView(generic.DetailView):
+class GameView(generics.CreateAPIView):
     model = Game
     template_name = "main/game.html"
-    form_class = GoalForm
+
+    def get_form(self, pk, form_class=None):
+        """Return an instance of the form to be used in this view."""
+
+        form_class = self.get_form_class(pk)
+        return form_class()
+
+    def get_form_class(self, pk):
+        """
+        The form can only show the workouts belonging to the user.
+
+        This is defined here because only at this point during the request
+        have we access to the current user
+        """
+        game = Game.objects.get(pk=pk)
+        home_team = game.home_team
+        away_team = game.away_team
+
+        class StepForm(GoalForm):
+            scorer = forms.ModelChoiceField(
+                queryset=TeamUser.objects.filter(
+                    Q(team_id=home_team.pk) | Q(team_id=away_team.pk)
+                )
+            )
+
+        return StepForm
 
     def get(self, request, pk):
         try:
@@ -1549,9 +1658,6 @@ class GameView(generic.DetailView):
             today = timezone.now()
 
             done = selected_game.timeslot.start_time < today
-            print("TIME==", selected_game.timeslot.start_time + TIME_SLOT_DURATION)
-            print("NOW==", today)
-            print("Time < Now ===", done)
             if done:
                 final_score = selected_game.result_set.all()
                 if final_score.first() == final_score.last():
@@ -1564,7 +1670,7 @@ class GameView(generic.DetailView):
                         )
                     raise Http404(("Game Does Not Exist"))
                 else:
-                    # mandar notify ao admin
+                    # mandar notify ao admin - dar o link onde ele pode editar o resultado!
                     Notifications.objects.create(
                         title="Result Conflitc",
                         description="<h3>There was a conflict in the final score of "
@@ -1595,41 +1701,106 @@ class GameView(generic.DetailView):
                     away_captain = selected_game.away_team.teamuser_set.filter(
                         isCaptain=True
                     ).first()
-                    # tratar do caso em que n há capitao
+                    # tratar do caso em que n ha capitao
                     is_home_captain = False
                     is_away_captain = False
-                    print("HOME==", request.user.pk)
-                    print("OLOLE==", home_captain)
                     if request.user.pk == home_captain.player.pk:
                         is_home_captain = True
+                        result = selected_game.result_set.filter(
+                            captain__pk=home_captain.pk
+                        ).first()
                     elif request.user.pk == away_captain.player.pk:
                         is_away_captain = True
-                    print("IS HOME CAPTAIN==", is_home_captain)
-                    print("IS AWAY CAPTAIN==", is_away_captain)
-
+                        result = selected_game.result_set.filter(
+                            captain__pk=away_captain.pk
+                        ).first()
+                    else:
+                        result = None
                     return render(
                         request,
                         template_name=self.template_name,
                         context={
                             "game": selected_game,
-                            "form": self.form_class,
+                            "form": self.get_form(pk),
                             "is_home_captain": is_home_captain,
                             "is_away_captain": is_away_captain,
+                            "result": result,
                         },
                     )
                     raise Http404
 
                 else:
                     return HttpResponse("NO GAME DEFINED")
-                    '''
-    def post(self, request):
+
+    def post(self, request, pk):
         """
         Overriting the default post made by html form
         """
-        form = self.form_class(request=request, data=request.POST)
-        if form.is_valid():
-            goal = form.save(commit=False)
-            # tas aqui!!
+        print("here heyhey")
+        try:
+            pk = int(pk)
+            selected_game = Game.objects.filter(pk=pk).first()
+
+        except (ValueError, Game.DoesNotExist):
+            selected_game = None
+        print("ole===", request.data)
+        serializer = GoalSerializer(data=request.data)
+        if serializer.is_valid():
+            goal = serializer.save()
+
         else:
-            messages.error(request, "Invalid username or password")
-            return HttpResponseRedirect("")'''
+            messages.error(request, serializer.errors)
+            return HttpResponseRedirect("")
+
+        if selected_game:
+            # searching for the captain in the home team
+            captain = selected_game.home_team.teamuser_set.filter(
+                player__pk=request.user.pk
+            ).first()
+            # searching for the captain in the away team
+            if not captain:
+                captain = selected_game.away_team.teamuser_set.filter(
+                    player__pk=request.user.pk
+                ).first()
+            if captain:
+                result = selected_game.result_set.filter(captain__pk=captain.pk).first()
+
+                if not result:
+                    result = Result.objects.create(
+                        home_score=0, away_score=0, captain=captain, game=selected_game
+                    )
+
+                goal.result = result
+
+                # checking if the scorer belongs to the home team
+                home_player = selected_game.home_team.teamuser_set.filter(
+                    pk=goal.scorer.pk
+                ).exists()
+                # checking if the scorer belongs to the away team
+                if not home_player:
+                    away_player = selected_game.away_team.teamuser_set.filter(
+                        pk=goal.scorer.pk
+                    ).exists()
+                if home_player or away_player:
+                    # incrementing and saving the result accordingly
+                    if home_player:
+                        result.home_score += 1
+                        goal.is_home = True
+                    else:
+                        result.away_score += 1
+                        goal.is_away = True
+                    goal.save()
+                    result.save()
+                    return Response("success")
+                else:
+                    messages.error(
+                        request,
+                        "This player does not play for any of the teams in this game",
+                    )
+                    return HttpResponseRedirect("")
+            else:
+                return HttpResponseBadRequest(
+                    "You can't create this result! If you're a Tournament Manager, please use your own custom page built for this"
+                )
+        else:
+            raise Http404

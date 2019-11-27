@@ -286,10 +286,9 @@ class TeamUser(BaseAbstractModel):
 class Result(BaseAbstractModel):
     home_score = models.IntegerField(null=False, default=0)
     away_score = models.IntegerField(null=False, default=0)
-    home_team = models.CharField(max_length=512, null=False, default="")
-    away_team = models.CharField(max_length=512, null=False, default="")
+    captain = models.ForeignKey(TeamUser, on_delete=models.PROTECT)
     game = models.ForeignKey(Game, null=True, on_delete=models.PROTECT)
-    # player_scores = models.ManyToManyField(CustomUser)
+    is_final = models.BooleanField(default=False)
 
     class Meta:
         db_table = "Result"
@@ -305,6 +304,8 @@ class Goal(BaseAbstractModel):
     result = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     scorer = models.ForeignKey(TeamUser, null=True, on_delete=models.PROTECT)
     time = models.TimeField()
+    is_home = models.BooleanField(default=False)
+    is_away = models.BooleanField(default=False)
 
     class Meta:
         db_table = "Goal"
@@ -312,4 +313,4 @@ class Goal(BaseAbstractModel):
         verbose_name_plural = "Golos"
 
     def __str__(self):
-        return str(self.result.game.pk)
+        return str(self.scorer) + " (" + str(self.time) + "')"

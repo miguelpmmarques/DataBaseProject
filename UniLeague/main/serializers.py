@@ -9,6 +9,9 @@ from .models import Field
 from .models import Team
 from .models import Position
 from .models import TeamUser
+from .models import Goal
+from .models import TimeSlot
+from .models import Game
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -81,4 +84,24 @@ class GameWeekDaySerializer(serializers.Serializer):
 class FieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = Field
+        fields = "__all__"
+
+
+class GoalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Goal
+        fields = ("time", "scorer")
+
+
+class GameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        fields = "__all__"
+
+
+class TimeSlotSerializer(serializers.ModelSerializer):
+    game = GameSerializer(required=False)
+
+    class Meta:
+        model = TimeSlot
         fields = "__all__"

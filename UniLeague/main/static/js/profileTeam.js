@@ -14,6 +14,8 @@ function main() {
             "X-CSRFToken": csrf_token
         }
     });
+    console.log("ATAO?");
+    get_games_next_week();
     var leave = document.getElementById("leave");
     leave.addEventListener("click", function(e) {
         var r = confirm("Are you certain you want to leave this team?!");
@@ -240,4 +242,35 @@ function leaveTeam(leave) {
             alert('Error updating this model instance.');
         });
 
+}
+
+function get_games_next_week() {
+    console.log("HERE");
+    var ul = document.getElementById("games_next_week");
+    $.ajax({
+        type: "GET",
+        url: `/games/week/${ul.getAttribute("name")}/`,
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: (d) => {
+            success_populate_list(d, ul);
+        },
+        failure: (d) => {
+            console.log("OLE===", d);
+        }
+    });
+}
+
+function success_populate_list(data, ul) {
+    console.log("data=== ", data);
+    for (elem of data) {
+        let li = document.createElement("li");
+        li.id = elem.id;
+        let a = document.createElement("a");
+        var date = new Date(elem.start_time);
+        a.innerHTML = `${elem.title} at ${date}`
+        a.setAttribute("href", `/games/${elem.game.id}/`)
+        li.appendChild(a);
+        ul.appendChild(li)
+    }
 }

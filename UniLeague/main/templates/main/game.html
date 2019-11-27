@@ -2,65 +2,137 @@
 {% load static %}
 {% load fontawesome_5 %}
 {% fontawesome_5_static %}
+{% block imports %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
+<script src="{% static 'js/jquery.timeselector.js' %}"></script>
 
-{% block body %}
-{% if messages %}
-{% for men in messages %}
-<div class="alert alert-danger" role="alert">
+<script src="{% static 'js/game.js' %}"></script>
+{% endblock %} {% block body %} {% if messages %} {% for men in messages %} <div class="alert alert-danger" role="alert">
     {{men}}
 </div>
 {% endfor %}
 {% endif %}
 <div class="row">
-    <div class="col">
-        <!-- home_team logo and name -->
-        <p class="text-center">HOME</p>
-        <div class="container mx-auto mt-5" style="width: 100px; height:100px;">
-            <img src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" style="width:100%;height:100%;"> <br>
-        </div>
-        <h2 class="text-center mt-5">{{game.home_team.name}}</h2>
-    </div>
-    <div class="col-6">
+    <div class="col-12">
         <!-- game info -->
-        {% if result %}
         <div class="container text-center">
             <!-- tournament and logo -->
             <h1>tournament: {{game.tournament.name}}</h1>
             <br>
             <h2>{{game.gameDate}}</h2>
             <br>
-            <h3>Field: {{game.field}}</h3>
+            <h3>Field: {{game.timeslot.field.name}}</h3>
             <br>
             <h5>cost:{{game.cost}}</h5>
             <br>
-
         </div>
-        {% endif %}
-        {% if is_home_captain or is_away_captain %}
-        <label for="addNewGoal">Add New Goal:</label>
-        <button id="addNewGoal" name="addNewGoal"><i class="fas fa-plus"></i></button>
-        {% if is_home_captain %}
-        <div id="home_form">
-            {{form.as_p}}
-            <button type"submit">Confirm</button>
-        </div>
-        {% elif is_away_captain %}
-        <div id="away_form">
-            {{form.as_p}}
-            <button type"submit">Confirm</button>
-        </div>
-        {% endif %}
-        {% endif %}
-
-    </div>
-    <div class="col">
-        <!-- away_team logo and name -->
-        <p class="text-center">AWAY</p>
-        <div class="container mx-auto mt-5" style="width: 200px; height:200px;">
-            <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:100%;height:100%;"> <br>
-        </div>
-        <h2 class="text-center mt-5">{{game.away_team.name}}</h2>
-
     </div>
 </div>
+<br>
+<div class="row">
+    <div class="col-5">
+        <!-- home_team logo and name -->
+        <div class="my-auto d-flex justify-content-center">
+            {% if result %}
+            <ul>
+                {% for elem in result.goal_set.all %}
+                {% if elem.is_home %}
+                <li>{{elem.scorer}}({{elem.time.hour}}:{{elem.time.minute}}')</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+
+        </div>
+        <div class="float-right">
+            <p class="text-center">HOME</p>
+            <div class="container mx-auto mt-5" style="width: 100px; height:100px;">
+                <img src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" style="width:100%;height:100%;"> <br>
+            </div>
+            <h2 class="text-center mt-5">{{game.home_team.name}}</h2>
+        </div>
+    </div>
+
+    <div class="col-2 d-flex justify-content-center">
+        <h1>VS</h1>
+    </div>
+    <div class="col-5">
+        <!-- away_team logo and name -->
+        <div class="my-auto d-flex justify-content-center">
+
+            {% if result %}
+            <ul>
+                {% for elem in result.goal_set.all %}
+                {% if elem.is_away %}
+                <li>{{elem.scorer}}({{elem.time.hour}}:{{elem.time.minute}}')</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="float-left">
+            <p class="text-center">AWAY</p>
+            <div class="container mx-auto mt-5" style="width: 200px; height:200px;">
+                <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:100%;height:100%;"> <br>
+            </div>
+            <h2 class="text-center mt-5">{{game.away_team.name}}</h2>
+        </div>
+
+    </div>
+
+</div>
+<br>
+
+{% if is_home_captain or is_away_captain %}
+<div class="row">
+    <div class="col">
+    </div>
+    <div class="input-group-prepend">
+        <span class="input-group-text bg-dark" for="addNewGoal" style='border: 2px solid black; color:white;'> Add New Goal</span>
+        <button class="input-group-text bg-light" id="addNewGoal" name="addNewGoal"><i class="fas fa-plus" style="color:#000000"></i></button>
+    </div>
+    <div class="col">
+        <form id="home_form" method="post" hidden>
+            {% csrf_token %}
+            <div class="col-xs-5">
+                {% for elem in form %}
+                {%if elem.label == "Time" %}
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-clock" style="color:#FFFFFF"></i></span>
+                        <span class=" input-group-text bg-dark text-white" style='border: 2px solid black'>time</span>
+                    </div>
+                    {{elem}}
+
+                </div>
+                {% else %}
+                <div class="col-xs-2">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-futbol" style="color:#FFFFFF"></i></span>
+                            <label class="input-group-text bg-dark text-white" style='border: 2px solid black'>Scorer</label>
+                        </div>
+                        <select class="custom-select" id="scorer_input">
+                            {% for item in elem %}
+                            {{item}}
+                            {% endfor %}
+                        </select>
+
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                <button type"submit">Confirm</button>
+            </div>
+        </form>
+    </div>
+    <div class="col">
+    </div>
+</div>
+
+{% endif %}
+
 {% endblock %}

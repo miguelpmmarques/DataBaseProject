@@ -68,4 +68,14 @@ class TournamentCreationForm(ModelForm):
 class GoalForm(forms.ModelForm):
     class Meta:
         model = Goal
+        widgets = {
+            "time": forms.TimeInput(
+                attrs={
+                    "id": "timepicker1",
+                    "type": "text",
+                    "class": "form-control input-small",
+                    "required": "false",
+                }
+            )
+        }
         fields = ("scorer", "time")

@@ -103,8 +103,8 @@
     </div>
     <div id="showPositions" class="col-lg-6">
         <br>
-        <div>
-            <div class="card bg-dark col-lg-6 mx-auto text-center card h-15">
+        <div class="row">
+            <div class="card bg-dark col-lg-5 float-left text-center card h-15">
                 <h1>Captain: {{captain.username}}</b>
                     {% if not user in players or not user.is_authenticated%}
                     <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/login/';">
@@ -160,6 +160,13 @@
                     </div>
                     {% endif %}
                 </div>
+            </div>
+            <div class="col-6 float-right">
+                <h1>Games This Week</h1>
+                <ul id="games_next_week" name="{{myTeam.pk}}">
+                </ul>
+                <button class="btn btn-dark" onclick="window.location.href='/games/calendar/team/{{myTeam.pk}}/'">Go To Calendar</button>
+
             </div>
         </div>
         <br>
