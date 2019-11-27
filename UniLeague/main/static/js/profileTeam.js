@@ -183,9 +183,7 @@ function changeCaptainFun(e, old_captain, options) {
 
                     data: data[elem], //, processData:false, contentType = 'application/json'
                     success: function(d) {
-                        console.log("INDEX====", elem);
                         if (elem == 2) {
-                            console.log("HEREREREER");
                             spinner.hidden = true;
                             window.location.href = "";
                         }

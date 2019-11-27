@@ -388,6 +388,7 @@ class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
 
     def get(self, request):
+        print("REQUEST===", self.request)
         if request.user.is_superuser:
             return HttpResponseRedirect("administration/")
 
@@ -412,12 +413,16 @@ class LandingPageView(generic.TemplateView):
         games = Game.objects.none()
         next_week = datetime.today() + timedelta(days=7)
         for q in userTeam:
-            home_games = Game.objects.filter(home_team=q.team).filter(gameDate__day__lte = next_week)
-            away_games = Game.objects.filter(away_team=q.team).filter(gameDate__day__lte = next_week)
+            home_games = Game.objects.filter(home_team=q.team).filter(
+                gameDate__day__lte=next_week
+            )
+            away_games = Game.objects.filter(away_team=q.team).filter(
+                gameDate__day__lte=next_week
+            )
 
             temp = home_games | away_games
             games = games | temp
-        games = games.distinct().order_by('-gameDate')
+        games = games.distinct().order_by("-gameDate")
         return games
 
 
@@ -1364,6 +1369,17 @@ class CalendarView(BaseCalendarView):
     queryset = TimeSlot.objects.all()
     allow_future = True
 
+    def get(self, request, *args, **kwargs):
+        try:
+            self.date_list, self.object_list, extra_context = self.get_dated_items()
+            context = self.get_context_data(
+                object_list=self.object_list, date_list=self.date_list, **extra_context
+            )
+            return self.render_to_response(context)
+        except Http404:
+            messages.error(request, "Ainda não há jogos!")
+            return render(request, "main/calendar.html")
+
     def get_queryset(self):
         """
         Return the list of items for this view.
@@ -1434,7 +1450,6 @@ class CalendarView(BaseCalendarView):
                 try:
                     year = self.request.GET["year"]
                 except KeyError:
-                    print("HERE")
                     raise Http404(_("No year specified"))
         return year
 

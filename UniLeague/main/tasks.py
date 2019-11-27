@@ -18,6 +18,7 @@ from .models import Notifications
 from .models import TimeSlot
 from .models import Tournament
 from .models import TeamUser
+from .models import Team
 from .tokens import account_activation_token
 
 
@@ -45,6 +46,7 @@ app.conf.beat_schedule = {
         "schedule": crontab(hour=0, minute=0),
         "args": (),
     },
+    "verify_hierarchy": {"task": "verify_hierarchy", "schedule": crontab(), "args": ()},
 }
 
 
@@ -102,7 +104,6 @@ def deactivate_ended_tournaments(self):
                 endTournament__lte=timezone.now() - timedelta(days=5)
             )
             for elem in ended_tournaments:
-                print("ELEM===", elem)
                 elem.is_active = False
                 elem.save()
     except IntegrityError:
@@ -157,28 +158,26 @@ def send_notification_for_absences(self):
 def verify_hierarchy(self):
     try:
         with transaction.atomic():
-            absentees = TeamUser.objects.filter(absences__gte=5)
-            for elem in absentees:
-                print(elem)
-                notification = Notifications.objects.filter(
-                    title="The user "
-                    + elem.player.username
-                    + " has "
-                    + str(elem.absences)
-                    + " absences"
-                ).first()
-                if not notification:
-                    notification = Notifications.objects.create(
-                        title="The user "
-                        + elem.player.username
-                        + " has "
-                        + str(elem.absences)
-                        + " absences",
-                        description="<br> Please go to your administration menu if you want to blacklist him/her.",
-                        user_send=CustomUser.objects.get(is_superuser=True),
-                        origin="System",
-                    ).save()
-                print(notification)
+            for team in Team.objects.all():
+                change_lineup_hierarchy_points("Avancado")
+                change_lineup_hierarchy_points("Defesa")
+                change_lineup_hierarchy_points("Medio")
+                change_lineup_hierarchy_points("Striker")
+                change_lineup_hierarchy_points(
+                    "Guarda-Redes"
+                )  # change starting defenders based on their hierarchy
 
     except IntegrityError:
         raise self.retry()
+
+
+def change_lineup_hierarchy_points(parser):
+    players = TeamUser.objects.filter(position__name__icontains=parser)
+    count_starters = players.filter(position__start=True).count()
+    ordered_players = players.order_by("-player__hierarchy")
+    print(ordered_players)
+    for i in range(players.count()):
+        if i <= count_starters:
+            ordered_players[i].position.start = True
+        else:
+            ordered_players[i].position.start = False
