@@ -48,6 +48,7 @@ from django.db.models.functions import Concat
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
+from django.db.models import Count
 from django.views.generic.dates import timezone_today
 
 # third party imports
@@ -66,6 +67,7 @@ from .serializers import GameWeekDaySerializer
 from .serializers import TournamentSerializer
 from .serializers import FieldSerializer
 from .serializers import TeamSerializer
+from .serializers import TeamSerializerCreate
 from .serializers import PositionSerializer
 from .serializers import TeamUserSerializer
 
@@ -118,7 +120,7 @@ class GoToTeamFromPlayer(generic.DetailView):
 
     def get(self, request):
 
-        teamuser = TeamUser.objects.all().order_by("-player")
+        teamuser = TeamUser.objects.all().order_by("player__first_name")
         return render(
             request, template_name=self.template_name, context={"users": teamuser}
         )
@@ -313,7 +315,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
             raise Http404
         except Team.DoesNotExist:
             team_serialized = request.session["team_form"]
-            team = TeamSerializer(data=team_serialized)
+            team = TeamSerializerCreate(data=team_serialized)
             if team.is_valid(raise_exception=True):
                 new_team = team.save()
                 TeamUser.objects.create(
@@ -398,7 +400,13 @@ class LandingPageView(generic.TemplateView):
             games = None
         try:
             tournaments = Tournament.objects.all()
-            teams = Team.objects.all()
+            # .annotate(team_count=models.Count('article'))[0].article_count
+            # teams = Team.objects.all().order_by(userteam_set__count)
+            teams = (
+                Team.objects.annotate(q_count=Count("teamuser"))
+                .order_by("-q_count")
+                .filter(q_count__lte=15)
+            )
             return render(
                 request,
                 template_name=self.template_name,
@@ -926,13 +934,18 @@ class changeInfo(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         teampk = kwargs.pop("teampk", False)
         playerpk = kwargs.pop("playerpk", False)
-        print("------------------------")
         print(request.data)
-
         budget = request.data["budget"]
         absences = request.data["absences"]
 
         instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
+        try:
+            with transaction.atomic():
+                user = instance.player
+                user.hierarchy += int(absences)
+                user.save()
+        except IntegrityError:
+            pass
         serializer = self.get_serializer(
             instance, {"budget": budget, "absences": absences}, partial=True
         )
@@ -1228,6 +1241,12 @@ class RestTeamsList(generics.ListAPIView):
                 queryset = queryset.filter(name__icontains=params[key])
             if key == "tournament_pk":
                 queryset = queryset.filter(tournament__pk=params[key])
+
+        queryset = (
+            queryset.annotate(q_count=Count("teamuser"))
+            .order_by("-q_count")
+            .filter(q_count__lte=15)
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -1289,6 +1308,20 @@ class TournamentDetailsView(generic.View):
                     )
                 # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
                 scorers = self.get_top_scorers(tournament)
+            else:
+                for elem in teams_data:
+                    teams.append(
+                        {
+                            "id": elem.pk,
+                            "name": elem.name,
+                            "points": 0,
+                            "goals_scored": 0,
+                            "games_won": 0,
+                            "tied_games": 0,
+                            "games_lost": 0,
+                            "goals_conceded": 0,
+                        }
+                    )
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
             teams.reverse()

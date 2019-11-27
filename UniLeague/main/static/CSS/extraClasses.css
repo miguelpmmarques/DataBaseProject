@@ -130,6 +130,16 @@ a:hover {
 
 }
 
+#userlistDaStuff:before { /* the custom styled bullets */
+  background-color: black;
+  border-radius: 50%;
+  content: "";
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 2px;
+  height: 10px;
+  width: 10px;
+}
 
 .rcorners_btn{
   background-color: rgba(115, 115, 115, 0.48);
