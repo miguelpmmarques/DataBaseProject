@@ -8,6 +8,7 @@ from .models import CustomUser
 from .models import Tournament
 from .models import Team
 from .models import Position
+from .models import Goal
 
 
 class CustomUserForm(UserCreationForm):
@@ -63,13 +64,8 @@ class TournamentCreationForm(ModelForm):
             "days_without_games",
         )
 
-# class ResultCreationForm(ModelForm):
-#     class Meta:
-#         model = Result
-#         fields = (
-#             "home_score",
-#             "away_score",
-#             "home_team",
-#             "away_team",
-#             #find a way to add Goals
-#         )
+
+class GoalForm(forms.ModelForm):
+    class Meta:
+        model = Goal
+        fields = ("scorer", "time")

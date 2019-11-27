@@ -77,6 +77,7 @@ from .forms import CustomUserForm
 from .forms import TournamentCreationForm
 from .forms import TeamCreationForm
 from .forms import PositionsForm
+from .forms import GoalForm
 
 
 # from .forms import CustomUserLoginForm
@@ -155,7 +156,6 @@ class TeamView(generic.DetailView):
                         team_selected = Team.objects.filter(pk=pk).first()
                     except ValueError:
                         team_selected = None
-                captainTeamUser = teamuser
         else:
             team_selected = Team.objects.get(pk=pk)
         if request.user.is_authenticated:
@@ -167,11 +167,8 @@ class TeamView(generic.DetailView):
         else:
             thisUser = None
 
-        return render(
-            request,
-            template_name=self.template_name,
-            context={
-                "captainTeamUser": captainTeamUser,
+        try:
+            context = {
                 "captain": CustomUser.objects.get(
                     pk__in=list(
                         TeamUser.objects.filter(team__pk=team_selected.pk)
@@ -193,9 +190,10 @@ class TeamView(generic.DetailView):
                 "positionsOcupied": TeamUser.objects.filter(
                     team__pk=team_selected.pk
                 ).values_list("position", flat=True),
-            },
-        )
-        raise Http404
+            }
+            return render(request, template_name=self.template_name, context=context)
+        except Exception:
+            raise Http404
 
 
 class NotificationsView(generic.DetailView):
@@ -1080,7 +1078,7 @@ class changePos(generics.RetrieveUpdateAPIView):
             return Response("Done")
 
 
-class RestTeamUserView(generics.RetrieveUpdateAPIView):
+class RestTeamUserView(generics.RetrieveUpdateDestroyAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
     permission_classes = [IsAuthenticated]
@@ -1537,27 +1535,34 @@ def nCr(n, r):
 class GameView(generic.DetailView):
     model = Game
     template_name = "main/game.html"
+    form_class = GoalForm
 
     def get(self, request, pk):
         try:
             pk = int(pk)
             selected_game = Game.objects.filter(pk=pk).first()
 
-        except ValueError:
+        except (ValueError, Game.DoesNotExist):
             selected_game = None
 
-        if not selected_game == None:
-            final_score = selected_game.result_set.all()
-            if final_score.first() == final_score.last():
+        if selected_game:
+            today = timezone.now()
 
-                if selected_game:
-                    return render(
-                        request,
-                        template_name=self.template_name,
-                        context={"game": selected_game, "result": final_score},
-                    )
-                    raise Http404
+            done = selected_game.timeslot.start_time < today
+            print("TIME==", selected_game.timeslot.start_time + TIME_SLOT_DURATION)
+            print("NOW==", today)
+            print("Time < Now ===", done)
+            if done:
+                final_score = selected_game.result_set.all()
+                if final_score.first() == final_score.last():
 
+                    if selected_game:
+                        return render(
+                            request,
+                            template_name=self.template_name,
+                            context={"game": selected_game, "result": final_score},
+                        )
+                    raise Http404(("Game Does Not Exist"))
                 else:
                     # mandar notify ao admin
                     Notifications.objects.create(
@@ -1568,10 +1573,63 @@ class GameView(generic.DetailView):
                         + selected_game.away_team
                         + " in tournament"
                         + selected_game.tournament.name
-                        + +"</h3>",
+                        + "</h3><h3>Please Confirm the Correct Result</h3>",
                         user_send=selected_game.tournament.tournament_manager,
                         origin="Captain",
                     ).save()
+                    messages.error(
+                        request,
+                        "Erros no resultado. Para apurar o resultado definitivo, por favor contacte o Gestor de Torneio",
+                    )
+                    return render(
+                        request,
+                        template_name=self.template_name,
+                        context={"game": selected_game},
+                    )
 
+            else:
+                if selected_game:
+                    home_captain = selected_game.home_team.teamuser_set.filter(
+                        isCaptain=True
+                    ).first()
+                    away_captain = selected_game.away_team.teamuser_set.filter(
+                        isCaptain=True
+                    ).first()
+                    # tratar do caso em que n há capitao
+                    is_home_captain = False
+                    is_away_captain = False
+                    print("HOME==", request.user.pk)
+                    print("OLOLE==", home_captain)
+                    if request.user.pk == home_captain.player.pk:
+                        is_home_captain = True
+                    elif request.user.pk == away_captain.player.pk:
+                        is_away_captain = True
+                    print("IS HOME CAPTAIN==", is_home_captain)
+                    print("IS AWAY CAPTAIN==", is_away_captain)
+
+                    return render(
+                        request,
+                        template_name=self.template_name,
+                        context={
+                            "game": selected_game,
+                            "form": self.form_class,
+                            "is_home_captain": is_home_captain,
+                            "is_away_captain": is_away_captain,
+                        },
+                    )
+                    raise Http404
+
+                else:
+                    return HttpResponse("NO GAME DEFINED")
+                    '''
+    def post(self, request):
+        """
+        Overriting the default post made by html form
+        """
+        form = self.form_class(request=request, data=request.POST)
+        if form.is_valid():
+            goal = form.save(commit=False)
+            # tas aqui!!
         else:
-            return HttpResponse("NO GAME DEFINED")
+            messages.error(request, "Invalid username or password")
+            return HttpResponseRedirect("")'''

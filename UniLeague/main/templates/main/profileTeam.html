@@ -86,13 +86,13 @@
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                 View user info
                             </button>
-                            <button class="float-none" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+                            <button class="float-none" id="leave" name="{{elem.pk}}"><i class="fa fa-user-times" aria-hidden="true"></i></button>
                             {% elif thisUser == elem %}
                             <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                 Request captain to change position
                             </button>
-                            <button class="float-right" onclick="console.log('hi');"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+                            <button class="float-right" id="leave" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true"></i></button>
                             {% endif %}
                         </li>
                         {% endfor %}
@@ -122,7 +122,8 @@
                 <div class="row">
                     <div class="card bg-dark col-lg-5 text-center mx-auto d-block">
                         <div class="embed-responsive embed-responsive-4by3">
-                            <img id="captainImg" src="{{ MEDIA_URL }}/media/{{captainTeamUser.player.image}}" class="card-img-top embed-responsive-item" alt="...">
+                            <p>{{captainTeamUser.username}}</p>
+                            <img id="captainImg" src="{{ MEDIA_URL }}/media/{{captain.image}}" class="card-img-top embed-responsive-item" alt="...">
                         </div>
                     </div>
                 </div>

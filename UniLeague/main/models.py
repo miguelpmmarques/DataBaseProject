@@ -304,6 +304,7 @@ class Result(BaseAbstractModel):
 class Goal(BaseAbstractModel):
     result = models.ForeignKey(Result, null=True, on_delete=models.PROTECT)
     scorer = models.ForeignKey(TeamUser, null=True, on_delete=models.PROTECT)
+    time = models.TimeField()
 
     class Meta:
         db_table = "Goal"

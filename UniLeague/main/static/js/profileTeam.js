@@ -14,6 +14,13 @@ function main() {
             "X-CSRFToken": csrf_token
         }
     });
+    var leave = document.getElementById("leave");
+    leave.addEventListener("click", function(e) {
+        var r = confirm("Are you certain you want to leave this team?!");
+        if (r == true) {
+            leaveTeam(leave);
+        }
+    });
     var options = document.getElementById("exampleFormControlSelect1");
     var captain = options.value;
     var changeCaptain = document.getElementById("changeCaptain");
@@ -169,8 +176,6 @@ function changeCaptainFun(e, old_captain, options) {
         urls.push(`${window.location.origin}/teamusers/rest/${old_captain}/`);
         urls.push(`${window.location.origin}/teams/rest/${my_team_id}/`);
         urls.push(`${window.location.origin}/teamusers/rest/${selected}/`)
-        console.log("data===", data);
-        console.log("urls===", urls);
         for (elem in urls) {
             console.log(data[elem]);
             console.log(urls[elem]);
@@ -198,4 +203,41 @@ function changeCaptainFun(e, old_captain, options) {
         }
 
     }
+}
+
+function leaveTeam(leave) {
+    console.log(`/teamusers/rest/${leave.name}/`);
+    $.ajax({
+            url: `/teamusers/rest/${leave.name}/`,
+            type: 'DELETE',
+            timeout: 3000,
+            success: function(d) {
+                console.log("HERER BITCH==", d);
+                $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
+                    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+                    for (var i = 0; i < changePosition.length; i++) {
+
+                        changePosition[i].addEventListener("click", function(e) {
+                            e.preventDefault();
+                            changePositionSubs(this.id.split("|"));
+
+                        });
+                    }
+                    var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+                    for (var i = 0; i < saveInfo.length; i++) {
+
+                        saveInfo[i].addEventListener("click", function(e) {
+                            e.preventDefault();
+                            saveBudgetAbsences(this.id);
+
+                        });
+                    }
+
+                });
+            },
+        })
+        .fail(function() {
+            alert('Error updating this model instance.');
+        });
+
 }
