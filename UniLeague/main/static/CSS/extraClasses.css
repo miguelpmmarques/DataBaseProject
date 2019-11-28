@@ -1,8 +1,6 @@
 .background {
-
     background-image: url("../assets/background_resize.jpg");
     /* background-image: radial-gradient(circle, #ff785a, #c7576a, #834363, #433146, #191919); */
-
     overflow-x: hidden;
 }
 
@@ -169,7 +167,6 @@ a:hover {
     border-color: black;
     padding: 3px;
     color: white;
-
 }
 
 #userlistDaStuff:before {
