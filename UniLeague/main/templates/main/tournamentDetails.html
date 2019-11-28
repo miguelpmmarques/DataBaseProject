@@ -1,8 +1,13 @@
 {% extends 'main/navbar.html' %}
 {% load static %}
 
+
 {% block body %}
+{% block imports %}
 <script src="{% static 'js/tournamentDetails.js' %}"></script>
+
+{% endblock %}
+{% csrf_token %}
 
 {% if messages %}
   {% for men in messages %}
@@ -59,13 +64,18 @@
         </tbody>
       </table>
 
-      <!-- add calendar table -->
+
+      
 
     </div>
 
     <div class="container" style="width:80%; height:50%;">
 
     </div>
+    <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
+      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+      Apply as Reserve
+    </button>
 
   </div>
 

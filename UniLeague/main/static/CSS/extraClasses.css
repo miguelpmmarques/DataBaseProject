@@ -1,6 +1,8 @@
 .background {
-    /* background-image: radial-gradient(circle, #2ba84a, #2aa145, #299941, #27923c, #268b38, #18823d, #0a7a41, #007143, #006449, #0f564a, #214844, #2d3a3a); */
-    background-image: radial-gradient(circle, #ff785a, #c7576a, #834363, #433146, #191919);
+
+    background-image: url("../assets/background_resize.jpg");
+    /* background-image: radial-gradient(circle, #ff785a, #c7576a, #834363, #433146, #191919); */
+
     overflow-x: hidden;
 }
 
@@ -129,6 +131,45 @@ a:hover {
     padding: 20px;
     width: 400px;
     height: 15px;
+}
+
+#userlistDaStuff:before {
+    /* the custom styled bullets */
+    background-color: black;
+    border-radius: 50%;
+    content: "";
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 2px;
+    height: 10px;
+    width: 10px;
+}
+
+.rcorners_btn {
+    background-color: rgba(115, 115, 115, 0.48);
+    border-radius: 16px;
+}
+
+.rcorners_list {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 2px;
+    border-radius: 25px;
+    box-shadow: 0 0 10px #E8E8E8 inset;
+    /* margin: 0 0 0 25px; */
+    width: 200px;
+    height: 50px;
+    /* padding: 20px; */
+}
+
+#timeselector-div {
+    background-color: #343940;
+    text-align: center;
+    border-style: solid;
+    border-radius: 10px;
+    border-color: black;
+    padding: 3px;
+    color: white;
+
 }
 
 #userlistDaStuff:before {

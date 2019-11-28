@@ -4,11 +4,11 @@
 {% load fontawesome_5 %}
 {% fontawesome_5_static %}
 
+
+{% block body %}
 {% block imports %}
 <script src="{% static 'js/profileTeam.js' %}"></script>
 {% endblock %}
-
-{% block body %}
 {% csrf_token %}
 <div class="row">
     <div class="col-lg-5">
@@ -16,7 +16,12 @@
         <div class="card bg-dark col-lg-10 mx-auto text-center">
             <br>
             <h1 id="myTeam" class="text-center" name="{{myTeam.pk}}"><b>Team: {{myTeam.name}}</h1>
-            <img id="teamLogo" class="img-thumbnail w-75 p-3 mx-auto d-block" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="">
+
+            {% if myTeam.teamLogo.strip %}
+              <img id="teamLogo" class="img-thumbnail w-75 p-3 mx-auto d-block" src="{{ MEDIA_URL}}/media/{{myTeam.teamLogo}}" alt="" style="width: 300px; height:350px">
+            {% else %}
+              <img id="teamLogo" class="img-thumbnail w-75 p-3 mx-auto d-block" src="/../../../static/assets/no_team_logo.png" alt="" style="width: 300px; height:350px">
+            {% endif %}
             <br>
             <br>
         </div>
@@ -123,7 +128,13 @@
                     <div class="card bg-dark col-lg-5 text-center mx-auto d-block">
                         <div class="embed-responsive embed-responsive-4by3">
                             <p>{{captainTeamUser.username}}</p>
-                            <img id="captainImg" src="{{ MEDIA_URL }}/media/{{captain.image}}" class="card-img-top embed-responsive-item" alt="...">
+                            {% if captain.image.strip %}
+                              <img id="captainImg" src="{{ MEDIA_URL }}/media/{{captain.image}}" class="card-img-top embed-responsive-item" alt="...">
+                            {% else %}
+                            <img id="captainImg" src="/../../../static/assets/no_img_user.png" class="card-img-top embed-responsive-item" alt="...">
+
+                            {% endif %}
+
                         </div>
                     </div>
                 </div>

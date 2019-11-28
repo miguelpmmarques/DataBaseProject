@@ -16,6 +16,7 @@ from .models import Notifications
 from .models import Result
 
 
+
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

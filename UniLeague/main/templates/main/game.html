@@ -20,9 +20,9 @@
             <!-- tournament and logo -->
             <h1>tournament: {{game.tournament.name}}</h1>
             <br>
-            <h2>{{game.gameDate}}</h2>
-            <br>
-            <h3>Field: {{game.timeslot.field.name}}</h3>
+
+            <h2>{{game.gameDate}} @ Field: {{game.timeslot.field.name}}</h2>
+
             <br>
             <h5>cost:{{game.cost}}</h5>
             <br>
@@ -48,19 +48,33 @@
 
         </div>
         <div class="float-right">
-            <p class="text-center">HOME</p>
-            <div class="container mx-auto mt-5" style="width: 100px; height:100px;">
-                <img src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" style="width:100%;height:100%;"> <br>
+
+
+          <div class="card bg-dark" style="width: 18rem;" style="text-align:center;">
+            <h3 class="card-title text-center">HOME</h3>
+            {% if game.home_team.teamLogo.strip %}
+              <img class="card-img-center mx-auto" src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" alt="" style="width: 200px; height:200px">
+            {% else %}
+              <img class="card-img-center mx-auto" src="/../../../static/assets/no_team_logo.png" alt="" style="width: 200px; height:200px">
+            {% endif %}
+            <div class="card-body">
+              <h4 class="card-text text-center">{{game.home_team.name}}</h4>
             </div>
-            <h2 class="text-center mt-5">{{game.home_team.name}}</h2>
+          </div>
         </div>
+
     </div>
 
     <div class="col-2 d-flex justify-content-center">
-        <h1>VS</h1>
+        {% if result%}
+          <h1>{{result.home_score}} - {{result.home_score}}</h1>
+        {% else %}
+          <h1> VS </h1>
+        {% endif %}
     </div>
     <div class="col-5">
-        <!-- away_team logo and name -->
+
+
         <div class="my-auto d-flex justify-content-center">
 
             {% if result %}
@@ -73,13 +87,23 @@
             </ul>
         </div>
         {% endif %}
-        <div class="float-left">
-            <p class="text-center">AWAY</p>
-            <div class="container mx-auto mt-5" style="width: 200px; height:200px;">
-                <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:100%;height:100%;"> <br>
+
+        <div class="float-right">
+
+          <div class="card bg-dark" style="width: 18rem;" style="text-align:center;">
+            <!-- <p class="text-center">HOME</p> -->
+            <h3 class="card-title text-center">AWAY</h3>
+            {% if game.away_team.teamLogo.strip %}
+              <img class="card-img-center mx-auto" src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" alt="" style="width: 200px; height:200px">
+            {% else %}
+              <img class="card-img-center mx-auto" src="/../../../static/assets/no_team_logo.png" alt="" style="width: 200px; height:200px">
+            {% endif %}
+            <div class="card-body">
+              <h4 class="card-text text-center">{{game.away_team.name}}</h4>
             </div>
-            <h2 class="text-center mt-5">{{game.away_team.name}}</h2>
+          </div>
         </div>
+
 
     </div>
 
@@ -93,8 +117,10 @@
     <div class="input-group-prepend">
         <span class="input-group-text bg-dark" for="addNewGoal" style='border: 2px solid black; color:white;'> Add New Goal</span>
         <button class="input-group-text bg-light" id="addNewGoal" name="addNewGoal"><i class="fas fa-plus" style="color:#000000"></i></button>
+
         <span class="input-group-text bg-dark" for="removeGoal" style='border: 2px solid black; color:white;'> Remove Goal</span>
         <button class="input-group-text bg-light" id="removeGoal" name="removeGoal"><i class="fas fa-minus" style="color:#000000"></i></button>
+
     </div>
     <div class="col">
         <form id="home_form" method="post" hidden>
@@ -131,6 +157,7 @@
                 <button type"submit">Confirm</button>
             </div>
         </form>
+
         {% if result %}
         <form id="rm_form" method="post" name="{{result.pk}}" hidden>
             {% else %}
@@ -158,7 +185,6 @@
                     <button type"submit">Remove</button>
                 </div>
             </form>
-
     </div>
     <div class="col">
     </div>
@@ -167,3 +193,4 @@
 {% endif %}
 
 {% endblock %}
+

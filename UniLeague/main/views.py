@@ -74,8 +74,10 @@ from .serializers import PositionSerializer
 from .serializers import TeamUserSerializer
 from .serializers import GoalSerializer
 from .serializers import TimeSlotSerializer
+
 from .serializers import NotificationSerializer
 from .serializers import ResultSerializer
+
 
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
@@ -929,6 +931,7 @@ class CreateGames(generic.CreateView):
         return
 
 
+
 class RestResults(generics.RetrieveUpdateAPIView):
     queryset = Result.objects.all()
     serializer_class = ResultSerializer
@@ -1047,6 +1050,43 @@ class replaceMember(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
+
+class addReserve(generics.RetrieveUpdateAPIView):
+    queryset = Tournament.objects.all()
+    serializer_class = TournamentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        tournamentpk = kwargs.pop("tournamentpk", False)
+
+        print("Chegou")
+        instance = Tournament.objects.get(pk=tournamentpk)
+        listReserves = instance.reserves
+        listReserves.add(request.user)
+
+        serializer = self.get_serializer(
+            instance, {"reserves": listReserves}, partial=True
+        )
+
+        Notifications.objects.create(
+            title="NEW RESERVE IN YOUT TOURNAMENT "+instance.name,
+            description="<h3>The user "
+            + request.user.username
+            + " as know as "
+            + request.user.first_name
+            + " "
+            + request.user.last_name
+            +" is a new reserve for your tournament.</h3>",
+            user_send=instance.tournament_manager,
+            origin="System",
+        ).save()
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, "_prefetched_objects_cache", None):
+            instance._prefetched_objects_cache = {}
+        return Response("Done")
+    
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
@@ -1478,6 +1518,7 @@ class TournamentDetailsView(generic.View):
             first_res = res_set.first()
             second_res = res_set.last()
 
+
             print("fr===", first_res)
             print("sr===", second_res)
             if first_res == None or second_res == None:
@@ -1674,6 +1715,7 @@ class GameView(generics.CreateAPIView):
     model = Game
     template_name = "main/game.html"
 
+
     def get_form(self, pk, is_home_captain, is_away_captain, form_class=None):
         """Return an instance of the form to be used in this view."""
 
@@ -1695,6 +1737,7 @@ class GameView(generics.CreateAPIView):
         game = Game.objects.get(pk=pk)
         home_team = game.home_team
         away_team = game.away_team
+
         q_set = None
         if is_home_captain:
             q_set = Goal.objects.filter(result__game__home_team__pk=home_team.pk)
@@ -1720,6 +1763,7 @@ class GameView(generics.CreateAPIView):
 
         return StepForm, form2
 
+
     def get(self, request, pk):
         try:
             pk = int(pk)
@@ -1732,6 +1776,7 @@ class GameView(generics.CreateAPIView):
             today = timezone.now()
 
             done = selected_game.timeslot.start_time > today
+
             if done:
                 final_score = selected_game.result_set.all()
                 if final_score.first() == final_score.last():
@@ -1790,12 +1835,14 @@ class GameView(generics.CreateAPIView):
                         ).first()
                     else:
                         result = None
+
                     form, form2 = self.get_form(pk, is_home_captain, is_away_captain)
                     return render(
                         request,
                         template_name=self.template_name,
                         context={
                             "game": selected_game,
+
                             "form": form,
                             "form2": form2,
                             "is_home_captain": is_home_captain,
@@ -1859,6 +1906,7 @@ class GameView(generics.CreateAPIView):
                 if home_player or away_player:
                     # incrementing and saving the result accordingly
                     if home_player:
+
                         goal.is_home = True
                     else:
                         goal.is_away = True
@@ -1866,7 +1914,6 @@ class GameView(generics.CreateAPIView):
                     result.home_score = result.goal_set.filter(is_home=True).count()
                     result.away_score = result.goal_set.filter(is_away=True).count()
                     result.save()
-
                     return Response("success")
                 else:
                     messages.error(

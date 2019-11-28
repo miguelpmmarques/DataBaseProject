@@ -14,6 +14,7 @@ function main() {
             "X-CSRFToken": csrf_token
         }
     });
+
     var form = document.getElementById("home_form")
     var btn = document.getElementById("addNewGoal");
     btn.addEventListener("click", (e) => {
@@ -31,10 +32,12 @@ function main() {
         } else {
             form2.hidden = true;
         }
+
     })
     var ole = $('#timepicker1').timeselector({
         hours12: false,
         min: '00:00',
+
         max: '01:30',
     })
 
@@ -93,6 +96,7 @@ function main() {
             type: "PATCH",
             url: "/results/" + result_id + "/",
             data: JSON.stringify({}),
+
             dataType: "json",
             contentType: "application/json; charset=utf-8",
             success: (d) => {
