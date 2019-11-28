@@ -13,10 +13,10 @@
     <script src="{% static 'js/activateMultipleUsers.js' %}"></script>
     <script type="text/javascript">
 
-    $('#myList a').on('click', function (e) {
-      e.preventDefault()
-      $(this).tab('show')
-      })
+        $('#myList a').on('click', function(e) {
+            e.preventDefault()
+            $(this).tab('show')
+        })
     </script>
 </head>
 
@@ -27,47 +27,59 @@
 
     <h1 class="text-center"><b>NOTIFICATIONS</b></h1>
 
-  <div class="row">
-  <div class="col-4">
-    <div class="list-group" id="list-tab" role="tablist" style="width: 30vw; height: 40vw; overflow: auto;" >
-        {% for not in  notifications %}
-        {% if forloop.counter == 1 %}
-        <a class="list-group-item list-group-item-action active"  data-toggle="list" href="#{{not.description}}" role="tab" aria-controls="home">
-          [{{not.sendDate}}]  {{not.title}}</a>
-        {% else %}
-        <a class="list-group-item list-group-item-action"  data-toggle="list" href="#{{not.description}}" role="tab" aria-controls="home">
-          [{{not.sendDate}}]  {{not.title}}</a>
-          {% endif %}
-        {% endfor %}
-        </div>
-  </div>
-  <div class="col-8">
-    <div class="tab-content" id="nav-tabContent">
-      {% for not in  notifications %}
-      {% if forloop.counter == 1 %}
-      <div class="tab-pane fade show show active" id="{{not.description}}" role="tabpanel" aria-labelledby="list-home-list">
-      <h1><b>{{not.title}}</b></h1>
-      <h4>At {{not.sendDate}}</h1>
-      {{not.description|safe }}
-      <h4><i>by {{not.origin}}</i></h4>
-      </div>
-      {% else %}
-      <div class="tab-pane fade show " id="{{not.description}}" role="tabpanel" aria-labelledby="list-home-list">
-      <h1><b>{{not.title}}</b></h1>
-      <h4>At {{not.sendDate}}</h1>
-      {{not.description|safe }}
-      <h4><i>by {{not.origin}}</i></h4>
-      </div>
-        {% endif %}
 
-      {% endfor %}
+    <div class="row">
+        <div class="col-4">
+            <div class="list-group" id="list-tab" role="tablist" style="width: 30vw; height: 40vw; overflow: auto;">
+                {% for not in  notifications %}
+                {% if forloop.counter == 1 %}
+                <a class="list-group-item list-group-item-action active" id="not" name="{{not.id}}" data-toggle="list" href="#{{not.description}}" role="tab" aria-controls="home">
+                    [{{not.sendDate}}] {{not.title}}</a>
+                {% else %}
+                <a class="list-group-item list-group-item-action" id="not" name="{{not.id}}" data-toggle="list" href="#{{not.description}}" role="tab" aria-controls="home">
+                    [{{not.sendDate}}] {{not.title}}</a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="tab-content" id="nav-tabContent">
+                {% for not in  notifications %}
+                {% if forloop.counter == 1 %}
+                <div class="tab-pane fade show show active" id="{{not.description}}" role="tabpanel" aria-labelledby="list-home-list">
+                    <h1><b>{{not.title}}</b></h1>
+                    <h4>At {{not.sendDate}}</h1>
+                        {{not.description|safe }}
+                        {% if not.html == "" %}
+                        <p hidden>no content</p>
+                        {% else %}
+                        {{not.html|safe}}
+                        {% endif %}
+                        <h4><i>by {{not.origin}}</i></h4>
+                </div>
+                {% else %}
+                <div class="tab-pane fade show " id="{{not.description}}" role="tabpanel" aria-labelledby="list-home-list">
+                    <h1><b>{{not.title}}</b></h1>
+                    <h4>At {{not.sendDate}}</h1>
+                        {{not.description|safe }}
+                        {% if not.html == "" %}
+                        <p hidden>no content</p>
+                        {% else %}
+                        {{not.html|safe}}
+                        {% endif %}
+                        <h4><i>by {{not.origin}}</i></h4>
+                </div>
+                {% endif %}
+
+                {% endfor %}
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 
 
     {% endblock %}
 </body>
+
 
 </html>

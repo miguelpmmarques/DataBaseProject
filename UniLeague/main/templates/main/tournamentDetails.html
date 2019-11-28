@@ -5,8 +5,10 @@
 {% block body %}
 {% block imports %}
 <script src="{% static 'js/tournamentDetails.js' %}"></script>
+
 {% endblock %}
 {% csrf_token %}
+
 {% if messages %}
   {% for men in messages %}
   <div class="alert alert-success" role="alert">
@@ -20,6 +22,7 @@
     <h1>Tournament: {{tournament.name}}</h1>
     <h1>Manager: {{tournament.tournament_manager}}</h1>
     {% endif %}
+
     <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
       <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
       Tournament Calendar
@@ -62,6 +65,8 @@
       </table>
 
 
+      
+
     </div>
 
     <div class="container" style="width:80%; height:50%;">
@@ -71,6 +76,7 @@
       <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
       Apply as Reserve
     </button>
+
   </div>
 
 </div>

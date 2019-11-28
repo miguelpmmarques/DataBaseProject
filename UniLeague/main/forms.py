@@ -9,6 +9,7 @@ from .models import Tournament
 from .models import Team
 from .models import Position
 from .models import Goal
+from .models import Result
 
 
 class CustomUserForm(UserCreationForm):

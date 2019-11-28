@@ -10,6 +10,8 @@ function main() {
     const activate_user = document.getElementById("activate_user");
     activate_user.addEventListener("click", function(e) {
         activateThisUser(e);
+        console.log("here");
+        erase_not_button(e);
     })
 }
 
@@ -24,7 +26,9 @@ function activateThisUser(e) {
     }
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     try {
+
       console.log(activate_user.name);
+
         fetch(`${window.location.origin}/users/rest/${activate_user.name}/`, {
             method: "PATCH",
             credentials: "include",
@@ -37,9 +41,11 @@ function activateThisUser(e) {
             body: JSON.stringify(reqData),
         }).then(response => {
             response.json().then(data => {
-              console.log(activate_user.name);
+
+                console.log(activate_user.name);
                 console.log("Data:", data);
                 this.loading = false;
+                window.location.href = ""
             });
         });
     } catch (e) {
@@ -49,3 +55,36 @@ function activateThisUser(e) {
         }, this.loadInterval);
     }
 }
+
+function erase_not_button(e) {
+    var not = document.getElementById("not");
+    const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
+    var reqData = {
+        html: ""
+    }
+    try {
+        fetch(`${window.location.origin}/notifications/rest/${not.name}/`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "X-CSRFToken": csrf_token,
+                "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(reqData),
+        }).then(response => {
+            response.json().then(data => {
+                console.log("Data:", data);
+                this.loading = false;
+            });
+        });
+    } catch (e) {
+        console.log(e, "erro");
+        setTimeout(() => {
+            erase_not_button();
+        }, this.loadInterval);
+    }
+
+}
+
