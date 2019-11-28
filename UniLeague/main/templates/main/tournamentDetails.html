@@ -1,31 +1,77 @@
 {% extends 'main/navbar.html' %}
 {% load static %}
 
+
 {% block body %}
+{% block imports %}
 <script src="{% static 'js/tournamentDetails.js' %}"></script>
-{% if tournament %}
-<h1>Tournament: {{tournament.name}}</h1>
-<h1>Manager: {{tournament.tournament_manager}}</h1>
+{% endblock %}
+{% csrf_token %}
+{% if messages %}
+  {% for men in messages %}
+  <div class="alert alert-success" role="alert">
+    {{men}}
+  </div>
+  {% endfor%}
 {% endif %}
-<table class="table">
-    <thead>
-        <tr>
+<div class="row">
+  <div class="col-sm-3 mt-4">
+    {% if tournament %}
+    <h1>Tournament: {{tournament.name}}</h1>
+    <h1>Manager: {{tournament.tournament_manager}}</h1>
+    {% endif %}
+    <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
+      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+      Tournament Calendar
+    </button>
+
+  </div>
+
+  <div class="col-sm-9">
+
+    <div class="container" style="width:80%; height:50%;">
+
+      <table class="table table-striped table-dark mt-4">
+        <thead>
+          <tr>
             <th scope="col">#</th>
             <th scope="col">Team Name</th>
             <th scope="col">Points</th>
+            <th scope="col">Wins</th>
+            <th scope="col">Ties</th>
+            <th scope="col">Losses</th>
             <th scope="col">Goals Scored</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for team in teams %}
-        <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
+            <th scope="col">Goals Conceded</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for team in teams %}
+          <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
             <th scope="row">{{ forloop.counter }}</th>
+
             <td>{{team.name}}</td>
             <td>{{team.points}}</td>
+            <td>{{team.games_won}}</td>
+            <td>{{team.tied_games}}</td>
+            <td>{{team.games_lost}}</td>
             <td>{{team.goals_scored}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <td>{{team.goals_conceded}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
+
+    </div>
+
+    <div class="container" style="width:80%; height:50%;">
+
+    </div>
+    <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
+      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+      Apply as Reserve
+    </button>
+  </div>
+
+</div>
 {% endblock %}

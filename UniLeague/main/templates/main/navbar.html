@@ -10,7 +10,7 @@
 
     {% fontawesome_5_static %}
     <meta charset="utf-8">
-
+    <script src="{% static 'js/activateUser.js' %}"></script>
     <script src="{% static 'js/changeDivContent.js' %}"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -18,9 +18,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'CSS/extraClasses.css' %}">
     <!-- <link rel="stylesheet" type="text/css" href="../css/mainMenu_user.css"> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     {% block imports %}
-
     {% endblock %}
 
 </head>
@@ -42,10 +44,33 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/teams/list/"> Teams </a>
                 </li>
-                {% if user.is_authenticated %}
-                {% if user.team_set.all %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/teams/profile/captain/"> My Team </a>
+                    <a class="nav-link text-white" href="/games/calendar/all/0/"> All Games </a>
+                </li>
+
+                {% if user.is_authenticated %}
+                {% if user.teamuser_set.all %}
+                <li class="nav-item">
+
+                    <div class="dropdown">
+                        <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Teams
+                            <span class="caret"></span></button>
+                        <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
+                            {%for elem in user.teamuser_set.all %}
+                            <li><a class="text-muted" href="/teams/profile/{{elem.team.id}}/">{{elem.team.name}}
+                                    {% if user == elem.player and elem.isCaptain %}
+                                    (c)
+                                    {% endif %}
+                                </a></li>
+                            {% endfor%}
+
+                            <div class="dropdown-divider"></div>
+                            <li><a class="text-muted" href="/teams/create/">Create Team</a></li>
+
+                        </ul>
+                    </div>
+
+                    <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
                 {% else %}
                 <li class="nav-item">
@@ -54,24 +79,50 @@
                 {% endif %}
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/users/goToTeam/"> Go to Team from PLayer </a>
+                    <a class="nav-link text-white" href="/users/goToTeam/"> Go to Team from Player </a>
                 </li>
                 {% endif %}
                 {% if user.is_authenticated %}
-                {% if user.isTournamentManager %}
+                <p>{{user.tournaments_set.all}}</p>
+
+                {% if user.tournaments_set.all or user.teamuser_set.all %}
+
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="">My Tournaments </a>
+
+
+                    <div class="dropdown">
+                        <button class="btn myTeamNav dropdown-toggle nav-link text-white" type="button" data-toggle="dropdown">My Tournaments
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu " role="menu" aria-labelledby="menu1">
+
+                            {%for elem in user.tournaments_set.all %}
+                            <li><a class="text-muted" href="/tournaments/{{elem.tournament.id}}/">{{elem.tournament.name}}</a></li>
+                            {% endfor%}
+
+                            {%for elem in user.teamuser_set.all %}
+                            <li><a class="text-muted" href="/tournaments/{{elem.team.tournament.id}}/">{{elem.team.tournament.name}}</a></li>
+                            {% endfor%}
+
+
+                            <div class="dropdown-divider"></div>
+                            {% if user.isTournamentManager%}
+                            <li><a class="text-muted" href="/tournaments/create/">Create Tournament</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <!-- <a class="nav-link text-white" href="/teams/profile/captain/"> My Teams </a> -->
                 </li>
                 {% else %}
+                {% if user.isTournamentManager %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/tournaments/create/">Create Tournaments </a>
+                    <a class="nav-link text-white" href="/tournaments/create/"> Create Tournament </a>
                 </li>
                 {% endif %}
 
-
-
-
                 {% endif %}
+                {% endif %}
+
                 <li class="nav-item">
 
                     <a class="nav-link text-white" href="/help/"> Help </a>
@@ -79,6 +130,14 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/notifications/"> Notifications <span class="dot text-center">{{user.notifications_set.count}}</span> </a>
+                </li>
+                {% endif %}
+
+
                 <li>
                     {% if user.is_authenticated %}
                     <a class="nav-link text-white" href="/users/profile/{{user.pk}}"> Profile </a>
@@ -98,12 +157,6 @@
     </nav>
     {% block body %}
     {% endblock %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 
-
 </html>
-
-

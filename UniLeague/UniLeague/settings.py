@@ -45,6 +45,9 @@ OPTIONS = {
 
 ALLOWED_HOSTS = []
 
+import djcelery
+
+djcelery.setup_loader()
 
 DJANGO_NATIVE_APPS = [
     "django.contrib.admin",
@@ -62,8 +65,10 @@ DEVELOPED_APPS = ["main"]
 THIRD_PARTY_APPS = [
     "celery",
     "django_celery_results",
+    "django_celery_beat",
     "phonenumber_field",
     "fontawesome_5",
+    "djcelery",
 ]
 
 INSTALLED_APPS = (
@@ -132,8 +137,8 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 CELERY_RESULT_BACKEND = "django-db"
-# CELERY_BROKER_URL = "redis://localhost:6379"
-# CELERY_BEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 
 CELERY_WORKER_DISABLE_RATE_LIMITS = True
 CELERY_SEND_TASK_ERROR_EMAILS = True
@@ -142,10 +147,19 @@ CELERY_TASK_ERROR_WHITELIST = ()
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = "Europe/Lisbon"
 
-CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = False
 CELERY_TASK_EAGER_PROPAGATES = True
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
+
+"""CELERY_BEAT_SCHEDULE = {
+    "erase-timeslots-every-day": {
+        "task": "erase_timeslots",
+        # There are 4 ways we can handle time, read further
+        "schedule": 1,
+        # If you're using any arguments
+    }
+}"""
 
 LANGUAGE_CODE = "en-us"
 

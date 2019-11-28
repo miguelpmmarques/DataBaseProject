@@ -1,8 +1,14 @@
 {% extends "main/navbar.html" %}
+{% load fontawesome_5 %}
 {% load static %}
+
+{% block imports %}
+{% fontawesome_5_static %}
+{% endblock %}
 
 <body>
     {% block body %}
+    {% csrf_token %}
     <script src="{% static 'js/adminMenu.js' %}"></script>
     {% if users %}
     <br><br>
@@ -15,22 +21,40 @@
             </form>
             <br>
             <ul id="ul_users" class="list-group margin" style="width: 29vw; height: 40vw; overflow: auto;">
+                <button id="activate_users" class="btn btn-dark">ACTIVATE SELECTED USERS</button>
+                <button id="deactivate_users" class="btn btn-dark">DEACTIVATE SELECTED USERS</button>
                 {% for elem in users %}
-                <li class="groupList list-group-item">{{elem.first_name}} {{elem.last_name}} (
-                    {% if elem.isCaptain %}
-                    Captain
-                    {% elif elem.isTournamentManager %}
+
+                <li class="groupList list-group-item" name="users_li" id="{{elem.id}}">{{elem.first_name}} {{elem.last_name}}
+
+
+                    {% if elem.isTournamentManager %}
                     Tournament Manager
                     {% else %}
-                    Player
+                    {% for team_user in elem.teamuser_set.all %}
+                    {% if team_user.isCaptain %}
+                    Captain in Team {team_user.team.name}
+                    {% else%}
+                    Player in Team {team_user.team.name}
                     {% endif %}
-                    )
+                    {% endfor %}
+                    {% endif %}
+                    {% if elem.is_active %}
+                    <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList"><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i"></i></button>
+
+                    <input type="checkbox" id="{{elem.id}}" name="act" data-toggle="tooltip" title="Check to Deactivate User"></input>
+                    {% else %}
+                    <button type="button" name="{{elem.id}}" class="float-right" data-toggle="tooltip" title="Click to Add player to BlackList" disabled><i class="fas fa-ban" name="{{elem.id}}" id="blacklist_i" deactivated></i></button>
+                    <input type="checkbox" id="{{elem.id}}" name="deact" data-toggle="tooltip" title="Check to Activate User"></input>
+
+                    {% endif %}
                 </li>
+
                 {% endfor %}
             </ul>
         </div>
         {% endif %}
-        {% if tournaments %}
+
         <div class="col-sm-4 text-center">
             <h1>Tournaments:</h1>
             <br>
@@ -41,12 +65,12 @@
             <br>
             <ul id="ul_tournaments" class="list-group margin" style="width: 29vw; height: 40vh; overflow: auto;">
                 {% for tournament in tournaments %}
-                <li class="groupList list-group-item">{{tournament.name}}</li>
+                <li class="groupList list-group-item" onclick="window.location.href='/tournaments/{{tournament.id}}/'">{{tournament.name}}</li>
                 {% endfor %}
             </ul>
         </div>
-        {% endif %}
-        {% if teams %}
+
+
         <div class="col-sm-4 text-center">
             <h1>Teams:</h1>
             <br>
@@ -57,12 +81,12 @@
             <br>
             <ul id="ul_teams" class="list-group margin" style="width: 29vw; height: 60vh; overflow: auto;">
                 {% for team in teams %}
-                <li class="groupList list-group-item">{{team.name}}</li>
+                <li class="groupList list-group-item" onclick="window.location.href='/teams/profile/{{team.id}}/'"><a>{{team.name}}</a></li>
                 {% endfor %}
             </ul>
         </div>
     </div>
-    {% endif %}
+
     {% endblock %}
 
 </body>

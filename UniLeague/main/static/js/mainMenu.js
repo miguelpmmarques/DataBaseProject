@@ -25,29 +25,9 @@ function createChildren(text, ul, has_icon = true) {
 }
 
 function main() {
-  console.log("Encontrou o js");
-    const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
-
-    const activate_user = document.getElementById("activate_users");
-    activate_users.addEventListener("click", function(e) {
-        activateMultipleUsers(e, true);
-    })
-    const deactivate_user = document.getElementById("deactivate_users");
-    deactivate_users.addEventListener("click", function(e) {
-        activateMultipleUsers(e, false);
-    })
-
-    $.ajaxSetup({
-
-        headers: {
-            "X-CSRFToken": csrf_token
-        }
-    });
     var lis = document.getElementsByName("users_li");
     for (elem of lis) {
         elem.addEventListener("click", function(e) {
-            console.log("CURRR===", e.currentTarget);
-            console.log("TAR===", e.target.disabled);
 
             if (e.target.getAttribute("name") === "users_li") {
                 window.location.href = `/users/profile/${e.currentTarget.id}/`
@@ -55,7 +35,6 @@ function main() {
             } else if (e.target.disabled === undefined) {
 
                 $(function() {
-                    console.log("EE==", e);
 
                     var data = JSON.stringify({
                         is_active: false,
@@ -79,12 +58,10 @@ function main() {
             }
         });
     }
-    $(document).ready(function() {
-        $('[data-toggle="tooltip"]').tooltip();
-    });
-
-
     var success_helper = function(e, type) {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
         var ul = document.getElementById(`ul_${type}`)
         var elements = ul.getElementsByTagName("li");
         var length = elements.length;
@@ -92,22 +69,33 @@ function main() {
             console.log(i);
             elements[0].remove();
         }
-        if (type == "users") {
-            for (elem of e) {
-                let extra;
-                if (e.isTournamentManager == true) {
-                    extra = "(Tournament Manager)";
-                } else if (e.isCaptain == true) {
-                    extra = "(Captain)";
-                } else {
-                    extra = "(Player)";
-                }
-                createChildren(`${elem.first_name} ${elem.last_name} ${extra}`, ul);
+        if (type == "teams") {
+          for (elem of e) {
+            console.log(elem.teamuser_set.length);
+            if (elem.teamuser_set.length < 16) {
+              createChildren(`${elem.name} has ${elem.teamuser_set.length}/16 players`, ul, false);
+
             }
+
+
+          }
         } else {
 
             for (elem of e) {
-                createChildren(`${elem.name}`, ul, false);
+              console.log(elem);
+                var date = new Date(elem.beginTournament)
+                let hour;
+                let daStuff;
+                if (date.getHours() >= 12){
+                  hour = date.getHours() -12
+                  daStuff = " p.m."
+                }else {
+                  hour = date.getHours()
+                  daStuff = " a.m."
+                }
+                strTOSend= monthNames[date.getMonth()]+". "+date.getDate()+", "+date.getFullYear()+", "+hour+":"+date.getMinutes()+daStuff
+
+                createChildren(`${elem.name} starts in `+strTOSend, ul, false);
             }
         }
     }
@@ -115,7 +103,6 @@ function main() {
         console.log(response_data);;
     }
     $("form").submit(function(e) {
-      console.log("BATEULELELELELELE");
         e.preventDefault();
         var type = this.id;
         if (type !== "blacklist" &&
@@ -138,47 +125,4 @@ function main() {
         }
 
     })
-
-}
-
-function activateMultipleUsers(e, param) {
-    let users_to_activate = document.getElementsByTagName("input");
-    console.log("users_to_activate");
-    console.log("users===", users_to_activate);
-    this.loading = true;
-    let reqData = [];
-    for (elem of users_to_activate) {
-        if (elem.id && elem.checked) {
-            let obj = {};
-            obj[String(elem.id)] = {
-                is_active: param
-            };
-            reqData.push(obj)
-        }
-    }
-    console.log("OLOLE:::>", reqData);
-    const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
-    try {
-        fetch(`http://127.0.0.1:8000/users/rest/list/patch/`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: {
-                "X-CSRFToken": csrf_token,
-                "X-Requested-With": "XMLHttpRequest",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(reqData),
-        }).then(response => {
-            response.json().then(data => {
-                window.location.href = "";
-                this.loading = false;
-            });
-        });
-    } catch (e) {
-        console.log(e, "erro");
-        setTimeout(() => {
-            patch_user_data();
-        }, this.loadInterval);
-    }
-
 }

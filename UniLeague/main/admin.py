@@ -11,6 +11,10 @@ from .models import TimeSlot
 from .models import Game
 from .models import GameWeekDay
 from .models import Day
+from .models import TeamUser
+from .models import Notifications
+from .models import RegularSlot
+from .models import Goal
 
 
 # Register your models here.
@@ -23,11 +27,9 @@ class CustomUserAdmin(admin.ModelAdmin):
         "citizen_card",
         "email",
         "phone",
-        "budget",
         "hierarchy",
         "image",
         "isConfirmed",
-        "isCaptain",
         "isTournamentManager",
         "is_superuser",
         "is_active",
@@ -46,3 +48,7 @@ admin.site.register(TimeSlot)
 admin.site.register(Game)
 admin.site.register(GameWeekDay)
 admin.site.register(Day)
+admin.site.register(TeamUser)
+admin.site.register(Notifications)
+admin.site.register(RegularSlot)
+admin.site.register(Goal)

@@ -9,8 +9,19 @@
 {% csrf_token %}
 <h1>Unactivated Users</h1>
 <br>
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+        {% endfor %}
+</ul>
+{% else %}
 {% for user in users %}
+{% if user.hierarchy == 0 %}
+<h2>{{user.first_name}} {{user.last_name}} -- BANNED</h2>
+{% else %}
 <h2>{{user.first_name}} {{user.last_name}}</h2>
+{% endif %}
 <p>
     {% for k,v in user.items %}
     {% ifnotequal k 'first_name' %}
@@ -22,5 +33,6 @@
     <input type="checkbox" id="{{user.id}}"> Activate</input>
 </p>
 {% endfor %}
-<button id="activate_users">ACTIVATE</button>
+<button id="activate_users">ACTIVATE SELECTED USERS</button>
+{% endif %}
 {% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'main/navbar.html' %}
+{% load static %}
+
+
+{% block body %}
+{% csrf_token %}
+<script src="{% static 'js/createGames.js' %}"></script>
+<button id="{{tournament.pk}}" name="createGames"> Create Games </button>
+{% endblock %}
