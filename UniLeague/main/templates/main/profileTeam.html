@@ -91,13 +91,13 @@
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                 View user info
                             </button>
-                            <button class="float-none" id="leave" name="{{elem.pk}}"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+                            <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class="fa fa-user-times" aria-hidden="true"></i></button>
                             {% elif thisUser == elem %}
                             <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                 Request captain to change position
                             </button>
-                            <button class="float-right" id="leave" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true"></i></button>
+                            <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true"></i></button>
                             {% endif %}
                         </li>
                         {% endfor %}
@@ -112,14 +112,9 @@
             <div class="card bg-dark col-lg-5 float-left text-center card h-15">
                 <h1>Captain: {{captain.username}}</b>
                     {% if not user in players or not user.is_authenticated%}
-                    <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/login/';">
-                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                        Join Team
-                    </button>
-                    {% else %}
                     <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
                         <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                        Leave Team
+                        Join Team
                     </button>
                     {% endif %}
                 </h1>

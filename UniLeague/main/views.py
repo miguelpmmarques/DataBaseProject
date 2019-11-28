@@ -500,10 +500,16 @@ class LandingPageView(generic.TemplateView):
                 .order_by("-q_count")
                 .filter(q_count__lte=15)
             )
+            teamCaptain = TeamUser.objects.filter(isCaptain=True)
             return render(
                 request,
                 template_name=self.template_name,
-                context={"teams": teams, "tournaments": tournaments, "games": games},
+                context={
+                    "teamCaptain": teamCaptain,
+                    "teams": teams,
+                    "tournaments": tournaments,
+                    "games": games,
+                },
             )
 
         except (Tournament.DoesNotExist, Team.DoesNotExist) as err:
@@ -931,7 +937,6 @@ class CreateGames(generic.CreateView):
         return
 
 
-
 class RestResults(generics.RetrieveUpdateAPIView):
     queryset = Result.objects.all()
     serializer_class = ResultSerializer
@@ -1050,7 +1055,6 @@ class replaceMember(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
-
 class addReserve(generics.RetrieveUpdateAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
@@ -1069,14 +1073,14 @@ class addReserve(generics.RetrieveUpdateAPIView):
         )
 
         Notifications.objects.create(
-            title="NEW RESERVE IN YOUT TOURNAMENT "+instance.name,
+            title="NEW RESERVE IN YOUT TOURNAMENT " + instance.name,
             description="<h3>The user "
             + request.user.username
             + " as know as "
             + request.user.first_name
             + " "
             + request.user.last_name
-            +" is a new reserve for your tournament.</h3>",
+            + " is a new reserve for your tournament.</h3>",
             user_send=instance.tournament_manager,
             origin="System",
         ).save()
@@ -1086,6 +1090,7 @@ class addReserve(generics.RetrieveUpdateAPIView):
         if getattr(instance, "_prefetched_objects_cache", None):
             instance._prefetched_objects_cache = {}
         return Response("Done")
+
 
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
@@ -1492,7 +1497,6 @@ class TournamentDetailsView(generic.View):
                     )
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
-
             teams.reverse()
             return render(
                 request,
@@ -1519,23 +1523,21 @@ class TournamentDetailsView(generic.View):
             first_res = res_set.first()
             second_res = res_set.last()
 
-
-            if first_res == None or second_res == None:
-                return games_won, goals_scored, tied_games, games_lost, goals_conceded
             print("fr===", first_res)
             print("sr===", second_res)
+            if first_res == None or second_res == None:
+                return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
             if (
-                first_res.game.home_team.name == team.name
-                and second_res.game.home_team.name == team.name
+                first_res.game.home_team == team.name
+                and second_res.game.home_team == team.name
             ):
                 home = True
             elif (
-                first_res.game.away_team.name == team.name
-                and second_res.game.away_team.name == team.name
+                first_res.game.away_team == team.name
+                and second_res.game.away_team == team.name
             ):
                 away = True
-
             if home or away:
                 if (
                     first_res.home_score == second_res.home_score
@@ -1559,8 +1561,6 @@ class TournamentDetailsView(generic.View):
                             games_lost += 1
                         else:
                             tied_games += 1
-
-        print(team.name, "games won", games_won)
         return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
     def get_top_scorers(self, tournament):
@@ -1719,7 +1719,6 @@ class GameView(generics.CreateAPIView):
     model = Game
     template_name = "main/game.html"
 
-
     def get_form(self, pk, is_home_captain, is_away_captain, form_class=None):
         """Return an instance of the form to be used in this view."""
 
@@ -1766,7 +1765,6 @@ class GameView(generics.CreateAPIView):
             )
 
         return StepForm, form2
-
 
     def get(self, request, pk):
         try:
@@ -1846,7 +1844,6 @@ class GameView(generics.CreateAPIView):
                         template_name=self.template_name,
                         context={
                             "game": selected_game,
-
                             "form": form,
                             "form2": form2,
                             "is_home_captain": is_home_captain,

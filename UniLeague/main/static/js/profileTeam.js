@@ -16,13 +16,17 @@ function main() {
     });
     console.log("ATAO?");
     get_games_next_week();
-    var leave = document.getElementById("leave");
-    leave.addEventListener("click", function(e) {
-        var r = confirm("Are you certain you want to leave this team?!");
-        if (r == true) {
-            leaveTeam(leave);
-        }
-    });
+
+    var leave = document.getElementsByClassName("float-none leave");
+    console.log(leave);
+    for (var i = 0; i < leave.length; i++) {
+      leave[i].addEventListener("click",function(e) {
+          e.preventDefault();
+          leaveTeam(this);
+      })
+    }
+
+    try {
     var options = document.getElementById("exampleFormControlSelect1");
     var captain = options.value;
     var changeCaptain = document.getElementById("changeCaptain");
@@ -61,6 +65,10 @@ function main() {
         e.preventDefault();
         sendNotifications(this.id);
     });
+  }
+  catch(err) {
+    console.log("not captain");
+  }
 }
 
 function sendNotifications(teampk) {
@@ -214,28 +222,7 @@ function leaveTeam(leave) {
             type: 'DELETE',
             timeout: 3000,
             success: function(d) {
-                console.log("HERER BITCH==", d);
-                $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
-                    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-                    for (var i = 0; i < changePosition.length; i++) {
-
-                        changePosition[i].addEventListener("click", function(e) {
-                            e.preventDefault();
-                            changePositionSubs(this.id.split("|"));
-
-                        });
-                    }
-                    var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-                    for (var i = 0; i < saveInfo.length; i++) {
-
-                        saveInfo[i].addEventListener("click", function(e) {
-                            e.preventDefault();
-                            saveBudgetAbsences(this.id);
-
-                        });
-                    }
-
-                });
+              window.location.href = ""
             },
         })
         .fail(function() {
