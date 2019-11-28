@@ -1086,7 +1086,7 @@ class addReserve(generics.RetrieveUpdateAPIView):
         if getattr(instance, "_prefetched_objects_cache", None):
             instance._prefetched_objects_cache = {}
         return Response("Done")
-    
+
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
     serializer_class = TeamUserSerializer
@@ -1492,6 +1492,7 @@ class TournamentDetailsView(generic.View):
                     )
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
+
             teams.reverse()
             return render(
                 request,
@@ -1519,21 +1520,22 @@ class TournamentDetailsView(generic.View):
             second_res = res_set.last()
 
 
-            print("fr===", first_res)
-            print("sr===", second_res)
             if first_res == None or second_res == None:
                 return games_won, goals_scored, tied_games, games_lost, goals_conceded
+            print("fr===", first_res)
+            print("sr===", second_res)
 
             if (
-                first_res.game.home_team == team.name
-                and second_res.game.home_team == team.name
+                first_res.game.home_team.name == team.name
+                and second_res.game.home_team.name == team.name
             ):
                 home = True
             elif (
-                first_res.game.away_team == team.name
-                and second_res.game.away_team == team.name
+                first_res.game.away_team.name == team.name
+                and second_res.game.away_team.name == team.name
             ):
                 away = True
+
             if home or away:
                 if (
                     first_res.home_score == second_res.home_score
@@ -1557,6 +1559,8 @@ class TournamentDetailsView(generic.View):
                             games_lost += 1
                         else:
                             tied_games += 1
+
+        print(team.name, "games won", games_won)
         return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
     def get_top_scorers(self, tournament):
