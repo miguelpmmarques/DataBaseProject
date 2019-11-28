@@ -18,6 +18,7 @@ urlpatterns = [
     path("logout/", views.log_out_request, name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("notifications/", views.NotificationsView.as_view(), name="notification"),
+    path("notifications/rest/<int:pk>/", views.NotificationsRestView.as_view()),
     path("notifyteam/<int:teampk>/", views.notifyTeam.as_view(), name="notification"),
     path(
         "replaceMember/<int:teampk>/",
@@ -81,6 +82,8 @@ urlpatterns = [
         views.CreateGames.as_view(),
         name="generate-games",
     ),
+    path("results/<int:pk>/", views.RestResults.as_view()),
+    path("goals/<int:pk>/", views.RestGoals.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # path("teams/<int:pk>/", views.),

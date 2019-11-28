@@ -35,6 +35,7 @@
         <!-- home_team logo and name -->
         <div class="my-auto d-flex justify-content-center">
             {% if result %}
+
             <ul>
                 {% for elem in result.goal_set.all %}
                 {% if elem.is_home %}
@@ -92,6 +93,8 @@
     <div class="input-group-prepend">
         <span class="input-group-text bg-dark" for="addNewGoal" style='border: 2px solid black; color:white;'> Add New Goal</span>
         <button class="input-group-text bg-light" id="addNewGoal" name="addNewGoal"><i class="fas fa-plus" style="color:#000000"></i></button>
+        <span class="input-group-text bg-dark" for="removeGoal" style='border: 2px solid black; color:white;'> Remove Goal</span>
+        <button class="input-group-text bg-light" id="removeGoal" name="removeGoal"><i class="fas fa-minus" style="color:#000000"></i></button>
     </div>
     <div class="col">
         <form id="home_form" method="post" hidden>
@@ -128,6 +131,34 @@
                 <button type"submit">Confirm</button>
             </div>
         </form>
+        {% if result %}
+        <form id="rm_form" method="post" name="{{result.pk}}" hidden>
+            {% else %}
+            <form id="rm_form" method="post" name="" hidden>
+                {% endif %}
+
+                {% csrf_token %}
+                <div class="col-xs-5">
+                    {% for elem in form2 %}
+                    <div class="col-xs-2">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-minus" style="color:#FFFFFF"></i></span>
+                                <label class="input-group-text bg-dark text-white" style='border: 2px solid black'>Goals</label>
+                            </div>
+                            <select class="custom-select" id="goals_rm">
+                                {% for item in elem %}
+                                {{item}}
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <button type"submit">Remove</button>
+                </div>
+            </form>
+
     </div>
     <div class="col">
     </div>

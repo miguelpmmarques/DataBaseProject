@@ -74,6 +74,8 @@ from .serializers import PositionSerializer
 from .serializers import TeamUserSerializer
 from .serializers import GoalSerializer
 from .serializers import TimeSlotSerializer
+from .serializers import NotificationSerializer
+from .serializers import ResultSerializer
 
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
@@ -99,6 +101,7 @@ from .models import Position
 from .models import Result
 from .models import Game
 from .models import TimeSlot
+from .models import Goal
 
 from .utils import Calendar
 
@@ -108,6 +111,12 @@ from django.views.generic.dates import YearArchiveView
 TIME_SLOT_DURATION = timedelta(minutes=90)
 
 # TINYURL.COM/SISTEMAS19
+
+
+class NotificationsRestView(generics.RetrieveUpdateAPIView):
+    queryset = Notifications.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class BaseCalendarView(YearArchiveView):
@@ -920,6 +929,32 @@ class CreateGames(generic.CreateView):
         return
 
 
+class RestResults(generics.RetrieveUpdateAPIView):
+    queryset = Result.objects.all()
+    serializer_class = ResultSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        try:
+            with transaction.atomic():
+                instance.home_score = instance.goal_set.filter(is_home=True).count()
+                instance.away_score = instance.goal_set.filter(is_away=True).count()
+                instance.save()
+        except IntegrityError:
+            pass
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+
 class RestTournaments(generics.RetrieveUpdateAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
@@ -1273,6 +1308,12 @@ class RestUsersListPatch(APIView):
             raise exp
 
 
+class RestGoals(generics.DestroyAPIView):
+    queryset = Goal.objects.all()
+    serializer_class = GoalSerializer
+    permission_classes = [IsAuthenticated]
+
+
 class RestUsersList(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -1437,12 +1478,20 @@ class TournamentDetailsView(generic.View):
             first_res = res_set.first()
             second_res = res_set.last()
 
+            print("fr===", first_res)
+            print("sr===", second_res)
             if first_res == None or second_res == None:
                 return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
-            if first_res.home_team == team.name and second_res.home_team == team.name:
+            if (
+                first_res.game.home_team == team.name
+                and second_res.game.home_team == team.name
+            ):
                 home = True
-            elif first_res.away_team == team.name and second_res.away_team == team.name:
+            elif (
+                first_res.game.away_team == team.name
+                and second_res.game.away_team == team.name
+            ):
                 away = True
             if home or away:
                 if (
@@ -1625,13 +1674,18 @@ class GameView(generics.CreateAPIView):
     model = Game
     template_name = "main/game.html"
 
-    def get_form(self, pk, form_class=None):
+    def get_form(self, pk, is_home_captain, is_away_captain, form_class=None):
         """Return an instance of the form to be used in this view."""
 
-        form_class = self.get_form_class(pk)
-        return form_class()
+        form_class, form_class2 = self.get_form_class(
+            pk, is_home_captain, is_away_captain
+        )
+        if form_class2:
+            return form_class(), form_class2()
+        else:
+            return form_class(), form_class2
 
-    def get_form_class(self, pk):
+    def get_form_class(self, pk, is_home_captain, is_away_captain):
         """
         The form can only show the workouts belonging to the user.
 
@@ -1641,6 +1695,21 @@ class GameView(generics.CreateAPIView):
         game = Game.objects.get(pk=pk)
         home_team = game.home_team
         away_team = game.away_team
+        q_set = None
+        if is_home_captain:
+            q_set = Goal.objects.filter(result__game__home_team__pk=home_team.pk)
+        elif is_away_captain:
+            q_set = Goal.objects.filter(result__game__away_team__pk=away_team.pk)
+
+        if q_set:
+
+            class StepFormRemoveGoals(forms.Form):
+                goal_set = forms.ModelChoiceField(queryset=q_set)
+
+            form2 = StepFormRemoveGoals
+
+        else:
+            form2 = None
 
         class StepForm(GoalForm):
             scorer = forms.ModelChoiceField(
@@ -1649,7 +1718,7 @@ class GameView(generics.CreateAPIView):
                 )
             )
 
-        return StepForm
+        return StepForm, form2
 
     def get(self, request, pk):
         try:
@@ -1662,7 +1731,7 @@ class GameView(generics.CreateAPIView):
         if selected_game:
             today = timezone.now()
 
-            done = selected_game.timeslot.start_time < today
+            done = selected_game.timeslot.start_time > today
             if done:
                 final_score = selected_game.result_set.all()
                 if final_score.first() == final_score.last():
@@ -1721,12 +1790,14 @@ class GameView(generics.CreateAPIView):
                         ).first()
                     else:
                         result = None
+                    form, form2 = self.get_form(pk, is_home_captain, is_away_captain)
                     return render(
                         request,
                         template_name=self.template_name,
                         context={
                             "game": selected_game,
-                            "form": self.get_form(pk),
+                            "form": form,
+                            "form2": form2,
                             "is_home_captain": is_home_captain,
                             "is_away_captain": is_away_captain,
                             "result": result,
@@ -1741,7 +1812,6 @@ class GameView(generics.CreateAPIView):
         """
         Overriting the default post made by html form
         """
-        print("here heyhey")
         try:
             pk = int(pk)
             selected_game = Game.objects.filter(pk=pk).first()
@@ -1789,13 +1859,14 @@ class GameView(generics.CreateAPIView):
                 if home_player or away_player:
                     # incrementing and saving the result accordingly
                     if home_player:
-                        result.home_score += 1
                         goal.is_home = True
                     else:
-                        result.away_score += 1
                         goal.is_away = True
                     goal.save()
+                    result.home_score = result.goal_set.filter(is_home=True).count()
+                    result.away_score = result.goal_set.filter(is_away=True).count()
                     result.save()
+
                     return Response("success")
                 else:
                     messages.error(

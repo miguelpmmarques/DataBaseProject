@@ -12,6 +12,8 @@ from .models import TeamUser
 from .models import Goal
 from .models import TimeSlot
 from .models import Game
+from .models import Notifications
+from .models import Result
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -93,6 +95,12 @@ class GoalSerializer(serializers.ModelSerializer):
         fields = ("time", "scorer")
 
 
+class ResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Result
+        fields = "__all__"
+
+
 class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
@@ -104,4 +112,10 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TimeSlot
+        fields = "__all__"
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notifications
         fields = "__all__"

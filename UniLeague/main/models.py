@@ -125,7 +125,7 @@ class Notifications(BaseAbstractModel):
     sendDate = models.DateTimeField(auto_now_add=True, null=True)
     user_send = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
     origin = models.CharField(max_length=512, unique=False, null=True, blank=False)
-    html = models.TextField()
+    html = models.TextField(default="", blank=True)
 
     class Meta:
         db_table = "Notifications"
@@ -312,6 +312,7 @@ class Goal(BaseAbstractModel):
         db_table = "Goal"
         verbose_name = "Golo"
         verbose_name_plural = "Golos"
+        ordering = ["-time"]
 
     def __str__(self):
         return str(self.scorer) + " (" + str(self.time) + "')"
