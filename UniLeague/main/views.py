@@ -293,7 +293,7 @@ class NotificationsView(generic.DetailView):
                 template_name=self.template_name,
                 context={"notifications": notification},
             )
-        return HttpResponseRedirect(reverse("main:login"))
+        return HttpResponseRedirect(reverse("main:login-view"))
 
 
 class ProfileView(generic.DetailView):
@@ -577,13 +577,15 @@ class LoginView(generic.CreateView):
             messages.error(request, "Logged in successfully")
             return HttpResponseRedirect(data.get("next", "/"))
         else:
-            messages.error(request, "Invalid username or password")
-            return HttpResponseRedirect("")
+            messages.error(
+                request,
+                "Login unsuccessful. Please enter the right password and username. Confirm your email if you haven't yet done so.",
+            )
+            return HttpResponseRedirect(reverse("main:login-view"))
 
 
 class RegisterView(generic.CreateView):
     form_class = CustomUserForm
-    success_url = reverse_lazy("login")
     template_name = "main/register.html"
 
     def post(self, request):
@@ -613,12 +615,12 @@ class RegisterView(generic.CreateView):
                 + user.first_name
                 + " "
                 + user.last_name
-                + " has registered and would like to become a member of Unileague</h3><br><h3>"
-                + "</h3> <button name="
-                + str(user.pk)
-                + " class='btn btn-light btn-outline-secondary' id='activate_user'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
+                + " has registered and would like to become a member of Unileague</h3><br><h3>",
                 user_send=superuser,
                 origin="System",
+                html="</h3> <button name="
+                + str(user.pk)
+                + " class='btn btn-light btn-outline-secondary' id='activate_user'><span id='spinner' class='spinner-border spinner-border-sm' hidden='true'></span>ACTIVATE</button>",
             ).save()
             Notifications.objects.create(
                 title="<h3>WELCOME TO UNILEAGUE",
@@ -645,9 +647,11 @@ class RegisterView(generic.CreateView):
             email = EmailMessage(mail_subject, message, to=[to_email])
             email.send()
             messages.error(request, "Confirm your account in your mail")
-            return HttpResponseRedirect("")
+            return HttpResponseRedirect(reverse("main:landing-page"))
+            for error in form.errors:
+                print("error===", error)
         messages.error(request, form.errors)
-        return HttpResponseRedirect(reverse("main:landing-page"))
+        return HttpResponseRedirect(reverse("main:register"))
 
 
 class HelpView(generic.TemplateView):
@@ -1197,9 +1201,10 @@ def activate(request, uidb64, token):
         user.isConfirmed = True
         host = request.get_host()
         ask_admin_for_permissions.apply_async((host, uid))
-        return HttpResponse(
-            "Thank you for your email confirmation. Now you can login your account."
+        messages.info(
+            request, "Confirmed. The Admin is now going to activate your account."
         )
+        return HttpResponseRedirect(reverse("main:landing-page"))
     else:
         return HttpResponse("Activation link is invalid!")
 

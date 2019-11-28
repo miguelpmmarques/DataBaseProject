@@ -64,7 +64,7 @@ def ask_admin_for_permissions(self, host, pk):
         admin = CustomUser.objects.filter(is_superuser=True).first()
         message = render_to_string(
             "main/email_activate_user.html",
-            {"admin": admin, "user": user, "domain": host + "/users/validate"},
+            {"admin": admin, "user": user, "domain": host},
         )
         email = EmailMessage(mail_subject, message, to=[admin.email])
         return email.send()

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 {% load static %}
-<html >
-  <head>
+<html>
+
+<head>
     <meta charset="utf-8">
     <title>Login</title>
 
@@ -10,14 +11,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="../static/CSS/extraClasses.css">
 
-  </head>
-  <body class="background text-white">
+</head>
+
+<body class="background text-white">
     {% if messages %}
-      {% for men in messages %}
-      <div class="alert alert-danger" role="alert">
+    {% for men in messages %}
+    <div class="alert alert-danger" role="alert">
         {{men}}
-      </div>
-      {% endfor%}
+    </div>
+    {% endfor%}
     {% endif %}
 
     <div class="row">
@@ -25,24 +27,24 @@
 
         <div class="col-4 m-auto  text-center">
 
-          <div class="container">
-            <img src="{% static 'assets/UniLeague_logo.png' %}" style="width:auto; height:300px;" alt="Responsive image"></a>
-          </div>
-          <form method="post" class="m-auto">
+            <div class="container">
+                <img src="{% static 'assets/UniLeague_logo.png' %}" style="width:auto; height:300px;" alt="Responsive image"></a>
+            </div>
+            <form method="post" class="m-auto">
 
-              {% csrf_token %}
-              <input type="text" name="username" autofocus required id="id_username" class="form-control m-auto text-center" placeholder="Username">
-              <input type="password" name="password" required id="id_password" class="form-control mt-3 text-center" placeholder="Password">
-              <button type="submit" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto;">Login</button>
+                {% csrf_token %}
+                <input type="text" name="username" autofocus required id="id_username" class="form-control m-auto text-center" placeholder="Username">
+                <input type="password" name="password" required id="id_password" class="form-control mt-3 text-center" placeholder="Password">
+                <button type="submit" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto;">Login</button>
 
-          </form>
+            </form>
 
-          <button type="button" onclick="window.location.href='/register'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Register</button>
-          <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+            <button type="button" onclick="window.location.href='/register'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Register</button>
+            <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
         </div>
 
-          <div class="col">
-          </div>
+        <div class="col">
+        </div>
     </div>
 
 
@@ -52,5 +54,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 
-  </body>
+</body>
+
 </html>

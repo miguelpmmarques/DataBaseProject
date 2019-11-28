@@ -24,7 +24,7 @@ urlpatterns = [
         views.replaceMember.as_view(),
         name="notification",
     ),
-    path("login/", views.LoginView.as_view(), name="login"),
+    path("login/", views.LoginView.as_view(), name="login-view"),
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("users/validate/<int:pk>/", views.validate, name="validate"),
     path("users/validate/", views.validateMultiple, name="validate_multiple"),

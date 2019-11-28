@@ -125,6 +125,7 @@ class Notifications(BaseAbstractModel):
     sendDate = models.DateTimeField(auto_now_add=True, null=True)
     user_send = models.ForeignKey(CustomUser, blank=True, on_delete=models.PROTECT)
     origin = models.CharField(max_length=512, unique=False, null=True, blank=False)
+    html = models.TextField()
 
     class Meta:
         db_table = "Notifications"
