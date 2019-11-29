@@ -33,10 +33,12 @@
 
                     </div>
                     <div class="card-body">
-                        <p class="card-text">E-mail: {{user.email}}</p>
-                        <p class="card-text">Budget: {{user.budget}}</p>
-                        <p class="card-text">Games: {{user.games}}</p>
-                        <p class="card-text">Goals: {{user.goals}}</p>
+                        <p class="card-text"><u><b>E-mail:</b> {{user.email}}</u></p>
+                        <p class="card-text"><u><b>Name:</b> {{user.first_name}} {{user.last_name}}</u></p>
+                        <p class="card-text"><u><b>Username:</b> {{user.username}}</u></p>
+                        <p class="card-text"><u><b>Phone Number:</b> {{user.phone}}</u></p>
+
+
                     </div>
                 </div>
 
@@ -125,6 +127,7 @@
                                 <span class="spinner-border spinner-border-sm " hidden="true"></span>
                                 Ask for replacement
                             </button>
+                            <p class="text-muted">Budget: {{teamuser.budget}} Absences: {{teamuser.absences}} </p>
 
                         </li>
                     </ul>
@@ -138,10 +141,7 @@
 
     </div>
     <div class="col-lg-4">
-        <div class="centered">
 
-            <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
-        </div>
 
     </div>
 </div>

@@ -96,7 +96,9 @@
                             <li><a class="text-muted" href="/tournaments/{{elem.id}}/">{{elem.name}}</a></li>
                             {% endfor%}
                             {%for elem in user.teamuser_set.all %}
+                            {% if elem.team.tournament not in user.tournament_set.all%}
                             <li><a class="text-muted" href="/tournaments/{{elem.team.tournament.id}}/">{{elem.team.tournament.name}}</a></li>
+                            {% endif %}
                             {% endfor%}
                             <div class="dropdown-divider"></div>
                             <li><a class="text-muted" href="/tournaments/create/">Create Tournament</a></li>
@@ -122,11 +124,9 @@
 
                 {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/notifications/"> Notifications <span class="dot text-center">{{user.notifications_set.count}}</span> </a>
+                    <a class="nav-link text-white" href="/notifications/"> Notifications <span class="circle text-center">{{user.notifications_set.count}}</span> </a>
                 </li>
                 {% endif %}
-
-
                 <li>
                     {% if user.is_authenticated %}
                     <a class="nav-link text-white" href="/users/profile/{{user.pk}}"> Profile </a>

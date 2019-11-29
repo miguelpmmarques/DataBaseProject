@@ -79,10 +79,8 @@ function main() {
                 console.log("Clicou");
 
                     changePositionSubs(this.id.split("|"));
-                
+
                 return;
-
-
             });
         }
         console.log("not captain");
