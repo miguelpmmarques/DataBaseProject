@@ -1451,8 +1451,8 @@ class TournamentDetailsView(generic.View):
             teams_data = Team.objects.filter(tournament__id=pk)
             scorers = None
             teams = []
-            ready_to_start = self.check_start_status(tournament)
             tournament = Tournament.objects.get(pk=pk)
+            ready_to_start = self.check_start_status(tournament)
             if tournament.game_set.all().count() > 0:
                 for elem in teams_data:
                     (
@@ -1588,10 +1588,8 @@ class TournamentDetailsView(generic.View):
         teams = Team.objects.filter(tournament__pk=tournament.pk)
         if teams.count() < tournament.number_teams:
             return False
-        for team in teams:
-            if team.teamuser_set.all().count() < team.numberPlayers:
-                return False
-        return True
+        else:
+            return True
 
 
 class CalendarView(BaseCalendarView):
