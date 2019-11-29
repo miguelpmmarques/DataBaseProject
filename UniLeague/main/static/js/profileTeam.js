@@ -7,6 +7,7 @@ if (document.readyState === "complete" ||
 
 function main() {
 
+
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     $.ajaxSetup({
 
@@ -270,11 +271,13 @@ function success_populate_list(data, ul) {
     for (elem of data) {
         let li = document.createElement("li");
         li.id = elem.id;
+        li.setAttribute("class", "customList list-group-item")
         let a = document.createElement("a");
         var date = new Date(elem.start_time);
         a.innerHTML = `${elem.title} at ${date}`
         a.setAttribute("href", `/games/${elem.game.id}/`)
+        a.setAttribute("class", "customList")
         li.appendChild(a);
-        ul.appendChild(li)
+        ul.appendChild(li);
     }
 }

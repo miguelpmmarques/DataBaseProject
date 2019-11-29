@@ -82,6 +82,26 @@
           {% endfor %}
         </tbody>
       </table>
+      <table class="table table-striped table-dark mt-4">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Player Name</th>
+            <th scope="col">Goals Scored</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {% for scorer,goals in scorers.item %}
+          <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{scorer}}</td>
+            <td>{{goals}}</td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
 
 

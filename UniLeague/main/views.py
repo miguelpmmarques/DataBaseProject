@@ -1449,8 +1449,9 @@ class TournamentDetailsView(generic.View):
     def get(self, request, pk):
         try:
             teams_data = Team.objects.filter(tournament__id=pk)
-
+            scorers = None
             teams = []
+            ready_to_start = self.check_start_status(tournament)
             tournament = Tournament.objects.get(pk=pk)
             if tournament.game_set.all().count() > 0:
                 for elem in teams_data:
@@ -1476,6 +1477,7 @@ class TournamentDetailsView(generic.View):
                     )
                 # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
                 scorers = self.get_top_scorers(tournament)
+                ready_to_start = False
             else:
                 for elem in teams_data:
                     teams.append(
@@ -1496,7 +1498,12 @@ class TournamentDetailsView(generic.View):
             return render(
                 request,
                 template_name="main/tournamentDetails.html",
-                context={"tournament": tournament, "teams": teams},
+                context={
+                    "tournament": tournament,
+                    "teams": teams,
+                    "scorers": scorers,
+                    "checkStart": ready_to_start,
+                },
             )
         except (Team.DoesNotExist, Tournament.DoesNotExist):
             return JsonResponse(
@@ -1562,14 +1569,29 @@ class TournamentDetailsView(generic.View):
         teams_pks = Team.objects.filter(tournament__pk=tournament.pk).values_list("pk")
         tournament_users = TeamUser.objects.filter(team__pk__in=teams_pks)
 
+        print(tournament_users)
         # create lists and order them by count
         # ordered_list = sorted(tournament_users, key=tournament_users.goal_set.all().count())
         ordered_list = {}
         for user in tournament_users:
-            ordered_list[user.player.username] = user.goal_set.all().count()
+            print(user.player.username)
+            ordered_list[user.player.username] = 0
+            goals = user.goal_set.all()
+            for goal in goals:
+                if goal.result.is_final:
+                    ordered_list[user.player.username] += 1
         ordered_list = dict(sorted(ordered_list.items()))
-        print(ordered_list)
+
         return ordered_list
+
+    def check_start_status(self, tournament):
+        teams = Team.objects.filter(tournament__pk=tournament.pk)
+        if teams.count() < tournament.number_teams:
+            return False
+        for team in teams:
+            if team.teamuser_set.all().count() < team.numberPlayers:
+                return False
+        return True
 
 
 class CalendarView(BaseCalendarView):
