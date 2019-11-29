@@ -81,6 +81,7 @@ function main() {
         e.preventDefault();
         var goal = $("#goals_rm option:selected")[0].value
         var result_id = this.name;
+        console.log("DELETE===", `/goals/${goal}`);
         $.ajax({
             type: "DELETE",
             url: `/goals/${goal}`,
@@ -91,7 +92,7 @@ function main() {
                 console.log(d);
             }
         });
-
+        console.log("PATCH===", "/results/" + result_id + "/");
         $.ajax({
             type: "PATCH",
             url: "/results/" + result_id + "/",

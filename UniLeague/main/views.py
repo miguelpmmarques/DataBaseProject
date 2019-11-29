@@ -158,7 +158,7 @@ class WeekCalendarView(generic.WeekArchiveView):
         since = self._make_date_lookup_arg(date)
         until = self._make_date_lookup_arg(self._get_next_week(date))
         lookup_kwargs = {"%s__gte" % date_field: since, "%s__lt" % date_field: until}
-        qs = self.get_dated_queryset(**lookup_kwargs)
+        qs = self.get_queryset()
         return (
             None,
             qs,
@@ -194,12 +194,18 @@ class WeekCalendarView(generic.WeekArchiveView):
         games = Game.objects.filter(
             Q(home_team__pk=pk) | Q(away_team__pk=pk)
         ).values_list("pk")
-        return TimeSlot.objects.filter(game__pk__in=games).order_by("start_time")
+        timeslots = (
+            TimeSlot.objects.filter(game__pk__in=games)
+            .filter(start_time__date__week=datetime.today().isocalendar()[1])
+            .order_by("start_time")
+        )
+        print("TIMESLUTS===", timeslots)
+        return timeslots
 
     def get(self, request, *args, **kwargs):
         print("OIOI")
         self.date_list, self.object_list, extra_context = self.get_dated_items()
-        print("oLE")
+        print("LLMLMLMLE")
         context = self.get_context_data(
             object_list=self.object_list, date_list=self.date_list, **extra_context
         )
@@ -924,6 +930,7 @@ class CreateGames(generic.CreateView):
                                             day=timeslot.start_time
                                         )
                                         game = Game.objects.create(
+                                            cost=tournament.cost,
                                             gameDate=aux_day,
                                             tournament=tournament,
                                             timeslot=timeslot,
@@ -1581,8 +1588,9 @@ class TournamentDetailsView(generic.View):
             ordered_list[user.player.username] = 0
             goals = user.goal_set.all()
             for goal in goals:
-                if goal.result.is_final:
-                    ordered_list[user.player.username] += 1
+                if goal.result:
+                    if goal.result.is_final:
+                        ordered_list[user.player.username] += 1
         ordered_list = dict(sorted(ordered_list.items()))
 
         return ordered_list
@@ -1811,40 +1819,46 @@ class GameView(generics.CreateAPIView):
             print("HERERERERE===", done)
             if done:
                 final_score = selected_game.result_set.all()
-                print("FINAL SCORE===", final_score)
-                if compareResults(final_score.first(), final_score.last()):
-                    final_score.first().is_final = True
-                    final_score.first().save()
-                    if selected_game:
-                        return render(
-                            request,
-                            template_name=self.template_name,
-                            context={"game": selected_game, "result": final_score},
+                print("FINAL SCORE===", final_score.count())
+                if final_score.count() == 2:
+
+                    if compareResults(final_score.first(), final_score.last()):
+                        print(
+                            "_________________________________________________________________"
                         )
-                    raise Http404(("Game Does Not Exist"))
-                else:
-                    # mandar notify ao admin - dar o link onde ele pode editar o resultado!
-                    Notifications.objects.get_or_create(
-                        title="The game "
-                        + selected_game.timeslot.title
-                        + " has conflicts in the results set by both captains.",
-                        description="<h3>There was a conflict in the final score of "
-                        + str(selected_game.home_team)
-                        + " vs "
-                        + str(selected_game.away_team)
-                        + " in tournament"
-                        + selected_game.tournament.name
-                        + "</h3><h3>Please Confirm the Correct Result</h3>",
-                        user_send=selected_game.tournament.tournament_manager,
-                        html='<button type="button" class="btn btn-dark" onclick=window.location.href="/games/'
-                        + str(selected_game.pk)
-                        + '/">Verify Result</button>',
-                        origin="Captain",
-                    )
-                    messages.error(
-                        request,
-                        "Erros no resultado. Para apurar o resultado definitivo, por favor contacte o Gestor de Torneio",
-                    )
+                        final_score.first().is_final = True
+                        final_score.first().save()
+                        if selected_game:
+                            print("FDSFSDSFDSFSDSFDS")
+                            return render(
+                                request,
+                                template_name=self.template_name,
+                                context={"game": selected_game, "result": final_score},
+                            )
+                        raise Http404(("Game Does Not Exist"))
+                    else:
+                        # mandar notify ao admin - dar o link onde ele pode editar o resultado!
+                        Notifications.objects.get_or_create(
+                            title="The game "
+                            + selected_game.timeslot.title
+                            + " has conflicts in the results set by both captains.",
+                            description="<h3>There was a conflict in the final score of "
+                            + str(selected_game.home_team)
+                            + " vs "
+                            + str(selected_game.away_team)
+                            + " in tournament"
+                            + selected_game.tournament.name
+                            + "</h3><h3>Please Confirm the Correct Result</h3>",
+                            user_send=selected_game.tournament.tournament_manager,
+                            html='<button type="button" class="btn btn-dark" onclick=window.location.href="/games/'
+                            + str(selected_game.pk)
+                            + '/">Verify Result</button>',
+                            origin="Captain",
+                        )
+                        messages.error(
+                            request,
+                            "Erros no resultado. Para apurar o resultado definitivo, por favor contacte o Gestor de Torneio",
+                        )
                 print("OIOI")
                 home_captain = selected_game.home_team.teamuser_set.filter(
                     isCaptain=True
@@ -1920,7 +1934,6 @@ class GameView(generics.CreateAPIView):
         serializer = GoalSerializer(data=request.data)
         if serializer.is_valid():
             goal = serializer.save()
-
         else:
             messages.error(request, serializer.errors)
             return HttpResponseRedirect("")
@@ -1928,23 +1941,29 @@ class GameView(generics.CreateAPIView):
         if selected_game:
             # searching for the captain in the home team
             tournament_manager = False
+            captain = False
             if request.user.pk == selected_game.tournament.tournament_manager.pk:
                 tournament_manager = True
+                print("TM==", tournament_manager)
 
             if tournament_manager:
                 captain = selected_game.home_team.teamuser_set.filter(
                     isCaptain=True
                 ).first()
+                print("TM_CAP===", captain)
             else:
-                if selected_game.result_set.filter(is_final=False):
+                if not selected_game.result_set.filter(is_final=True).exists():
+                    print("HERERERE")
                     captain = selected_game.home_team.teamuser_set.filter(
                         player__pk=request.user.pk
                     ).first()
+                    print("captain==", captain)
                     # searching for the captain in the away team
                     if not captain:
                         captain = selected_game.away_team.teamuser_set.filter(
                             player__pk=request.user.pk
                         ).first()
+                        print("captain2==", captain)
             if captain:
                 result = selected_game.result_set.filter(captain__pk=captain.pk).first()
 

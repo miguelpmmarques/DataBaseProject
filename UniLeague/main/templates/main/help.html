@@ -2,54 +2,59 @@
 {% load static %}
 {% load fontawesome_5 %}
 {% fontawesome_5_static %}
-
+{% block title %}
+<title>Help</title>
+{% endblock %}
 {% block body %}
-  <div class="row">
+<div class="row">
     <div class="col text-center text-dark">
-      <ul class="ist-group mx-auto mt-5" style="width:60%;">
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('FAQs');">
-          <i class="fa fa-question-circle left" aria-hidden="true"></i>
-          <span>FAQ's</span>
-        </li>
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Authentication');">
-          <i class="fas fa-key left" aria-hidden="true"></i>
-          <span>Authentication</span>
-        </li>
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Tournaments');">
-          <i class="fas fa-trophy left" aria-hidden="true"></i>
-          <span>Tournaments</span>
-        </li>
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Payments');">
-          <i class="fa fa-wallet left" aria-hidden="true"></i>
-          <span>Payments</span>
-        </li>
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Teams');">
-          <i class="fa fa-users left" aria-hidden="true"></i>
-          <span>Teams</span>
-        </li>
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Tactics');">
-          <i class="fa fa-clipboard left" aria-hidden="true"></i>
-          <span>Tactics</span>
-        </li>
-        <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Contacts');">
-          <i class="fa fa-phone left" aria-hidden="true"></i>
-          <span>Contacts</span>
-        </li>
+        <ul class="ist-group mx-auto mt-5" style="width:60%;">
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('FAQs');">
+                <i class="fa fa-question-circle left" aria-hidden="true"></i>
+                <span>FAQ's</span>
+            </li>
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Authentication');">
+                <i class="fas fa-key left" aria-hidden="true"></i>
+                <span>Authentication</span>
+            </li>
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Tournaments');">
+                <i class="fas fa-trophy left" aria-hidden="true"></i>
+                <span>Tournaments</span>
+            </li>
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Payments');">
+                <i class="fa fa-wallet left" aria-hidden="true"></i>
+                <span>Payments</span>
+            </li>
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Teams');">
+                <i class="fa fa-users left" aria-hidden="true"></i>
+                <span>Teams</span>
+            </li>
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Tactics');">
+                <i class="fa fa-clipboard left" aria-hidden="true"></i>
+                <span>Tactics</span>
+            </li>
+            <li class="list-group-item  justify-content-between align-items-center" onclick="changeContent('Contacts');">
+                <i class="fa fa-phone left" aria-hidden="true"></i>
+                <span>Contacts</span>
+            </li>
 
-      </ul>
+        </ul>
     </div>
 
     <div class="col">
-      <div class="container mt-5">
-        <p id="text_placeholder" class="text-justify">
-          O Lorem Ipsum é um texto modelo da indústria tipográfica e de impressão. O Lorem Ipsum tem vindo a ser o texto padrão usado por estas indústrias desde o ano de 1500, quando uma misturou os caracteres de um texto para criar um espécime de livro. Este texto não só sobreviveu 5 séculos, mas também o salto para a tipografia electrónica, mantendo-se essencialmente inalterada. Foi popularizada nos anos 60 com a disponibilização das folhas de Letraset, que continham passagens com Lorem Ipsum, e mais recentemente com os programas de publicação como o Aldus PageMaker que incluem versões do Lorem Ipsum.
-        </p>
-      </div>
+        <div class="container mt-5">
+            <div class="border border-dark rounded p-5 m-auto" style="background-color: rgba(0,0,0,0.2)">
+                <p id="text_placeholder" class="text-justify">
+                    O Lorem Ipsum é um texto modelo da indústria tipográfica e de impressão. O Lorem Ipsum tem vindo a ser o texto padrão usado por estas indústrias desde o ano de 1500, quando uma misturou os caracteres de um texto para criar um
+                    espécime
+                    de livro. Este texto não só sobreviveu 5 séculos, mas também o salto para a tipografia electrónica, mantendo-se essencialmente inalterada. Foi popularizada nos anos 60 com a disponibilização das folhas de Letraset, que continham
+                    passagens com Lorem Ipsum, e mais recentemente com os programas de publicação como o Aldus PageMaker que incluem versões do Lorem Ipsum.
+                </p>
+            </div>
+        </div>
     </div>
-
     <div class="col-2">
-
     </div>
-  </div>
+</div>
 
 {% endblock %}

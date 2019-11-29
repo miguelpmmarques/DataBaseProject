@@ -2,9 +2,12 @@
 {% load static %}
 <html>
 
+{% block title %}
+<title>Login</title>
+{% endblock %}
+
 <head>
     <meta charset="utf-8">
-    <title>Login</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
     <!-- Bootstrap  -->
@@ -28,7 +31,7 @@
         <div class="col-4 m-auto  text-center">
 
             <div class="container">
-                <img src="{% static 'assets/UniLeague_logo.png' %}" style="width:auto; height:300px;" alt="Responsive image"></a>
+                <img src="{% static 'assets/UniLeague_logo.png' %}" class="m-5" style="width:auto; height:300px;border-radius:25vw" alt="Responsive image"></a>
             </div>
             <form method="post" class="m-auto">
 

@@ -90,6 +90,7 @@ function main() {
     }
     $("form").submit(function(e) {
         e.preventDefault();
+        //console.log("HERERE FDS");
         var type = this.id;
         if (type !== "blacklist" &&
             type !== "blacklist_i") {

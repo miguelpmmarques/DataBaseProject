@@ -16,7 +16,7 @@ function main() {
     });
     createGames.addEventListener("click", function(e) {
         $.ajax({
-                url: "",
+                url: "/games/generate/" + createGames.id + "/",
                 type: 'POST',
                 timeout: 3000,
                 data: {

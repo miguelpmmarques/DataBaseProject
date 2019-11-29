@@ -2,6 +2,9 @@
 {% load static %}
 {% load fontawesome_5 %}
 {% fontawesome_5_static %}
+{% block title %}
+<title>Game</title>
+{% endblock %}
 {% block imports %}
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
 <script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
@@ -13,160 +16,126 @@
 </div>
 {% endfor %}
 {% endif %}
-<div class="row">
-    <div class="col-12">
-        <!-- game info -->
-        <div class="container text-center">
-            <!-- tournament and logo -->
-            <h1>tournament: {{game.tournament.name}}</h1>
-            <br>
-            <h2>{{game.gameDate}} @ Field: {{game.timeslot.field.name}}</h2>
-
-            <br>
-            <h5>cost:{{game.cost}}</h5>
-            <br>
+<div class="card bg-dark" style="width:80%;min-height:80%;margin: auto;">
+    <div class="row card-header bg-secondary" style="width:94%;margin: auto">
+        <div class=" col-12">
+            <!-- game info -->
+            <div class="container text-center">
+                <!-- tournament and logo -->
+                <h1 class="font-weight-bold" style="text-shadow: 4px 4px #000000;"><br>Tournament: {{game.tournament.name}}</h1>
+                <br>
+                <h4 style="text-shadow: 1px 1px #000000;">{{game.gameDate}} @ {{game.timeslot.field.name}}</h4>
+                <h5>cost:{{game.cost}}</h5>
+            </div>
         </div>
     </div>
-</div>
-<br>
-<div class="row">
-    <div class="col-5">
+    <br>
+    <div class="row">
         <!-- home_team logo and name -->
-        <div class="my-auto d-flex justify-content-center">
-            {% if result %}
-            <ul>
-                {% for elem in result.goal_set.all %}
-                {% if elem.is_home %}
-                <li>{{elem.scorer}}({{elem.time.hour}}:{{elem.time.minute}}')</li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-            {% endif %}
+        <div class="row w-75" style="max-width:40%">
+            <div class="col-4 mt-5 ml-5 d-flex justify-content-center">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item text-light bg-secondary" disabled> __Home Goals__</li>
+                    {% if result %}
+
+                    {% for elem in result.goal_set.all %}
+                    {% if elem.is_home %}
+                    <li class="list-group-item text-secondary bg-light">{{elem.scorer}}({{elem.time.hour}}:{{elem.time.minute}}')</li>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                </ul>
 
 
-        </div>
-        <div class="float-right">
-            <div class="card bg-dark" style="width:300px; height:auto;">
-                <h5 class="card-title text-center">HOME</h5>
-                {% if game.away_team.teamLogo.strip %}
-                <img class="card-img mx-auto" src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" style="width:200px;height:200px;"> <br>
-                {% else %}
-                <img class="card-img mx-auto" src="/../../../static/assets/no_team_logo.png" style="width:200px;height:200px;"> <br>
-                {% endif %}
-                <div class="card-body">
-                    <h2 class="text-center mt-2">{{game.home_team.name}}</h2>
-                </div>
             </div>
-        </div>
-
-    </div>
-
-    <div class="col-2 d-flex justify-content-center">
-        <h1>VS</h1>
-    </div>
-    <div class="col-5">
-        <!-- away_team logo and name -->
-        <div class="my-auto d-flex justify-content-center">
-
-            {% if result %}
-            <ul>
-                {% for elem in result.goal_set.all %}
-                {% if elem.is_away %}
-                <li>{{elem.scorer}}({{elem.time.hour}}:{{elem.time.minute}}')</li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-        <div class="float-left">
-            <div class="card bg-dark" style="width:300px; height:auto;">
-                <h5 class="card-titl text-center">AWAY</h5>
-                {% if game.away_team.teamLogo.strip %}
-                <img class="card-img mx-auto" src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:200px;height:200px;"> <br>
-                {% else %}
-                <img class="card-img mx-auto" src="/../../../static/assets/no_team_logo.png" style="width:200px;height:200px;"> <br>
-                {% endif %}
-                <div class="card-body">
-                    <h2 class="text-center mt-2">{{game.away_team.name}}</h2>
-                </div>
-            </div>
-            <!-- <div class="container mx-auto mt-5" style="width: 200px; height:200px;">
-                {% if game.away_team.teamLogo.strip %}
-                  <img src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:100%;height:100%;"> <br>
-                {% else %}
-                  <img src="" style="width:100%;height:100%;"> <br>
-                {% endif %}
-            </div>
-            <h2 class="text-center mt-5">{{game.away_team.name}}</h2> -->
-        </div>
-
-    </div>
-
-</div>
-<br>
-
-{% if is_home_captain or is_away_captain or is_tournament_manager %}
-<div class="row">
-    <div class="col">
-    </div>
-    <div class="input-group-prepend">
-        <span class="input-group-text bg-dark" for="addNewGoal" style='border: 2px solid black; color:white;'> Add New Goal</span>
-        <button class="input-group-text bg-light" id="addNewGoal" name="addNewGoal"><i class="fas fa-plus" style="color:#000000"></i></button>
-        <span class="input-group-text bg-dark" for="removeGoal" style='border: 2px solid black; color:white;'> Remove Goal</span>
-        <button class="input-group-text bg-light" id="removeGoal" name="removeGoal"><i class="fas fa-minus" style="color:#000000"></i></button>
-    </div>
-
-    <div class="col">
-        <form id="home_form" method="post" hidden>
-            {% csrf_token %}
-            <div class="col-xs-5">
-                {% for elem in form %}
-                {%if elem.label == "Time" %}
-
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-clock" style="color:#FFFFFF"></i></span>
-                        <span class=" input-group-text bg-dark text-white" style='border: 2px solid black'>time</span>
-                    </div>
-                    {{elem}}
-
-                </div>
-                {% else %}
-                <div class="col-xs-2">
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-futbol" style="color:#FFFFFF"></i></span>
-                            <label class="input-group-text bg-dark text-white" style='border: 2px solid black'>Scorer</label>
-                        </div>
-                        <select class="custom-select" id="scorer_input">
-                            {% for item in elem %}
-                            {{item}}
-                            {% endfor %}
-                        </select>
-
+            <div class="col-5 m-3 float-right">
+                <div class="card bg-secondary" style="width:300px; height:auto;">
+                    <br>
+                    <h5 class="card-title text-center font-italic">HOME</h5>
+                    {% if game.away_team.teamLogo.strip %}
+                    <img class="card-img mx-auto border border-dark shadow p-3 mb-3 bg-white rounded" src="{{ MEDIA_URL }}/media/{{game.home_team.teamLogo}}" style="width:200px;height:200px;"> <br>
+                    {% else %}
+                    <img class="card-img mx-auto border border-dark shadow p-3 mb-3 bg-white rounded" src="/../../../static/assets/no_team_logo.png" style="width:200px;height:200px;"> <br>
+                    {% endif %}
+                    <div class="card-body">
+                        <h2 class="text-center">{{game.home_team.name}}</h2>
                     </div>
                 </div>
-                {% endif %}
-                {% endfor %}
-                <button type"submit">Confirm</button>
             </div>
-        </form>
-        {% if result %}
-        <form id="rm_form" method="post" name="{{result.pk}}" hidden>
-            {% else %}
-            <form id="rm_form" method="post" name="" hidden>
-                {% endif %}
 
+        </div>
+
+        <div class="col d-flex m-0 p-0 justify-content-center my-auto" style="width:20%">
+            <h1 class="container text-center"><i class="fas fa-times fa-3x" style="color:red; text-shadow: 8px 8px #000000;"></i></h1>
+        </div>
+        <div class="row w-75 float-right" style="max-width:40%">
+
+            <!-- away_team logo and name -->
+            <div class="col-6 m-3 ml-0 float-left">
+                <div class="card bg-secondary float-left" style="width:300px; height:auto;">
+                    <br>
+                    <h5 class="card-title text-center font-italic">AWAY</h5>
+                    {% if game.away_team.teamLogo.strip %}
+                    <img class="card-img mx-auto border border-dark shadow p-3 mb-3 bg-white rounded " src="{{ MEDIA_URL }}/media/{{game.away_team.teamLogo}}" style="width:200px;height:200px;"> <br>
+                    {% else %}
+                    <img class="card-img mx-auto border border-dark shadow p-3 mb-3 bg-white rounded " src="/../../../static/assets/no_team_logo.png" style="width:200px;height:200px;"> <br>
+                    {% endif %}
+                    <div class="card-body">
+                        <h2 class="text-center">{{game.away_team.name}}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 mt-5 ml-4 float-right d-flex justify-content-center">
+
+                <ul class="list-group list-group-flush float-right">
+                    <li class="list-group-item text-light bg-secondary" disabled>__Away Goals__</li>
+                    {% if result %}
+                    {% for elem in result.goal_set.all %}
+                    {% if elem.is_away %}
+                    <li class="list-group list-group-flush text-secondary bg-light">{{elem.scorer}}({{elem.time.hour}}:{{elem.time.minute}}')</li>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    {% if is_home_captain or is_away_captain or is_tournament_manager %}
+    <div class="row d-flex justify-content-center text-center mb-5 pb-1">
+        <div class="col-3">
+        </div>
+        <div class="input-group-prepend ml-5 pl-5">
+            <span class="input-group-text bg-dark" for="addNewGoal" style='border: 2px solid black; color:white;'> Add New Goal</span>
+            <button class="input-group-text bg-light" id="addNewGoal" name="addNewGoal"><i class="fas fa-plus" style="color:#000000"></i></button>
+            <span class="input-group-text bg-dark" for="removeGoal" style='border: 2px solid black; color:white;'> Remove Goal</span>
+            <button class="input-group-text bg-light" id="removeGoal" name="removeGoal"><i class="fas fa-minus" style="color:#000000"></i></button>
+        </div>
+
+        <div class="col mr-5 pr-5">
+            <form id="home_form" method="post" hidden>
                 {% csrf_token %}
-                <div class="col-xs-5">
-                    {% for elem in form2 %}
+                <div class="col-xs-5 mr-5 pr-5">
+                    {% for elem in form %}
+                    {%if elem.label == "Time" %}
+
+                    <div class="input-group mb-3 mr-5">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-clock" style="color:#FFFFFF"></i></span>
+                            <span class=" input-group-text bg-dark text-white" style='border: 2px solid black'>time</span>
+                        </div>
+                        {{elem}}
+
+                    </div>
+                    {% else %}
                     <div class="col-xs-2">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-minus" style="color:#FFFFFF"></i></span>
-                                <label class="input-group-text bg-dark text-white" style='border: 2px solid black'>Goals</label>
+                                <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-futbol" style="color:#FFFFFF"></i></span>
+                                <label class="input-group-text bg-dark text-white" style='border: 2px solid black'>Scorer</label>
                             </div>
-                            <select class="custom-select" id="goals_rm">
+                            <select class="custom-select" id="scorer_input">
                                 {% for item in elem %}
                                 {{item}}
                                 {% endfor %}
@@ -174,12 +143,39 @@
 
                         </div>
                     </div>
+                    {% endif %}
                     {% endfor %}
-                    <button type"submit">Remove</button>
+                    <button type"submit">Confirm</button>
                 </div>
             </form>
-    </div>
-    <div class="col">
+            {% if result %}
+            <form id="rm_form" method="post" name="{{result.pk}}" hidden>
+                {% else %}
+                <form id="rm_form" method="post" name="" hidden>
+                    {% endif %}
+
+                    {% csrf_token %}
+                    <div class="col-xs-5 mr-5 pr-5">
+                        {% for elem in form2 %}
+                        <div class="col-xs-2">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-dark" style='border: 2px solid black'><i class="fas fa-minus" style="color:#FFFFFF"></i></span>
+                                    <label class="input-group-text bg-dark text-white" style='border: 2px solid black'>Goals </label>
+                                </div>
+                                <select class="custom-select" id="goals_rm">
+                                    {% for item in elem %}
+                                    {{item}}
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button type"submit">Remove</button>
+                    </div>
+                </form>
+        </div>
     </div>
 </div>
 

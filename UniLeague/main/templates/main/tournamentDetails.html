@@ -1,126 +1,130 @@
 {% extends 'main/navbar.html' %}
 {% load static %}
-
+{% block title %}
+<title>Tournament</title>
+{% endblock %}
 
 {% block body %}
 {% block imports %}
 <script src="{% static 'js/tournamentDetails.js' %}"></script>
+<script src="{% static 'js/createGames.js' %}"></script>
 
 {% endblock %}
 {% csrf_token %}
 
 {% if messages %}
-  {% for men in messages %}
-  <div class="alert alert-success" role="alert">
+{% for men in messages %}
+<div class="alert alert-success" role="alert">
     {{men}}
-  </div>
-  {% endfor%}
+</div>
+{% endfor%}
 {% endif %}
 <div class="row">
-  <div class="col-sm-3 mt-4">
-    {% if tournament %}
-    <h1>Tournament: {{tournament.name}}</h1>
-    <h1>Manager: {{tournament.tournament_manager}}</h1>
-    {% endif %}
+    <div class="col-sm-3 mt-4">
+        {% if tournament %}
+        <h1>Tournament: {{tournament.name}}</h1>
+        <h1>Manager: {{tournament.tournament_manager}}</h1>
+        {% endif %}
 
-    <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
-      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-      Tournament Calendar
-    </button>
+        <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
+            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+            Tournament Calendar
+        </button>
 
-    <h3>RESERVES:</h3>
-    <div class="">
+        <h3>RESERVES:</h3>
+        <div class="">
 
-    {% if tournament.reserves.all %}
-    <ul id="teams_tournament" class="list-group margin">
+            {% if tournament.reserves.all %}
+            <ul id="teams_tournament" class="list-group margin">
 
-        {% for user in tournament.reserves.all %}
-        <a href="/users/profile/{{user.id}}/">
-            <li class="groupList list-group-item">{{user.username}}</li>
-        </a>
-        {% endfor %}
+                {% for user in tournament.reserves.all %}
+                <a href="/users/profile/{{user.id}}/">
+                    <li class="groupList list-group-item">{{user.username}}</li>
+                </a>
+                {% endfor %}
 
-    </ul>
-    {% else %}
-    <li class="groupList list-group-item">No Teams found</li>
-    {% endif %}
-  </div>
-
-
-  </div>
-
-  <div class="col-sm-9">
-
-    <div class="container" style="width:80%; height:50%;">
-
-      <table class="table table-striped table-dark mt-4">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Team Name</th>
-            <th scope="col">Points</th>
-            <th scope="col">Wins</th>
-            <th scope="col">Ties</th>
-            <th scope="col">Losses</th>
-            <th scope="col">Goals Scored</th>
-            <th scope="col">Goals Conceded</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for team in teams %}
-          <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
-            <th scope="row">{{ forloop.counter }}</th>
-
-            <td>{{team.name}}</td>
-            <td>{{team.points}}</td>
-            <td>{{team.games_won}}</td>
-            <td>{{team.tied_games}}</td>
-            <td>{{team.games_lost}}</td>
-            <td>{{team.goals_scored}}</td>
-            <td>{{team.goals_conceded}}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <table class="table table-striped table-dark mt-4">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Player Name</th>
-            <th scope="col">Goals Scored</th>
-
-          </tr>
-        </thead>
-        <tbody>
-          {% for scorer,goals in scorers.item %}
-          <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{scorer}}</td>
-            <td>{{goals}}</td>
-
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-
+            </ul>
+            {% else %}
+            <li class="groupList list-group-item">No Teams found</li>
+            {% endif %}
+        </div>
 
 
     </div>
 
-    <div class="container" style="width:80%; height:50%;">
+    <div class="col-sm-9">
 
+        <div class="container" style="width:80%; height:50%;">
+
+            <table class="table table-striped table-dark mt-4">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Team Name</th>
+                        <th scope="col">Points</th>
+                        <th scope="col">Wins</th>
+                        <th scope="col">Ties</th>
+                        <th scope="col">Losses</th>
+                        <th scope="col">Goals Scored</th>
+                        <th scope="col">Goals Conceded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                    <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
+                        <th scope="row">{{ forloop.counter }}</th>
+
+                        <td>{{team.name}}</td>
+                        <td>{{team.points}}</td>
+                        <td>{{team.games_won}}</td>
+                        <td>{{team.tied_games}}</td>
+                        <td>{{team.games_lost}}</td>
+                        <td>{{team.goals_scored}}</td>
+                        <td>{{team.goals_conceded}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <table class="table table-striped table-dark mt-4">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Player Name</th>
+                        <th scope="col">Goals Scored</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scorer,goals in scorers.item %}
+                    <tr class='clickable-row' data-href='/teams/profile/{{team.id}}/'>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{scorer}}</td>
+                        <td>{{goals}}</td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+
+
+        </div>
+
+        <div class="container" style="width:80%; height:50%;">
+
+        </div>
+        <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
+            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+            Apply as Reserve
+        </button>
+        {% if not tournament.game_set.all.exists %}
+        <button id="{{tournament.pk}}" name="createGames" class="btn btn-light btn-outline-secondary apllyReserve">
+            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+            Start tournament
+        </button>
+        {% endif %}
     </div>
-    <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
-      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-      Apply as Reserve
-    </button>
-
-    <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
-      <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-      Start tournament
-    </button>
-  </div>
 
 </div>
 {% endblock %}

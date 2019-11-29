@@ -5,28 +5,30 @@
 
 <!DOCTYPE html>
 <html>
+{% block title %}
+<title>Landing Page</title>
+{% endblock %}
 
 <head>
     <meta charset="utf-8">
-    <title>MAIN MENU</title>
 </head>
 
 <body>
     {% block body %}
-  <script src="{% static 'js/mainMenu.js' %}"></script>
+    <script src="{% static 'js/mainMenu.js' %}"></script>
 
     {% if messages %}
-      {% for men in messages %}
-      <div class="alert alert-success" role="alert">
+    {% for men in messages %}
+    <div class="alert alert-success" role="alert">
         {{men}}
-      </div>
-      {% endfor%}
+    </div>
+    {% endfor%}
     {% endif %}
     {% if user.is_authenticated %}
 
-      {% if user.isTournamentManager %}
-        <div class="row">
-          <div class="col">
+    {% if user.isTournamentManager %}
+    <div class="row">
+        <div class="col">
             <h2 class="text-center">TEAM CAPTAINS</h2>
             <form class="form-inline d-flex justify-content-center" id="teams">
                 <i class="fas fa-search" aria-hidden="true"></i>
@@ -46,9 +48,9 @@
                 {% endif %}
             </ul>
             {% endif %}
-          </div>
+        </div>
 
-          <div class="col">
+        <div class="col">
             <h2 class="text-center">TEAMS</h2>
 
 
@@ -72,45 +74,44 @@
             <li class="groupList list-group-item">No Teams found</li>
             {% endif %}
             <div class="container text-center">
-              <a href="#" class="btn btn-primary m-auto">View Leaderboards</a>
+                <a href="#" class="btn btn-primary m-auto">View Leaderboards</a>
             </div>
 
-          </div>
-
-          <div class="col-2">
-          </div>
         </div>
-      {% else %}
 
-        <div class="row">
-          <div class="col">
+        <div class="col-2">
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col">
 
-          </div>
-          <div class="col-8 text-center">
+        </div>
+        <div class="col-8 text-center">
             <div class="text-center mt-4">
-              <h1><b>GAMES THIS WEEK</b></h1>
-              {% if games.all %}
-              <ul id="ul_games" class="list-group margin">
-                {% for game in games %}
-                <a href="/games/{{game.id}}/">
-                    <li class="groupList list-group-item"> <b>{{game.tournament.name}}</b> {{game.home_team.name}} vs {{game.away_team.name}} <i>{{game.gameDate.day}}</i></li>
+                <h1><b>GAMES THIS WEEK</b></h1>
+                {% if games.all %}
+                <ul id="ul_games" class="list-group margin">
+                    {% for game in games %}
+                    <a href="/games/{{game.id}}/">
+                        <li class="groupList list-group-item"> <b>{{game.tournament.name}}</b> {{game.home_team.name}} vs {{game.away_team.name}} <i>{{game.gameDate.day}}</i></li>
+                    </a>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <a>
+                    <li class="groupList list-group-item">You have no upcoming games</li>
                 </a>
-                {% endfor %}
-              </ul>
-              {% else %}
-              <a>
-                  <li class="groupList list-group-item">You have no upcoming games</li>
-              </a>
-              {% endif %}
+                {% endif %}
             </div>
-          </div>
+        </div>
 
-          <div class="col">
-
-          </div>
+        <div class="col">
 
         </div>
-      {% endif %}
+
+    </div>
+    {% endif %}
 
     <!-- UNREGISTERED USER -->
     {% else %}
@@ -122,34 +123,34 @@
 
 
 
-              <h1>Teams:</h1>
-              <br>
-              <form class="form-inline d-flex justify-content-center" id="teams">
-                  <i class="fas fa-search" aria-hidden="true"></i>
-                  <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
-              </form>
-              <br>
-              <ul id="ul_teams" class="list-group margin" style="height: 60vh; overflow: auto;">
-                  {% for team in teams %}
-                  <li class="groupList list-group-item" onclick="window.location.href='/teams/profile/{{team.id}}/'">
+            <h1>Teams:</h1>
+            <br>
+            <form class="form-inline d-flex justify-content-center" id="teams">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="input_teams" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
+            </form>
+            <br>
+            <ul id="ul_teams" class="list-group margin" style="height: 60vh; overflow: auto;">
+                {% for team in teams %}
+                <li class="groupList list-group-item" onclick="window.location.href='/teams/profile/{{team.id}}/'">
                     <a>{{team.name}} has {{team.teamuser_set.count}}/16 players</a></li>
-                  {% endfor %}
-              </ul>
+                {% endfor %}
+            </ul>
         </div>
         <div class="col-sm-6 text-center">
-                <h1>Tournaments:</h1>
-                <br>
-                <form class="form-inline d-flex justify-content-center" id="tournaments">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                    <input id="input_tournaments" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
-                </form>
-                <br>
-                <ul id="ul_tournaments" class="list-group margin" style=" height: 40vh; overflow: auto;">
-                    {% for tournament in tournaments %}
-                    <li class="groupList list-group-item" onclick="window.location.href='/tournaments/{{tournament.id}}/'">
-                      {{tournament.name}} starts<i> in {{tournament.beginTournament}}</i></li>
-                    {% endfor %}
-                </ul>
+            <h1>Tournaments:</h1>
+            <br>
+            <form class="form-inline d-flex justify-content-center" id="tournaments">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input id="input_tournaments" class="form-control form-control-sm ml-3 w-50" type="text" placeholder="Search" aria-label="Search">
+            </form>
+            <br>
+            <ul id="ul_tournaments" class="list-group margin" style=" height: 40vh; overflow: auto;">
+                {% for tournament in tournaments %}
+                <li class="groupList list-group-item" onclick="window.location.href='/tournaments/{{tournament.id}}/'">
+                    {{tournament.name}} starts<i> in {{tournament.beginTournament}}</i></li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
     {% endif %}

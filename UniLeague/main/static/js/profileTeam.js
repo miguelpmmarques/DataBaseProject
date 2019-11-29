@@ -1,9 +1,13 @@
 if (document.readyState === "complete" ||
     (document.readyState !== "loading" && !document.documentElement.doScroll)) {
+    console.log("XAU");
     main();
 } else {
-    document.addEventListener("DOMContentLoaded", main);
+    document.addEventListener("DOMContentLoaded", function(e) {
+        main()
+    });
 }
+var xhr = null;
 
 function main() {
 
@@ -15,77 +19,75 @@ function main() {
             "X-CSRFToken": csrf_token
         }
     });
-    console.log("ATAO?");
     get_games_next_week();
 
     var leave = document.getElementsByClassName("float-none leave");
     console.log(leave);
     for (var i = 0; i < leave.length; i++) {
-      leave[i].addEventListener("click",function(e) {
-          e.preventDefault();
-          leaveTeam(this);
-      })
+        leave[i].addEventListener("click", function(e) {
+            e.preventDefault();
+            leaveTeam(this);
+        })
     }
 
     try {
-      var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
-      console.log(convocatoria);
-      convocatoria.addEventListener("click", function(e) {
+        var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
+        console.log(convocatoria);
+        convocatoria.addEventListener("click", function(e) {
 
-          e.preventDefault();
-          sendNotifications(this.id);
-      });
-      var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-      for (var i = 0; i < changePosition.length; i++) {
-
-        changePosition[i].addEventListener("click", function(e) {
-          e.preventDefault();
-          console.log("Clicou");
-          changePositionSubs(this.id.split("|"));
-
-        });
-      }
-    var options = document.getElementById("exampleFormControlSelect1");
-    var captain = options.value;
-    var changeCaptain = document.getElementById("changeCaptain");
-    changeCaptain.addEventListener("click", function(e) {
-        var r = confirm("Are you certain you want to change the captain?!");
-        if (r == true) {
-            changeCaptainFun(e, captain, options);
-        }
-    });
-
-
-    var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-    for (var i = 0; i < saveInfo.length; i++) {
-
-        saveInfo[i].addEventListener("click", function(e) {
             e.preventDefault();
-
-            saveBudgetAbsences(this.id);
-
+            sendNotifications(this.id);
         });
-    }
+        var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+        for (var i = 0; i < changePosition.length; i++) {
 
-  }
-  catch(err) {
-    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-    for (var i = 0; i < changePosition.length; i++) {
+            changePosition[i].addEventListener("click", function(e) {
+                e.preventDefault();
+                console.log("Clicou");
+                changePositionSubs(this.id.split("|"));
 
-      changePosition[i].addEventListener("click", function(e) {
-        e.preventDefault();
-        console.log("Clicou");
-        var r = confirm("ARE YOU SURE?\nIF YOU CONTINUE, ONLY THE CAPTAIN CAN MOVE YOU BACK TO STARTER");
-        if (r == true) {
-            changePositionSubs(this.id.split("|"));
+            });
         }
-        return;
+        var options = document.getElementById("exampleFormControlSelect1");
+        var captain = options.value;
+        var changeCaptain = document.getElementById("changeCaptain");
+        changeCaptain.addEventListener("click", function(e) {
+            var r = confirm("Are you certain you want to change the captain?!");
+            if (r == true) {
+                changeCaptainFun(e, captain, options);
+            }
+        });
 
 
-      });
+        var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
+        for (var i = 0; i < saveInfo.length; i++) {
+
+            saveInfo[i].addEventListener("click", function(e) {
+                e.preventDefault();
+
+                saveBudgetAbsences(this.id);
+
+            });
+        }
+
+    } catch (err) {
+        var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+        for (var i = 0; i < changePosition.length; i++) {
+
+            changePosition[i].addEventListener("click", function(e) {
+                e.preventDefault();
+                console.log("Clicou");
+                var r = confirm("ARE YOU SURE?\nIF YOU CONTINUE, ONLY THE CAPTAIN CAN MOVE YOU BACK TO STARTER");
+                if (r == true) {
+                    changePositionSubs(this.id.split("|"));
+                }
+                return;
+
+
+            });
+        }
+        console.log("not captain");
     }
-    console.log("not captain");
-  }
 }
 
 function sendNotifications(teampk) {
@@ -135,13 +137,17 @@ function saveBudgetAbsences(mypk) {
 }
 
 function changePositionSubs(mypk) {
-  console.log("CLICOU");
+    console.log("CLICOU");
     data = {
         "playerpk": mypk[0],
         "teampk": mypk[1]
     }
+    if (xhr != null) {
+        xhr.abort();
+        xhr = null;
+    }
 
-    $.ajax({
+    xhr = $.ajax({
             url: "/positionchange/" + mypk[0] + "/" + mypk[1] + "/",
             type: 'PATCH',
             timeout: 3000,
@@ -240,7 +246,7 @@ function leaveTeam(leave) {
             type: 'DELETE',
             timeout: 3000,
             success: function(d) {
-              window.location.href = ""
+                window.location.href = ""
             },
         })
         .fail(function() {
@@ -252,7 +258,12 @@ function leaveTeam(leave) {
 function get_games_next_week() {
     console.log("HERE");
     var ul = document.getElementById("games_next_week");
-    $.ajax({
+    if (xhr != null) {
+        xhr.abort();
+        xhr = null;
+    }
+
+    xhr = $.ajax({
         type: "GET",
         url: `/games/week/${ul.getAttribute("name")}/`,
         dataType: "json",

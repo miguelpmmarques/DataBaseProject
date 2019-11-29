@@ -3,140 +3,142 @@
 {% load static %}
 {% load fontawesome_5 %}
 {% fontawesome_5_static %}
-
+{% block title %}
+<title>Profile</title>
+{% endblock %}
 {% block imports %}
 <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
 {% block body %}
 {% csrf_token %}
-<h1 id="myProfile" > NAME {{user.first_name}} {{user.last_name}} </h1>
+<h1 id="myProfile"> NAME {{user.first_name}} {{user.last_name}} </h1>
 
-  <div class="row">
+<div class="row">
 
     <div class="col-lg-4 ">
-      <div class="row text-center">
-        <div class="col-lg-7">
+        <div class="row text-center">
+            <div class="col-lg-7">
 
-          <div class=" bg-dark rounded-lg background-color: #0B0C10;">
-            <div class="embed-responsive embed-responsive-4by3">
+                <div class=" bg-dark rounded-lg background-color: #0B0C10;">
+                    <div class="embed-responsive embed-responsive-4by3">
 
-              <!-- <img id="profileImg" src="/../../../static/assets/no_img_user.png" class="card-img-top embed-responsive-item" alt="..."> -->
-              {% if user.image|length >= 1  %}
-                <img id="profileImg" src="{{ MEDIA_URL }}/media/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
-              {% else %}
-                <!-- <p>THIS IS THE IMAGE</p> -->
-                <img id="profileImg" src="/../../../static/assets/no_img_user.png" class="card-img-top embed-responsive-item" alt="...">
+                        <!-- <img id="profileImg" src="/../../../static/assets/no_img_user.png" class="card-img-top embed-responsive-item" alt="..."> -->
+                        {% if user.image|length >= 1  %}
+                        <img id="profileImg" src="{{ MEDIA_URL }}/media/{{user.image}}" class="card-img-top embed-responsive-item" alt="...">
+                        {% else %}
+                        <!-- <p>THIS IS THE IMAGE</p> -->
+                        <img id="profileImg" src="/../../../static/assets/no_img_user.png" class="card-img-top embed-responsive-item" alt="...">
 
-              {% endif %}
+                        {% endif %}
+
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">E-mail: {{user.email}}</p>
+                        <p class="card-text">Budget: {{user.budget}}</p>
+                        <p class="card-text">Games: {{user.games}}</p>
+                        <p class="card-text">Goals: {{user.goals}}</p>
+                    </div>
+                </div>
 
             </div>
-            <div class="card-body">
-              <p class="card-text">E-mail: {{user.email}}</p>
-              <p class="card-text">Budget: {{user.budget}}</p>
-              <p class="card-text">Games: {{user.games}}</p>
-              <p class="card-text">Goals: {{user.goals}}</p>
-            </div>
-        </div>
-
-      </div>
         </div>
     </div>
-    <div class="col-lg-4 " >
+    <div class="col-lg-4 ">
 
-      <h1> <b>MY TEAMS</b> </h1>
-      <div style="width: 30vw; height: 30vw; overflow: auto;">
-        <ul id="ul" class="list-group">
-          {% if user.teamuser_set.all %}
-            {% for teamuser in user.teamuser_set.all %}
-            <div id="daStuff{{teamuser.team.pk}}" class="modal fade" role="dialog">
-              <div class="modal-dialog">
-                <!-- Modal content-->
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  </div>
-                  <div class="modal-body">
-                    <h1 class="text-secondary text-center">
-                      <b>
-                        FIND REPLACEMENT
-                      </b>
-                    </h1>
+        <h1> <b>MY TEAMS</b> </h1>
+        <div style="width: 30vw; height: 30vw; overflow: auto;">
+            <ul id="ul" class="list-group">
+                {% if user.teamuser_set.all %}
+                {% for teamuser in user.teamuser_set.all %}
+                <div id="daStuff{{teamuser.team.pk}}" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <h1 class="text-secondary text-center">
+                                    <b>
+                                        FIND REPLACEMENT
+                                    </b>
+                                </h1>
 
 
-                        <p class="text-secondary">Name:
-                          <input type="text" class="form-control text-center" id="name|{{teamuser.team.pk}}" style="width: 50%; " >
+                                <p class="text-secondary">Name:
+                                    <input type="text" class="form-control text-center" id="name|{{teamuser.team.pk}}" style="width: 50%; ">
 
-                         </p>
-                        <p class="text-secondary">Email:
-                          <input type="text" class="form-control text-center" id="email|{{teamuser.team.pk}}" style="width: 50%;  " >
-                        </p>
+                                </p>
+                                <p class="text-secondary">Email:
+                                    <input type="text" class="form-control text-center" id="email|{{teamuser.team.pk}}" style="width: 50%;  ">
+                                </p>
 
-                        <p class="text-secondary">Phone:
-                          <input type="number" class="form-control text-center" id="phone|{{teamuser.team.pk}}" style="width: 35%; ">
-                         </p>
-                        <p class="text-secondary">Until:
-                          <input type="date" class="form-control text-center" id="until|{{teamuser.team.pk}}" style="width: 35%; ">
-                        </p>
+                                <p class="text-secondary">Phone:
+                                    <input type="number" class="form-control text-center" id="phone|{{teamuser.team.pk}}" style="width: 35%; ">
+                                </p>
+                                <p class="text-secondary">Until:
+                                    <input type="date" class="form-control text-center" id="until|{{teamuser.team.pk}}" style="width: 35%; ">
+                                </p>
 
-                        <br>
-                        <button id="{{teamuser.team.pk}}" class="btn btn-light btn-outline-secondary replace" data-toggle="modal" data-target="#daStuff{{teamuser.team.name}}">
-                          <span  class="spinner-border spinner-border-sm" hidden="true"></span>
-                          Save
-                        </button>
+                                <br>
+                                <button id="{{teamuser.team.pk}}" class="btn btn-light btn-outline-secondary replace" data-toggle="modal" data-target="#daStuff{{teamuser.team.name}}">
+                                    <span class="spinner-border spinner-border-sm" hidden="true"></span>
+                                    Save
+                                </button>
 
-                  </div>
-                  <div class="modal-footer">
-                    <select class="" name="">
-                        {% for elem in teamuser.team.tournament.reserves.all %}
-                        <option value="" selected>{{elem.username}}</option>
+                            </div>
+                            <div class="modal-footer">
+                                <select class="" name="">
+                                    {% for elem in teamuser.team.tournament.reserves.all %}
+                                    <option value="" selected>{{elem.username}}</option>
 
-                        {% endfor %}
+                                    {% endfor %}
 
-                    </select>
+                                </select>
 
-                      <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
-                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                        Ask for a tournament reservation
-                      </button>
-                  </div>
+                                <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
+                                    <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                                    Ask for a tournament reservation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
 
 
 
-              <li class="groupList list-group-item">
-                <a class="text-danger" href="/tournaments/{{teamuser.team.tournament.id}}/">
-                  {{teamuser.team.tournament.name}}
-                </a>
-                <ul>
-                    <li class="groupList list-group-item">
-                       <a class="text-muted" href="/teams/profile/{{teamuser.team.id}}/">
-                         {{teamuser.team.name}}
-                          </a>
-                        <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{teamuser.team.pk}}">
-                          <span  class="spinner-border spinner-border-sm " hidden="true"></span>
-                          Ask for replacement
-                        </button>
+                <li class="groupList list-group-item">
+                    <a class="text-danger" href="/tournaments/{{teamuser.team.tournament.id}}/">
+                        {{teamuser.team.tournament.name}}
+                    </a>
+                    <ul>
+                        <li class="groupList list-group-item">
+                            <a class="text-muted" href="/teams/profile/{{teamuser.team.id}}/">
+                                {{teamuser.team.name}}
+                            </a>
+                            <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{teamuser.team.pk}}">
+                                <span class="spinner-border spinner-border-sm " hidden="true"></span>
+                                Ask for replacement
+                            </button>
 
-                     </li>
-                </ul>
-              </li>
-            {% endfor %}
-          {% else %}
-              <li class="groupList list-group-item">No Teams and Tournaments found</li>
-          {% endif %}
-        </ul>
-      </div>
+                        </li>
+                    </ul>
+                </li>
+                {% endfor %}
+                {% else %}
+                <li class="groupList list-group-item">No Teams and Tournaments found</li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
     <div class="col-lg-4">
-      <div class="centered">
+        <div class="centered">
 
-        <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
-      </div>
+            <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark mt-3 rounded" style="width:350px; height:auto">Back</button>
+        </div>
 
     </div>
-  </div>
+</div>
 
 
 {% endblock %}

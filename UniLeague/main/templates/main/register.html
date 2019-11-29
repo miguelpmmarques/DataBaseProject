@@ -3,63 +3,63 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-  {% if messages %}
-    {% for men in messages %}
-    <div class="alert alert-danger" role="alert">
-      {{men}}
-    </div>
-    {% endfor%}
-    {% endif %}
-  <div class="row mb-5">
-      <div class="col mt-auto text-center"></div>
+{% if messages %}
+{% for men in messages %}
+<div class="alert alert-danger" role="alert">
+    {{men}}
+</div>
+{% endfor%}
+{% endif %}
+<div class="row m-5">
+    <div class=" col mt-auto text-center"></div>
 
-      <div class="col-8 m-auto form-group">
-        <div class="text-center">
-          <label style="font-size:80px; color:black;">Registration</label>
+    <div class="col-8 m-auto form-group">
+        <div class="text-center mb-3">
+            <label style="font-size:80px; color:black;">Registration</label>
         </div>
         <!-- GENDER RADIO-BUTTONS -->
         <form method="post" class="m-auto">
-          {% csrf_token %}
+            {% csrf_token %}
 
-          <!-- FIRST AND LAST NAME -->
-          <div class="form-inline w-100">
-            <input type="text" class="form-control text-center mr-4" style="width: 48%; " name="first_name" maxlength="512" required id="id_first_name" placeholder="First Name">
-            <input type="text" class="form-control text-center " style="width: 48%; " name="last_name" maxlength="512" required id="id_last_name" placeholder="Last Name">
-          </div>
-          <p></p>
+            <!-- FIRST AND LAST NAME -->
+            <div class="form-inline w-100">
+                <input type="text" class="form-control text-center mr-4" style="width: 48%; " name="first_name" maxlength="512" required id="id_first_name" placeholder="First Name">
+                <input type="text" class="form-control text-center " style="width: 48%; " name="last_name" maxlength="512" required id="id_last_name" placeholder="Last Name">
+            </div>
+            <p></p>
 
-          <!-- PASSWORD AND CONFIRM PASS -->
-          <div class="form-inline w-100">
-            <input type="password" class="form-control text-center mr-4" name="password1" required id="id_password1" style="width: 48%; " placeholder="Password">
-            <input type="password" class="form-control text-center" name="password2" required id="id_password2" style="width: 48%; " placeholder="Confirm Password">
-          </div>
-          <p></p>
+            <!-- PASSWORD AND CONFIRM PASS -->
+            <div class="form-inline w-100">
+                <input type="password" class="form-control text-center mr-4" name="password1" required id="id_password1" style="width: 48%; " placeholder="Password">
+                <input type="password" class="form-control text-center" name="password2" required id="id_password2" style="width: 48%; " placeholder="Confirm Password">
+            </div>
+            <p></p>
 
-          <!-- EMAIL AND CC -->
-          <div class="form-inline w-100">
-            <input type="email" class="form-control text-center mr-4" style="width: 71%; " name="email" maxlength="254" required id="id_email" placeholder="Email">
-            <input type="number" class="form-control text-center" style="width: 25%; "name="citizen_card"  min="-9223372036854775808" max="9223372036854775807" required id="id_citizen_card" placeholder="CC">
-          </div>
-          <p></p>
+            <!-- EMAIL AND CC -->
+            <div class="form-inline w-100">
+                <input type="email" class="form-control text-center mr-4" style="width: 71%; " name="email" maxlength="254" required id="id_email" placeholder="Email">
+                <input type="number" class="form-control text-center" style="width: 25%; " name="citizen_card" min="-9223372036854775808" max="9223372036854775807" required id="id_citizen_card" placeholder="CC">
+            </div>
+            <p></p>
 
-          <!-- USERNAME AND PHONE -->
-          <div class="form-inline w-100">
-            <input type="text" class="form-control text-center mr-4" style="width: 71%; " name="username" maxlength="150" autofocus required id="id_username"placeholder="Username">
-            <input type="tel" class="form-control text-center" style="width: 25%;" name="phone" maxlength= "128" id="id_phone" placeholder="Phone">
-          </div>
+            <!-- USERNAME AND PHONE -->
+            <div class="form-inline w-100">
+                <input type="text" class="form-control text-center mr-4" style="width: 71%; " name="username" maxlength="150" autofocus required id="id_username" placeholder="Username">
+                <input type="tel" class="form-control text-center" style="width: 25%;" name="phone" maxlength="128" id="id_phone" placeholder="Phone">
+            </div>
 
-          <p></p>
+            <p></p>
 
-          <div class="text-center">
-          <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark rounded margin" style="width:350px; height:auto">Back</button>
-          <button type="submit" class="btn btn-dark rounded" style="width:350px; height:auto;">Register</button>
-        </div>
+            <div class="text-center">
+                <button type="button" onclick="window.location.href='{{request.META.HTTP_REFERER}}'" class="btn btn-dark rounded margin" style="width:350px; height:auto">Back</button>
+                <button type="submit" class="btn btn-dark rounded" style="width:350px; height:auto;">Register</button>
+            </div>
         </form>
 
-      </div>
+    </div>
 
-      <div class="col">
-      </div>
+    <div class="col">
+    </div>
 
     <!-- BUTTONS   -->
     <div class="container mt-5 text-center w-100 float-center">
@@ -68,6 +68,6 @@
         <!-- <button type="button" class="btn btn-dark  rounded" style="width:45%; height:auto;">Register</button> -->
     </div>
 
-  </div>
+</div>
 
-  {% endblock %}
+{% endblock %}

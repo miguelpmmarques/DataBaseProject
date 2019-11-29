@@ -5,10 +5,12 @@
 
 <!DOCTYPE html>
 <html>
+{% block title %}
+<title>UniLeague</title>
+{% endblock %}
 
 <head>
     <meta charset="utf-8">
-    <title>MAIN MENU</title>
 </head>
 
 <body>
@@ -26,12 +28,14 @@
                 {% if users %}
                 {% regroup users by player as user_list %}
                 {% for player in user_list %}
-                  <ul class="groupList list-group-item">{{player.grouper.first_name}} {{player.grouper.last_name}} teams:
-                        {% for team in player.list %}
-                          <a href="/teams/profile/{{team.id}}"><li id="userlistDaStuff" class="groupList list-group-item">{{team.team.name}}</li></a>
-                        {% endfor %}
-                  </ul>
-                  <p></p>
+                <ul class="groupList list-group-item">{{player.grouper.first_name}} {{player.grouper.last_name}} teams:
+                    {% for team_user in player.list %}
+                    <a href="/teams/profile/{{team_user.team.id}}/">
+                        <li id="userlistDaStuff" class="groupList list-group-item">{{team_user.team.name}}</li>
+                    </a>
+                    {% endfor %}
+                </ul>
+                <p></p>
                 {% endfor %}
                 {% else %}
                 <li class="groupList list-group-item">No Teams found</li>

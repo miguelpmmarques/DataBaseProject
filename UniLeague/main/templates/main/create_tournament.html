@@ -1,7 +1,9 @@
 {% extends 'main/navbar.html' %}
 {% load static %}
 <!-- {% block title %}Create Tournament{% endblock %} -->
-
+{% block title %}
+<title>Create Tournament</title>
+{% endblock %}
 
 {% block imports %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha256-siyOpF/pBWUPgIcQi17TLBkjvNgNQArcmwJB8YvkAgg=" crossorigin="anonymous" />
@@ -11,110 +13,120 @@
 {% block content %}
 {% block body %}
 <br>
-<form method="post" class="text-center m-auto" enctype="multipart/form-data">
-    <h1><b>CREATE TOURNAMENT</b></h1>
-    {% csrf_token %}
+<div class="card bg-dark text-center m-auto" style="max-width:40%; height:60%;margin:auto;border-radius:5vw">
+    <h1 class="text-center font-weight-bold bg-secondary pt-3 pb-3 mt-2" style="text-shadow: 4px 4px #000000;margin-left:10%;margin-right:10%;border-radius:25vw;"><b>CREATE TOURNAMENT</b></h1>
+    <form method="post" class="text-center mx-auto mt-2 mb-5" enctype="multipart/form-data">
+        {% csrf_token %}
 
-    <div class="alert alert-warning alert-dismissible fade show" id="alert" role="alert" hidden>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
+        <div class="alert alert-warning alert-dismissible fade show" id="alert" role="alert" hidden>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
 
-    <!-- TEST CAROUSEL -->
-    <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval=false>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <div class="container m-auto text-center align-center">
-                    {% for k, v in labels.items %}
-                    {% if k == "name" %}
-                    <input type="{{v.type}}" class="mt-3 mr-5 w-50 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
-                    {% elif k == "number_teams" %}
-                    <input type="{{v.type}}" class="mt-3 mr-5 w-50 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
-                    {% elif k == "number_of_hands" %}
-                    <input type="{{v.type}}" class="mt-3 mr-5 w-50 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-
-                <div class="container">
-                    {% for k, v in labels.items %}
-                    {% if k == "fields" %}
-                    <br><label for="{{k}}">{{v.value}}:</label><br>
-                    <select name="{{k}}" multiple>
-                        {% for field in v.choices %}
-                        <option value="{{field.id}}">{{field.name}}</option>
-                        {% endfor %}
-                    </select>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="carousel-item">
-                <div class="container mx-auto text-center justify-content-center">
-                    {% for k, v in labels.items %}
-                    {% if k == "beginTournament" %}
-                    <br><label for="{{k}}" class="mt-5 text-center mx-auto">{{v.value}}:</label><br>
-                    <input type="{{v.type}}" class="mt-2 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
-                    {% elif k == "endTournament" %}
-                    <br><label for="{{k}}" class="mt-5 text-center">{{v.value}}:</label><br>
-                    <input type="{{v.type}}" class="mt-2 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
-
-                    {% elif k == "game_week_days" %}
-
-                    <label for="{{k}}" class="mt-5">{{v.value}}:</label><br>
-                    <fieldset id="{{k}}" name="{{k}}">
-                        {% for elem in v.choices %}
-                        <input type="{{v.type}}" name="{{elem}}" id="{{elem}}">{{elem}} </input>
-                        {% endfor %}
-                    </fieldset>
-
-
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="carousel-item">
-
-                <div class="row">
-                    <div class="col"></div>
-                    <div class="col-2 mx-auto">
+        <!-- TEST CAROUSEL -->
+        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval=false>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="container m-auto text-center align-center">
                         {% for k, v in labels.items %}
+                        {% if k == "name" %}
+                        <input type="{{v.type}}" class="rcorners_input mt-3 mr-5 ml-5 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+                        {% elif k == "number_teams" %}
+                        <input type="{{v.type}}" class="rcorners_input mt-3 mr-5 ml-5 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+                        {% elif k == "number_of_hands" %}
+                        <input type="{{v.type}}" class="rcorners_input mt-3 mr-5 ml-5 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
 
-                        {% if k == "days_without_games" %}
-                        <br><label for="datepicker" class="mt-2 mr-3">{{v.value}}:</label>
 
-                        <div id="datepicker" class="mt-2" name="datepicker">
-                            <input type="text" class="form-control" hidden="true" name="{{k}}">
 
+                    <div class="container">
+                        {% for k, v in labels.items %}
+                        {% if k == "fields" %}
+                        <br><label for="{{k}}">{{v.value}}:</label><br>
+                        <select class="custom-select m-auto" name="{{k}}" style="max-width:60%;" multiple>
+                            {% for field in v.choices %}
+                            <option value="{{field.id}}">{{field.name}}</option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="container mx-auto text-center justify-content-center">
+                        {% for k, v in labels.items %}
+                        {% if k == "beginTournament" %}
+                        <br><label for="{{k}}" class=" mt-2 text-center mx-auto">{{v.value}}:</label><br>
+                        <input type="{{v.type}}" class="rcorners_input mt-2 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input>
+                        {% elif k == "endTournament" %}
+                        <br><label for="{{k}}" class="mt-5 text-center">{{v.value}}:</label><br>
+                        <input type="{{v.type}}" class="rcorners_input mt-2 text-center" name="{{k}}" id="{{k}}" required placeholder="{{v.value}}"></input><br>
+
+                        {% elif k == "game_week_days" %}
+                        {{elem|make_list|first}}
+                        <div class="card bg-secondary mt-4 p-3" style="border-radius:1vw;">
+                            <label for="{{k}}" class="mt-1">{{v.value}}:</label><br>
+                            <fieldset id="{{k}}" name="{{k}}">
+                                {% for elem in v.choices %}
+                                <label for="{{elem}}" class="pl-3">{{elem|make_list|first}}</label>
+                                <input type="{{v.type}}" class="btn btn-light active mt-3" name="{{elem}}" id="{{elem}}" value="{{elem}}"></input>
+                                <span class="glyphicon glyphicon-ok"></span>
+                                {% endfor %}
+                            </fieldset>
                         </div>
+
 
                         {% endif %}
                         {% endfor %}
-                        <!-- <button type="submit" class="mt-2" id="create">Create Tournament</button> -->
-                        <button type="submit" class="btn btn-light btn-outline-secondary" id="create">
-
-                            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                            Create Tournament
-
-                        </button>
                     </div>
-                    <div class="col"></div>
+                </div>
+                <div class="carousel-item">
+
+                    <div class="row">
+                        <div class="col"></div>
+                        <div class="card bg-secondary">
+                            <div class="col mx-auto">
+                                {% for k, v in labels.items %}
+
+                                {% if k == "days_without_games" %}
+                                <br><label for="datepicker" class="mt-2 bg-light p-3 text-dark" style="border-radius:25vw;">{{v.value}}:</label>
+
+                                <div id="datepicker" class="ml-2" name="datepicker">
+                                    <input type="text" class="form-control" hidden="true" name="{{k}}">
+
+                                </div>
+
+                                {% endif %}
+                                {% endfor %}
+                                <!-- <button type="submit" class="mt-2" id="create">Create Tournament</button> -->
+                            </div>
+                            <button type="submit" class="btn btn-light btn-outline-dark" id="create">
+
+                                <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                                Create Tournament
+
+                            </button>
+                        </div>
+                        <div class="col"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
-    </div>
 
 
-</form>
+    </form>
+    <a class="carousel-control-prev float-left" href="#carouselExampleControls" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next float-right" href="#carouselExampleControls" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>
 
 
 </div>

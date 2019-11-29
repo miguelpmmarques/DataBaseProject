@@ -1,6 +1,8 @@
 {% extends 'main/navbar.html' %}
 {% load static %}
-
+{% block title %}
+<title>Calendar</title>
+{% endblock %}
 {% block body %}
 <link rel="stylesheet" href="{% static 'CSS/calendar.css' %}">
 <div class="clearfix">
@@ -17,7 +19,8 @@
     {{men}}
 </div>
 {% endfor %}
-{% else %}
-{{calendar}}
 {% endif %}
+<div class="card bg-dark" id="cal">
+    {{calendar}}
+</div>
 {% endblock %}

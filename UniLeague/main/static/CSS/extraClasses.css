@@ -2,6 +2,12 @@
     background-image: url("../assets/background_resize.jpg");
     /* background-image: radial-gradient(circle, #ff785a, #c7576a, #834363, #433146, #191919); */
     overflow-x: hidden;
+    background-color: rgba(46, 54, 53, 0.4);
+    background-blend-mode: darken;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
 }
 
 .menuButton {
@@ -208,15 +214,15 @@ a:hover {
 }
 
 .customList {
-  font-size: 14px;
-  font-weight: bold;
-  color: black;
-  text-decoration:none;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    text-decoration: none;
 }
 
 .customList:hover {
-  font-size: 14px;
-  font-weight: bold;
-  color: black;
-  text-decoration:none;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    text-decoration: none;
 }

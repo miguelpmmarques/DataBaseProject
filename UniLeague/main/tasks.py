@@ -8,6 +8,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils import timezone
 from django.db import transaction
 from django.db import IntegrityError
+from django.db.models import F
 
 
 from UniLeague.celery import app
@@ -56,7 +57,12 @@ app.conf.beat_schedule = {
     },
     "check_games_results": {
         "task": "check_games_results",
-        "schedule": crontab(),
+        "schedule": crontab(hour=0, minute=0),
+        "args": (),
+    },
+    "check_for_negative_budget": {
+        "task": "check_for_negative_budget",
+        "schedule": crontab(hour=0, minute=0),
         "args": (),
     },
 }
@@ -100,6 +106,7 @@ def erase_timeslots(self):
                 empty_slot.delete()
     except IntegrityError:
         raise self.retry()
+    return True
 
 
 @app.task(
@@ -120,6 +127,7 @@ def deactivate_ended_tournaments(self):
                 elem.save()
     except IntegrityError:
         raise self.retry()
+    return True
 
 
 @app.task(
@@ -130,12 +138,10 @@ def deactivate_ended_tournaments(self):
     default_retry_delay=60,
 )
 def send_notification_for_absences(self):
-    print("oi atão!")
     try:
         with transaction.atomic():
             absentees = TeamUser.objects.filter(absences__gte=5)
             for elem in absentees:
-                print(elem)
                 notification = Notifications.objects.filter(
                     title="The user "
                     + elem.player.username
@@ -158,6 +164,7 @@ def send_notification_for_absences(self):
 
     except IntegrityError:
         raise self.retry()
+    return True
 
 
 @app.task(
@@ -181,13 +188,13 @@ def verify_hierarchy(self):
 
     except IntegrityError:
         raise self.retry()
+    return True
 
 
 def change_lineup_hierarchy_points(parser):
     players = TeamUser.objects.filter(position__name__icontains=parser)
     count_starters = players.filter(position__start=True).count()
     ordered_players = players.order_by("-player__hierarchy")
-    print(ordered_players)
     for i in range(players.count()):
         if i <= count_starters:
             ordered_players[i].position.start = True
@@ -208,11 +215,17 @@ def check_games_results(self):
         with transaction.atomic():
             finished_games = Game.objects.filter(timeslot__start_time__lte=today)
             for game in finished_games:
+                # updating user budgets
+                game.users_set.all().update(budget=F("budget") - game.cost)
                 results = game.result_set.all()
                 if not results.filter(is_final=True).exists():
                     first_result = results.first()
                     second_result = results.last()
-                    if first_result and second_result:
+                    if (
+                        first_result
+                        and second_result
+                        and (first_result != second_result)
+                    ):
                         results_equal = compareResults(first_result, second_result)
                         if results_equal:
                             first_result.is_final = True
@@ -244,22 +257,51 @@ def check_games_results(self):
                                 notification.save()
                                 print(notification)
     except IntegrityError:
-        return False
+        raise self.retry()
     return True
 
 
 def compareResults(f, s):
-    if f.home_score == f.home_score and f.away_score == f.away_score:
-        goals_f = f.goal_set.all().order_by("-time")
-        goals_s = s.goal_set.all().order_by("-time")
-        count = 0
-        if goals_f.count() == goals_s.count():
-            for i in range(goals_f.count()):
-                if (
-                    goals_f[i].scorer.pk == goals_s[i].scorer.pk
-                    and goals_f[i].time == goals_s[i].time
-                ):
-                    count += 1
-        if count == goals_f.count():
-            return True
+    if f and s and f != s:
+        if f.home_score == f.home_score and f.away_score == f.away_score:
+            goals_f = f.goal_set.all().order_by("-time")
+            goals_s = s.goal_set.all().order_by("-time")
+            count = 0
+            if goals_f.count() == goals_s.count():
+                for i in range(goals_f.count()):
+                    if (
+                        goals_f[i].scorer.pk == goals_s[i].scorer.pk
+                        and goals_f[i].time == goals_s[i].time
+                    ):
+                        count += 1
+            if count == goals_f.count():
+                return True
         return False
+
+
+@app.task(
+    name="check_for_negative_budget",
+    bind=True,
+    ignore_result=False,
+    task_retries=5,
+    default_retry_delay=60,
+)
+def check_for_negative_budget(self):
+    team_users = TeamUser.objects.filter(budget__lt=0)
+    for team_user in team_users:
+        try:
+            with transaction.atomic():
+                notification = Notifications.objects.get_or_create(
+                    title="Your budget is bellow zero ",
+                    description="<br> <h3>Your budget is"
+                    + str(team_user.budget)
+                    + "</h3><h3>Please pay your bills to your captain.</h3>",
+                    user_send=team_user.player,
+                    origin="System",
+                    html="",
+                )
+                notification.save()
+        except IntegrityError:
+            raise self.retry()
+        print(notification)
+        return True
