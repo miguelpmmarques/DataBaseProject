@@ -1056,6 +1056,38 @@ class replaceMember(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
+class replaceSubseserve(APIView):
+    queryset = Team.objects.all()
+    serializer_class = TournamentSerializer
+    permission_classes = [IsAuthenticated]
+    allowed_methods = "PATCH"
+
+    def patch(self, request, *args, **kwargs):
+
+        user = request.data["user"]
+        replace = request.data["replace"]
+        team = request.data["team"]
+
+        instance = CustomUser.objects.get(pk=user)
+        instance2 = CustomUser.objects.get(pk=replace)
+        instance3 = Team.objects.get(pk=team)
+
+        Notifications.objects.create(
+            title="Replace a player in tournament ",
+            description="<h3>You are going to replace the user "
+            + instance.username
+            + " in the team "
+            + instance3.name
+            + " from the tournament "
+            + instance3.tournament.name
+            + ".</h3>",
+            user_send=instance2,
+            origin="System",
+        ).save()
+
+        return Response("Done")
+
+
 class addReserve(APIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
