@@ -93,10 +93,12 @@
                             </button>
                             <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class="fa fa-user-times" aria-hidden="true"></i></button>
                             {% elif thisUser == elem %}
+                            {% if elem.position.start %}
                             <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                                Request captain to change position
+                                BECOME SUBSTITUTE
                             </button>
+                            {% endif %}
                             <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true"></i></button>
                             {% endif %}
                         </li>

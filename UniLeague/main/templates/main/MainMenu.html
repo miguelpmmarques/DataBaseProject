@@ -37,7 +37,7 @@
             <ul id="list_captains" class="list-group margin">
                 {% if teamCaptain.all %}
                 {% for team in teamCaptain.all %}
-                <a href="/users/profile/{{team.captain.id}}/">
+                <a href="/users/profile/{{team.player.id}}/">
                     <li class="groupList list-group-item">{{team.player.username}}</li>
                 </a>
                 {% endfor %}

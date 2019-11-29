@@ -28,6 +28,25 @@
       Tournament Calendar
     </button>
 
+    <h3>RESERVES:</h3>
+    <div class="">
+
+    {% if tournament.reserves.all %}
+    <ul id="teams_tournament" class="list-group margin">
+
+        {% for user in tournament.reserves.all %}
+        <a href="/users/profile/{{user.id}}/">
+            <li class="groupList list-group-item">{{user.username}}</li>
+        </a>
+        {% endfor %}
+
+    </ul>
+    {% else %}
+    <li class="groupList list-group-item">No Teams found</li>
+    {% endif %}
+  </div>
+
+
   </div>
 
   <div class="col-sm-9">
@@ -65,7 +84,7 @@
       </table>
 
 
-      
+
 
     </div>
 

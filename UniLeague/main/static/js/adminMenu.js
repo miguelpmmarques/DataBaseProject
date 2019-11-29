@@ -44,13 +44,16 @@ function main() {
         }
     });
     var lis = document.getElementsByName("users_li");
+    console.log(lis);
     for (elem of lis) {
         elem.addEventListener("click", function(e) {
             console.log("CURRR===", e.currentTarget);
             console.log("TAR===", e.target.disabled);
 
             if (e.target.getAttribute("name") === "users_li") {
-                window.location.href = `/users/profile/${e.currentTarget.id}/`
+              alert(e.target.id)
+
+                window.location.href = `/users/profile/${e.target.id}/`
 
             } else if (e.target.disabled === undefined) {
 

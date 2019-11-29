@@ -56,7 +56,12 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                   </div>
                   <div class="modal-body">
-                    <h1 class="text-secondary">FIND REPLACEMENT</h1>
+                    <h1 class="text-secondary text-center">
+                      <b>
+                        FIND REPLACEMENT
+                      </b>
+                    </h1>
+
 
                         <p class="text-secondary">Name:
                           <input type="text" class="form-control text-center" id="name|{{teamuser.team.pk}}" style="width: 50%; " >
@@ -81,6 +86,13 @@
 
                   </div>
                   <div class="modal-footer">
+                    <select class="" name="">
+                        {% for elem in teamuser.team.tournament.reserves.all %}
+                        <option value="" selected>{{elem.username}}</option>
+
+                        {% endfor %}
+
+                    </select>
 
                       <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
                         <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>

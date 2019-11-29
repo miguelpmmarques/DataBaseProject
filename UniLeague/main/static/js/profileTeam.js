@@ -27,6 +27,23 @@ function main() {
     }
 
     try {
+      var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
+      console.log(convocatoria);
+      convocatoria.addEventListener("click", function(e) {
+
+          e.preventDefault();
+          sendNotifications(this.id);
+      });
+      var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+      for (var i = 0; i < changePosition.length; i++) {
+
+        changePosition[i].addEventListener("click", function(e) {
+          e.preventDefault();
+          console.log("Clicou");
+          changePositionSubs(this.id.split("|"));
+
+        });
+      }
     var options = document.getElementById("exampleFormControlSelect1");
     var captain = options.value;
     var changeCaptain = document.getElementById("changeCaptain");
@@ -37,16 +54,6 @@ function main() {
         }
     });
 
-    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-    for (var i = 0; i < changePosition.length; i++) {
-
-        changePosition[i].addEventListener("click", function(e) {
-            e.preventDefault();
-            console.log("Clicou");
-            changePositionSubs(this.id.split("|"));
-
-        });
-    }
 
     var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
     for (var i = 0; i < saveInfo.length; i++) {
@@ -58,15 +65,24 @@ function main() {
 
         });
     }
-    var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
-    console.log(convocatoria);
-    convocatoria.addEventListener("click", function(e) {
 
-        e.preventDefault();
-        sendNotifications(this.id);
-    });
   }
   catch(err) {
+    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+    for (var i = 0; i < changePosition.length; i++) {
+
+      changePosition[i].addEventListener("click", function(e) {
+        e.preventDefault();
+        console.log("Clicou");
+        var r = confirm("ARE YOU SURE?\nIF YOU CONTINUE, ONLY THE CAPTAIN CAN MOVE YOU BACK TO STARTER");
+        if (r == true) {
+            changePositionSubs(this.id.split("|"));
+        }
+        return;
+
+
+      });
+    }
     console.log("not captain");
   }
 }
@@ -118,6 +134,7 @@ function saveBudgetAbsences(mypk) {
 }
 
 function changePositionSubs(mypk) {
+  console.log("CLICOU");
     data = {
         "playerpk": mypk[0],
         "teampk": mypk[1]

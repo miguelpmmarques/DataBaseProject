@@ -40,6 +40,7 @@ function createReserveFunction(tournamentpk){
           success: function(d) {
               if (d === "Done") {
                   console.log("Done");
+                  window.location = ''
               }
           },
       })

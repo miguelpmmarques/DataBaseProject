@@ -311,10 +311,11 @@ class ProfileView(generic.DetailView):
     template_name = "main/profile.html"
     model = CustomUser
 
-
-class ProfileView(generic.DetailView):
-    template_name = "main/profile.html"
-    model = CustomUser
+    def get(self, request, pk):
+        user = CustomUser.objects.get(pk=pk)
+        return render(
+            request, template_name=self.template_name, context={"user": user},
+        )
 
 
 class CreateTeam(generic.CreateView):
@@ -1055,23 +1056,21 @@ class replaceMember(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
-class addReserve(generics.RetrieveUpdateAPIView):
+class addReserve(APIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
     permission_classes = [IsAuthenticated]
+    allowed_methods = "PATCH"
 
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         tournamentpk = kwargs.pop("tournamentpk", False)
 
-        print("Chegou")
         instance = Tournament.objects.get(pk=tournamentpk)
         listReserves = instance.reserves
         listReserves.add(request.user)
+        instance.save()
 
-        serializer = self.get_serializer(
-            instance, {"reserves": listReserves}, partial=True
-        )
-
+        print("Chegou")
         Notifications.objects.create(
             title="NEW RESERVE IN YOUT TOURNAMENT " + instance.name,
             description="<h3>The user "
@@ -1085,10 +1084,6 @@ class addReserve(generics.RetrieveUpdateAPIView):
             origin="System",
         ).save()
 
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        if getattr(instance, "_prefetched_objects_cache", None):
-            instance._prefetched_objects_cache = {}
         return Response("Done")
 
 
