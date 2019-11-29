@@ -19,6 +19,9 @@ from .models import TimeSlot
 from .models import Tournament
 from .models import TeamUser
 from .models import Team
+from .models import Game
+from .models import Result
+
 from .tokens import account_activation_token
 
 
@@ -46,7 +49,16 @@ app.conf.beat_schedule = {
         "schedule": crontab(hour=0, minute=0),
         "args": (),
     },
-    "verify_hierarchy": {"task": "verify_hierarchy", "schedule": crontab(), "args": ()},
+    "verify_hierarchy": {
+        "task": "verify_hierarchy",
+        "schedule": crontab(hour=0, minute=0),
+        "args": (),
+    },
+    "check_games_results": {
+        "task": "check_games_results",
+        "schedule": crontab(),
+        "args": (),
+    },
 }
 
 
@@ -138,7 +150,7 @@ def send_notification_for_absences(self):
                         + " has "
                         + str(elem.absences)
                         + " absences",
-                        description="<br> Please go to your administration menu if you want to blacklist him/her.",
+                        description="<br> <h3>Please go to your administration menu if you want to blacklist him/her.</h3>",
                         user_send=CustomUser.objects.get(is_superuser=True),
                         origin="System",
                     ).save()
@@ -181,3 +193,73 @@ def change_lineup_hierarchy_points(parser):
             ordered_players[i].position.start = True
         else:
             ordered_players[i].position.start = False
+
+
+@app.task(
+    name="check_games_results",
+    bind=True,
+    ignore_result=False,
+    task_retries=5,
+    default_retry_delay=60,
+)
+def check_games_results(self):
+    today = timezone.now()
+    try:
+        with transaction.atomic():
+            finished_games = Game.objects.filter(timeslot__start_time__lte=today)
+            for game in finished_games:
+                results = game.result_set.all()
+                if not results.filter(is_final=True).exists():
+                    first_result = results.first()
+                    second_result = results.last()
+                    if first_result and second_result:
+                        results_equal = compareResults(first_result, second_result)
+                        if results_equal:
+                            first_result.is_final = True
+                            first_result.save()
+                        else:
+
+                            tournament_manager = game.tournament.tournament_manager
+                            try:
+                                notification = Notifications.objects.get(
+                                    title="The game "
+                                    + game.timeslot.title
+                                    + " has conflicts in the results set by both captains."
+                                )
+                            except Notifications.DoesNotExist:
+                                home_captain = game.home_team.teamuser_set.filter(
+                                    isCaptain=True
+                                ).first()
+                                notification = Notifications.objects.create(
+                                    title="The game "
+                                    + game.timeslot.title
+                                    + " has conflicts in the results set by both captains.",
+                                    description="<br> <h3>Please correct this error.<h3>",
+                                    user_send=game.tournament.tournament_manager,
+                                    origin="System",
+                                    html='<button type="button" class="btn btn-dark" onclick=window.location.href="/games/'
+                                    + str(game.pk)
+                                    + '/">Verify Result</button>',
+                                )
+                                notification.save()
+                                print(notification)
+    except IntegrityError:
+        return False
+    return True
+
+
+def compareResults(f, s):
+    if f.home_score == f.home_score and f.away_score == f.away_score:
+        goals_f = f.goal_set.all().order_by("-time")
+        goals_s = s.goal_set.all().order_by("-time")
+        count = 0
+        if goals_f.count() == goals_s.count():
+            for i in range(goals_f.count()):
+                if (
+                    goals_f[i].scorer.pk == goals_s[i].scorer.pk
+                    and goals_f[i].time == goals_s[i].time
+                ):
+                    count += 1
+        if count == goals_f.count():
+            return True
+        return False

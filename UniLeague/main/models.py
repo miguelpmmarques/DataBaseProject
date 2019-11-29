@@ -127,7 +127,6 @@ class Notifications(BaseAbstractModel):
     origin = models.CharField(max_length=512, unique=False, null=True, blank=False)
     html = models.TextField(default="", blank=True)
 
-
     class Meta:
         db_table = "Notifications"
         verbose_name = "Notificacao"
@@ -170,7 +169,6 @@ class Tournament(BaseAbstractModel):
         upload_to="users/%Y/%m/%d/", blank=True, null=True
     )
     reserves = models.ManyToManyField(CustomUser, related_name="reservas", blank=True)
-
 
     class Meta:
         db_table = "Tournament"
@@ -316,7 +314,6 @@ class Goal(BaseAbstractModel):
         verbose_name = "Golo"
         verbose_name_plural = "Golos"
         ordering = ["-time"]
-
 
     def __str__(self):
         return str(self.scorer) + " (" + str(self.time) + "')"

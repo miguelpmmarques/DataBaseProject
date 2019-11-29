@@ -81,6 +81,7 @@ from .serializers import ResultSerializer
 
 from .tokens import account_activation_token
 from .tasks import ask_admin_for_permissions
+from .tasks import compareResults
 from .forms import CustomUserForm
 from .forms import TournamentCreationForm
 from .forms import TeamCreationForm
@@ -264,13 +265,13 @@ class TeamView(generic.DetailView):
 
         try:
             context = {
-                "captain": CustomUser.objects.get(
+                "captain": CustomUser.objects.filter(
                     pk__in=list(
                         TeamUser.objects.filter(team__pk=team_selected.pk)
                         .filter(isCaptain=True)
                         .values_list("player", flat=True)
                     )
-                ),
+                ).first(),
                 "myTeam": team_selected,
                 "thisUser": thisUser,
                 "player_position": TeamUser.objects.filter(team__pk=team_selected.pk),
@@ -287,7 +288,8 @@ class TeamView(generic.DetailView):
                 ).values_list("position", flat=True),
             }
             return render(request, template_name=self.template_name, context=context)
-        except Exception:
+        except Exception as err:
+            print("err===", err)
             raise Http404
 
 
@@ -305,11 +307,6 @@ class NotificationsView(generic.DetailView):
                 context={"notifications": notification},
             )
         return HttpResponseRedirect(reverse("main:login-view"))
-
-
-class ProfileView(generic.DetailView):
-    template_name = "main/profile.html"
-    model = CustomUser
 
 
 class ProfileView(generic.DetailView):
@@ -931,7 +928,6 @@ class CreateGames(generic.CreateView):
         return
 
 
-
 class RestResults(generics.RetrieveUpdateAPIView):
     queryset = Result.objects.all()
     serializer_class = ResultSerializer
@@ -1050,7 +1046,6 @@ class replaceMember(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
-
 class addReserve(generics.RetrieveUpdateAPIView):
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
@@ -1069,14 +1064,14 @@ class addReserve(generics.RetrieveUpdateAPIView):
         )
 
         Notifications.objects.create(
-            title="NEW RESERVE IN YOUT TOURNAMENT "+instance.name,
+            title="NEW RESERVE IN YOUT TOURNAMENT " + instance.name,
             description="<h3>The user "
             + request.user.username
             + " as know as "
             + request.user.first_name
             + " "
             + request.user.last_name
-            +" is a new reserve for your tournament.</h3>",
+            + " is a new reserve for your tournament.</h3>",
             user_send=instance.tournament_manager,
             origin="System",
         ).save()
@@ -1086,6 +1081,7 @@ class addReserve(generics.RetrieveUpdateAPIView):
         if getattr(instance, "_prefetched_objects_cache", None):
             instance._prefetched_objects_cache = {}
         return Response("Done")
+
 
 class changeInfo(generics.RetrieveUpdateAPIView):
     queryset = TeamUser.objects.all()
@@ -1519,7 +1515,6 @@ class TournamentDetailsView(generic.View):
             first_res = res_set.first()
             second_res = res_set.last()
 
-
             if first_res == None or second_res == None:
                 return games_won, goals_scored, tied_games, games_lost, goals_conceded
             print("fr===", first_res)
@@ -1719,19 +1714,27 @@ class GameView(generics.CreateAPIView):
     model = Game
     template_name = "main/game.html"
 
-
-    def get_form(self, pk, is_home_captain, is_away_captain, form_class=None):
+    def get_form(
+        self,
+        pk,
+        is_home_captain,
+        is_away_captain,
+        is_tournament_manager,
+        form_class=None,
+    ):
         """Return an instance of the form to be used in this view."""
 
         form_class, form_class2 = self.get_form_class(
-            pk, is_home_captain, is_away_captain
+            pk, is_home_captain, is_away_captain, is_tournament_manager
         )
         if form_class2:
             return form_class(), form_class2()
         else:
             return form_class(), form_class2
 
-    def get_form_class(self, pk, is_home_captain, is_away_captain):
+    def get_form_class(
+        self, pk, is_home_captain, is_away_captain, is_tournament_manager
+    ):
         """
         The form can only show the workouts belonging to the user.
 
@@ -1743,7 +1746,7 @@ class GameView(generics.CreateAPIView):
         away_team = game.away_team
 
         q_set = None
-        if is_home_captain:
+        if is_home_captain or is_tournament_manager:
             q_set = Goal.objects.filter(result__game__home_team__pk=home_team.pk)
         elif is_away_captain:
             q_set = Goal.objects.filter(result__game__away_team__pk=away_team.pk)
@@ -1767,7 +1770,6 @@ class GameView(generics.CreateAPIView):
 
         return StepForm, form2
 
-
     def get(self, request, pk):
         try:
             pk = int(pk)
@@ -1778,13 +1780,17 @@ class GameView(generics.CreateAPIView):
 
         if selected_game:
             today = timezone.now()
+            print("TIMESLOT===", selected_game.timeslot.start_time)
+            print("now===", today)
+            done = selected_game.timeslot.start_time < today
 
-            done = selected_game.timeslot.start_time > today
-
+            print("HERERERERE===", done)
             if done:
                 final_score = selected_game.result_set.all()
-                if final_score.first() == final_score.last():
-
+                print("FINAL SCORE===", final_score)
+                if compareResults(final_score.first(), final_score.last()):
+                    final_score.first().is_final = True
+                    final_score.first().save()
                     if selected_game:
                         return render(
                             request,
@@ -1794,70 +1800,87 @@ class GameView(generics.CreateAPIView):
                     raise Http404(("Game Does Not Exist"))
                 else:
                     # mandar notify ao admin - dar o link onde ele pode editar o resultado!
-                    Notifications.objects.create(
-                        title="Result Conflitc",
+                    Notifications.objects.get_or_create(
+                        title="The game "
+                        + selected_game.timeslot.title
+                        + " has conflicts in the results set by both captains.",
                         description="<h3>There was a conflict in the final score of "
-                        + selected_game.home_team
+                        + str(selected_game.home_team)
                         + " vs "
-                        + selected_game.away_team
+                        + str(selected_game.away_team)
                         + " in tournament"
                         + selected_game.tournament.name
                         + "</h3><h3>Please Confirm the Correct Result</h3>",
                         user_send=selected_game.tournament.tournament_manager,
+                        html='<button type="button" class="btn btn-dark" onclick=window.location.href="/games/'
+                        + str(selected_game.pk)
+                        + '/">Verify Result</button>',
                         origin="Captain",
-                    ).save()
+                    )
                     messages.error(
                         request,
                         "Erros no resultado. Para apurar o resultado definitivo, por favor contacte o Gestor de Torneio",
                     )
-                    return render(
-                        request,
-                        template_name=self.template_name,
-                        context={"game": selected_game},
-                    )
-
-            else:
-                if selected_game:
-                    home_captain = selected_game.home_team.teamuser_set.filter(
-                        isCaptain=True
+                print("OIOI")
+                home_captain = selected_game.home_team.teamuser_set.filter(
+                    isCaptain=True
+                ).first()
+                print("HOME CAPTAIN===", home_captain)
+                away_captain = selected_game.away_team.teamuser_set.filter(
+                    isCaptain=True
+                ).first()
+                print("AWAY CAPTAIN===", away_captain)
+                # tratar do caso em que n ha capitao
+                is_home_captain = False
+                is_away_captain = False
+                is_tournament_manager = False
+                if request.user.pk == home_captain.player.pk:
+                    is_home_captain = True
+                    result = selected_game.result_set.filter(
+                        captain__pk=home_captain.pk
                     ).first()
-                    away_captain = selected_game.away_team.teamuser_set.filter(
-                        isCaptain=True
+                elif request.user.pk == away_captain.player.pk:
+                    is_away_captain = True
+                    result = selected_game.result_set.filter(
+                        captain__pk=away_captain.pk
                     ).first()
-                    # tratar do caso em que n ha capitao
-                    is_home_captain = False
-                    is_away_captain = False
-                    if request.user.pk == home_captain.player.pk:
-                        is_home_captain = True
-                        result = selected_game.result_set.filter(
-                            captain__pk=home_captain.pk
-                        ).first()
-                    elif request.user.pk == away_captain.player.pk:
-                        is_away_captain = True
-                        result = selected_game.result_set.filter(
-                            captain__pk=away_captain.pk
-                        ).first()
-                    else:
-                        result = None
+                elif request.user.pk == selected_game.tournament.tournament_manager.pk:
 
-                    form, form2 = self.get_form(pk, is_home_captain, is_away_captain)
-                    return render(
-                        request,
-                        template_name=self.template_name,
-                        context={
-                            "game": selected_game,
-
-                            "form": form,
-                            "form2": form2,
-                            "is_home_captain": is_home_captain,
-                            "is_away_captain": is_away_captain,
-                            "result": result,
-                        },
-                    )
-                    raise Http404
-
+                    is_tournament_manager = True
+                    result = selected_game.result_set.filter(
+                        captain__pk=home_captain.pk
+                    ).first()
+                    print("IS TM===", result)
                 else:
-                    return HttpResponse("NO GAME DEFINED")
+                    result = None
+
+                form, form2 = self.get_form(
+                    pk, is_home_captain, is_away_captain, is_tournament_manager
+                )
+                print("FORM===", form)
+                print("FORM2===", form2)
+                return render(
+                    request,
+                    template_name=self.template_name,
+                    context={
+                        "game": selected_game,
+                        "form": form,
+                        "form2": form2,
+                        "is_home_captain": is_home_captain,
+                        "is_away_captain": is_away_captain,
+                        "is_tournament_manager": is_tournament_manager,
+                        "result": result,
+                    },
+                )
+                raise Http404
+            else:
+                return render(
+                    request,
+                    template_name=self.template_name,
+                    context={"game": selected_game},
+                )
+        else:
+            return HttpResponse("NO GAME DEFINED")
 
     def post(self, request, pk):
         """
@@ -1880,14 +1903,24 @@ class GameView(generics.CreateAPIView):
 
         if selected_game:
             # searching for the captain in the home team
-            captain = selected_game.home_team.teamuser_set.filter(
-                player__pk=request.user.pk
-            ).first()
-            # searching for the captain in the away team
-            if not captain:
-                captain = selected_game.away_team.teamuser_set.filter(
-                    player__pk=request.user.pk
+            tournament_manager = False
+            if request.user.pk == selected_game.tournament.tournament_manager.pk:
+                tournament_manager = True
+
+            if tournament_manager:
+                captain = selected_game.home_team.teamuser_set.filter(
+                    isCaptain=True
                 ).first()
+            else:
+                if selected_game.result_set.filter(is_final=False):
+                    captain = selected_game.home_team.teamuser_set.filter(
+                        player__pk=request.user.pk
+                    ).first()
+                    # searching for the captain in the away team
+                    if not captain:
+                        captain = selected_game.away_team.teamuser_set.filter(
+                            player__pk=request.user.pk
+                        ).first()
             if captain:
                 result = selected_game.result_set.filter(captain__pk=captain.pk).first()
 
@@ -1917,6 +1950,8 @@ class GameView(generics.CreateAPIView):
                     goal.save()
                     result.home_score = result.goal_set.filter(is_home=True).count()
                     result.away_score = result.goal_set.filter(is_away=True).count()
+                    if tournament_manager:
+                        result.is_final = True
                     result.save()
                     return Response("success")
                 else:
@@ -1927,7 +1962,7 @@ class GameView(generics.CreateAPIView):
                     return HttpResponseRedirect("")
             else:
                 return HttpResponseBadRequest(
-                    "You can't create this result! If you're a Tournament Manager, please use your own custom page built for this"
+                    "You can't create this result! Your tournament manager is now responsible for this."
                 )
         else:
             raise Http404

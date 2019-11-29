@@ -6,19 +6,19 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <meta charset="utf-8">
-    <title>MAIN MENU</title>
-    <script src="{% static 'js/activateUser.js' %}"></script>
-    <script src="{% static 'js/activateMultipleUsers.js' %}"></script>
-    <script type="text/javascript">
 
-        $('#myList a').on('click', function(e) {
-            e.preventDefault()
-            $(this).tab('show')
-        })
-    </script>
-</head>
+
+{% block imports %}
+<script src="{% static 'js/activateUser.js' %}"></script>
+<script src="{% static 'js/activateMultipleUsers.js' %}"></script>
+<script type="text/javascript">
+    $('#myList a').on('click', function(e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })
+</script>
+{% endblock %}
+
 
 <body>
     {% block body %}
