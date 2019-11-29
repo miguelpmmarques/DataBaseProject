@@ -1,4 +1,3 @@
-
 if (document.readyState === "complete" ||
     (document.readyState !== "loading" && !document.documentElement.doScroll)) {
     main();
@@ -27,7 +26,7 @@ function activateThisUser(e) {
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     try {
 
-      console.log(activate_user.name);
+        console.log(activate_user.name);
 
         fetch(`${window.location.origin}/users/rest/${activate_user.name}/`, {
             method: "PATCH",
@@ -87,4 +86,3 @@ function erase_not_button(e) {
     }
 
 }
-
