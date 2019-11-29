@@ -313,6 +313,10 @@ class ProfileView(generic.DetailView):
     template_name = "main/profile.html"
     model = CustomUser
 
+    def get(self, request, pk):
+        user = CustomUser.objects.get(pk=pk)
+        return render(request, template_name=self.template_name, context={"user": user})
+
 
 class CreateTeam(generic.CreateView):
     template_name = "main/createTeam.html"
@@ -497,10 +501,16 @@ class LandingPageView(generic.TemplateView):
                 .order_by("-q_count")
                 .filter(q_count__lte=15)
             )
+            teamCaptain = TeamUser.objects.filter(isCaptain=True)
             return render(
                 request,
                 template_name=self.template_name,
-                context={"teams": teams, "tournaments": tournaments, "games": games},
+                context={
+                    "teamCaptain": teamCaptain,
+                    "teams": teams,
+                    "tournaments": tournaments,
+                    "games": games,
+                },
             )
 
         except (Tournament.DoesNotExist, Team.DoesNotExist) as err:
@@ -1046,23 +1056,22 @@ class replaceMember(generics.RetrieveUpdateAPIView):
         return Response("Done")
 
 
-class addReserve(generics.RetrieveUpdateAPIView):
+class addReserve(APIView):
+
     queryset = Tournament.objects.all()
     serializer_class = TournamentSerializer
     permission_classes = [IsAuthenticated]
+    allowed_methods = "PATCH"
 
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         tournamentpk = kwargs.pop("tournamentpk", False)
 
-        print("Chegou")
         instance = Tournament.objects.get(pk=tournamentpk)
         listReserves = instance.reserves
         listReserves.add(request.user)
+        instance.save()
 
-        serializer = self.get_serializer(
-            instance, {"reserves": listReserves}, partial=True
-        )
-
+        print("Chegou")
         Notifications.objects.create(
             title="NEW RESERVE IN YOUT TOURNAMENT " + instance.name,
             description="<h3>The user "
@@ -1076,10 +1085,6 @@ class addReserve(generics.RetrieveUpdateAPIView):
             origin="System",
         ).save()
 
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        if getattr(instance, "_prefetched_objects_cache", None):
-            instance._prefetched_objects_cache = {}
         return Response("Done")
 
 
@@ -1445,9 +1450,10 @@ class TournamentDetailsView(generic.View):
     def get(self, request, pk):
         try:
             teams_data = Team.objects.filter(tournament__id=pk)
-
+            scorers = None
             teams = []
             tournament = Tournament.objects.get(pk=pk)
+            ready_to_start = self.check_start_status(tournament)
             if tournament.game_set.all().count() > 0:
                 for elem in teams_data:
                     (
@@ -1472,6 +1478,7 @@ class TournamentDetailsView(generic.View):
                     )
                 # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
                 scorers = self.get_top_scorers(tournament)
+                ready_to_start = False
             else:
                 for elem in teams_data:
                     teams.append(
@@ -1488,12 +1495,16 @@ class TournamentDetailsView(generic.View):
                     )
             print("teams===", teams)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
-
             teams.reverse()
             return render(
                 request,
                 template_name="main/tournamentDetails.html",
-                context={"tournament": tournament, "teams": teams},
+                context={
+                    "tournament": tournament,
+                    "teams": teams,
+                    "scorers": scorers,
+                    "checkStart": ready_to_start,
+                },
             )
         except (Team.DoesNotExist, Tournament.DoesNotExist):
             return JsonResponse(
@@ -1519,18 +1530,19 @@ class TournamentDetailsView(generic.View):
                 return games_won, goals_scored, tied_games, games_lost, goals_conceded
             print("fr===", first_res)
             print("sr===", second_res)
+            if first_res == None or second_res == None:
+                return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
             if (
-                first_res.game.home_team.name == team.name
-                and second_res.game.home_team.name == team.name
+                first_res.game.home_team == team.name
+                and second_res.game.home_team == team.name
             ):
                 home = True
             elif (
-                first_res.game.away_team.name == team.name
-                and second_res.game.away_team.name == team.name
+                first_res.game.away_team == team.name
+                and second_res.game.away_team == team.name
             ):
                 away = True
-
             if home or away:
                 if (
                     first_res.home_score == second_res.home_score
@@ -1554,22 +1566,33 @@ class TournamentDetailsView(generic.View):
                             games_lost += 1
                         else:
                             tied_games += 1
-
-        print(team.name, "games won", games_won)
         return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
     def get_top_scorers(self, tournament):
         teams_pks = Team.objects.filter(tournament__pk=tournament.pk).values_list("pk")
         tournament_users = TeamUser.objects.filter(team__pk__in=teams_pks)
 
+        print(tournament_users)
         # create lists and order them by count
         # ordered_list = sorted(tournament_users, key=tournament_users.goal_set.all().count())
         ordered_list = {}
         for user in tournament_users:
-            ordered_list[user.player.username] = user.goal_set.all().count()
+            print(user.player.username)
+            ordered_list[user.player.username] = 0
+            goals = user.goal_set.all()
+            for goal in goals:
+                if goal.result.is_final:
+                    ordered_list[user.player.username] += 1
         ordered_list = dict(sorted(ordered_list.items()))
-        print(ordered_list)
+
         return ordered_list
+
+    def check_start_status(self, tournament):
+        teams = Team.objects.filter(tournament__pk=tournament.pk)
+        if teams.count() < tournament.number_teams:
+            return False
+        else:
+            return True
 
 
 class CalendarView(BaseCalendarView):
@@ -1722,6 +1745,7 @@ class GameView(generics.CreateAPIView):
         is_tournament_manager,
         form_class=None,
     ):
+
         """Return an instance of the form to be used in this view."""
 
         form_class, form_class2 = self.get_form_class(
@@ -1844,8 +1868,8 @@ class GameView(generics.CreateAPIView):
                     result = selected_game.result_set.filter(
                         captain__pk=away_captain.pk
                     ).first()
-                elif request.user.pk == selected_game.tournament.tournament_manager.pk:
 
+                elif request.user.pk == selected_game.tournament.tournament_manager.pk:
                     is_tournament_manager = True
                     result = selected_game.result_set.filter(
                         captain__pk=home_captain.pk

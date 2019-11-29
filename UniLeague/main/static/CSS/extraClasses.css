@@ -206,3 +206,17 @@ a:hover {
     padding: 3px;
     color: white;
 }
+
+.customList {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  text-decoration:none;
+}
+
+.customList:hover {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  text-decoration:none;
+}

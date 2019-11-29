@@ -91,13 +91,15 @@
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                 View user info
                             </button>
-                            <button class="float-none" id="leave" name="{{elem.pk}}"><i class="fa fa-user-times" aria-hidden="true"></i></button>
+                            <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class="fa fa-user-times" aria-hidden="true"></i></button>
                             {% elif thisUser == elem %}
+                            {% if elem.position.start %}
                             <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                                Request captain to change position
+                                BECOME SUBSTITUTE
                             </button>
-                            <button class="float-right" id="leave" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true"></i></button>
+                            {% endif %}
+                            <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true"></i></button>
                             {% endif %}
                         </li>
                         {% endfor %}
@@ -109,17 +111,12 @@
     <div id="showPositions" class="col-lg-6">
         <br>
         <div class="row">
-            <div class="card bg-dark col-lg-5 float-left text-center card h-15">
+            <div class="card bg-dark col-lg-5 float-left text-center card h-15" style="height:450px;">
                 <h1>Captain: {{captain.username}}</b>
                     {% if not user in players or not user.is_authenticated%}
-                    <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/login/';">
-                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                        Join Team
-                    </button>
-                    {% else %}
                     <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
                         <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                        Leave Team
+                        Join Team
                     </button>
                     {% endif %}
                 </h1>
@@ -174,7 +171,7 @@
             </div>
             <div class="col-6 float-right">
                 <h1>Games This Week</h1>
-                <ul id="games_next_week" name="{{myTeam.pk}}">
+                <ul id="games_next_week" class="list-group margin" name="{{myTeam.pk}}">
                 </ul>
                 <button class="btn btn-dark" onclick="window.location.href='/games/calendar/team/{{myTeam.pk}}/'">Go To Calendar</button>
 

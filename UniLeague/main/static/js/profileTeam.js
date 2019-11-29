@@ -7,6 +7,7 @@ if (document.readyState === "complete" ||
 
 function main() {
 
+
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     $.ajaxSetup({
 
@@ -16,13 +17,34 @@ function main() {
     });
     console.log("ATAO?");
     get_games_next_week();
-    var leave = document.getElementById("leave");
-    leave.addEventListener("click", function(e) {
-        var r = confirm("Are you certain you want to leave this team?!");
-        if (r == true) {
-            leaveTeam(leave);
-        }
-    });
+
+    var leave = document.getElementsByClassName("float-none leave");
+    console.log(leave);
+    for (var i = 0; i < leave.length; i++) {
+      leave[i].addEventListener("click",function(e) {
+          e.preventDefault();
+          leaveTeam(this);
+      })
+    }
+
+    try {
+      var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
+      console.log(convocatoria);
+      convocatoria.addEventListener("click", function(e) {
+
+          e.preventDefault();
+          sendNotifications(this.id);
+      });
+      var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+      for (var i = 0; i < changePosition.length; i++) {
+
+        changePosition[i].addEventListener("click", function(e) {
+          e.preventDefault();
+          console.log("Clicou");
+          changePositionSubs(this.id.split("|"));
+
+        });
+      }
     var options = document.getElementById("exampleFormControlSelect1");
     var captain = options.value;
     var changeCaptain = document.getElementById("changeCaptain");
@@ -33,16 +55,6 @@ function main() {
         }
     });
 
-    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-    for (var i = 0; i < changePosition.length; i++) {
-
-        changePosition[i].addEventListener("click", function(e) {
-            e.preventDefault();
-            console.log("Clicou");
-            changePositionSubs(this.id.split("|"));
-
-        });
-    }
 
     var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
     for (var i = 0; i < saveInfo.length; i++) {
@@ -54,13 +66,26 @@ function main() {
 
         });
     }
-    var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
-    console.log(convocatoria);
-    convocatoria.addEventListener("click", function(e) {
 
+  }
+  catch(err) {
+    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
+    for (var i = 0; i < changePosition.length; i++) {
+
+      changePosition[i].addEventListener("click", function(e) {
         e.preventDefault();
-        sendNotifications(this.id);
-    });
+        console.log("Clicou");
+        var r = confirm("ARE YOU SURE?\nIF YOU CONTINUE, ONLY THE CAPTAIN CAN MOVE YOU BACK TO STARTER");
+        if (r == true) {
+            changePositionSubs(this.id.split("|"));
+        }
+        return;
+
+
+      });
+    }
+    console.log("not captain");
+  }
 }
 
 function sendNotifications(teampk) {
@@ -110,6 +135,7 @@ function saveBudgetAbsences(mypk) {
 }
 
 function changePositionSubs(mypk) {
+  console.log("CLICOU");
     data = {
         "playerpk": mypk[0],
         "teampk": mypk[1]
@@ -214,28 +240,7 @@ function leaveTeam(leave) {
             type: 'DELETE',
             timeout: 3000,
             success: function(d) {
-                console.log("HERER BITCH==", d);
-                $('#ul_users').load(' #ul_users > *', function(responseText, textStatus, XMLHttpRequest) {
-                    var changePosition = document.getElementsByClassName('btn btn-light btn-outline-secondary changePos');
-                    for (var i = 0; i < changePosition.length; i++) {
-
-                        changePosition[i].addEventListener("click", function(e) {
-                            e.preventDefault();
-                            changePositionSubs(this.id.split("|"));
-
-                        });
-                    }
-                    var saveInfo = document.getElementsByClassName('btn btn-default saveInfo');
-                    for (var i = 0; i < saveInfo.length; i++) {
-
-                        saveInfo[i].addEventListener("click", function(e) {
-                            e.preventDefault();
-                            saveBudgetAbsences(this.id);
-
-                        });
-                    }
-
-                });
+              window.location.href = ""
             },
         })
         .fail(function() {
@@ -266,11 +271,13 @@ function success_populate_list(data, ul) {
     for (elem of data) {
         let li = document.createElement("li");
         li.id = elem.id;
+        li.setAttribute("class", "customList list-group-item")
         let a = document.createElement("a");
         var date = new Date(elem.start_time);
         a.innerHTML = `${elem.title} at ${date}`
         a.setAttribute("href", `/games/${elem.game.id}/`)
+        a.setAttribute("class", "customList")
         li.appendChild(a);
-        ul.appendChild(li)
+        ul.appendChild(li);
     }
 }
