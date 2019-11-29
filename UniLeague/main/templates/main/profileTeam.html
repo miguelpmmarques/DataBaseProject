@@ -7,11 +7,11 @@
 {% block title %}
 <title>Team</title>
 {% endblock %}
-
-{% block body %}
 {% block imports %}
 <script src="{% static 'js/profileTeam.js' %}"></script>
 {% endblock %}
+
+{% block body %}
 {% csrf_token %}
 <div class="row">
     <div class="col-lg-5">
@@ -79,7 +79,7 @@
                             {% else %}
                             [SUBSTITUTE]
                             {% endif %}
-                            {% if thisUser.player.pk == captain.pk or user.pk == elem.player.pk %}
+                            {% if thisUser.player.pk == captain.pk %}
                             <button class="btn btn-light btn-outline-secondary changePos" id="{{elem.player.pk}}|{{elem.team.pk}}">
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                 Replace with
@@ -101,7 +101,9 @@
                                 BECOME SUBSTITUTE
                             </button>
                             {% endif %}
-                            <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}"><i class=" fa fa-user-times" aria-hidden="true" data-toggle="tooltip" title="Click to remove player from team"></i></button>
+                            <button class="float-none leave" id="{{elem.pk}}" name="{{elem.pk}}">
+                              <i class=" fa fa-user-times" aria-hidden="true" data-toggle="tooltip" title="Click to remove player from team"></i>
+                            </button>
                             {% endif %}
                         </li>
                         {% endfor %}

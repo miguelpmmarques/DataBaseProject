@@ -77,10 +77,9 @@ function main() {
             changePosition[i].addEventListener("click", function(e) {
                 e.preventDefault();
                 console.log("Clicou");
-                var r = confirm("ARE YOU SURE?\nIF YOU CONTINUE, ONLY THE CAPTAIN CAN MOVE YOU BACK TO STARTER");
-                if (r == true) {
+
                     changePositionSubs(this.id.split("|"));
-                }
+                
                 return;
 
 

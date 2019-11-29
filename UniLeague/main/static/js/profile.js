@@ -58,9 +58,7 @@ function reserveReplace(pk) {
         },
         data: data
     })
-    .fail(function() {
-        alert('Error updating this model instance.');
-    });
+
 
 }
 

@@ -3,13 +3,13 @@
 {% block title %}
 <title>Tournament</title>
 {% endblock %}
-
-{% block body %}
 {% block imports %}
 <script src="{% static 'js/tournamentDetails.js' %}"></script>
 <script src="{% static 'js/createGames.js' %}"></script>
 
 {% endblock %}
+
+{% block body %}
 {% csrf_token %}
 
 {% if messages %}
