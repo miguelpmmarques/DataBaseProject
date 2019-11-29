@@ -43,6 +43,7 @@
             </div>
         </div>
     </div>
+
     <div class="col-lg-4 ">
 
         <h1> <b>MY TEAMS</b> </h1>
@@ -88,25 +89,29 @@
 
                             </div>
                             <div class="modal-footer">
-                                <select class="" name="">
+                                {% if teamuser.team.tournament.reserves.all %}
+                                <select id="select{{teamuser.player.id}}|{{teamuser.team.id}}" name="">
                                     {% for elem in teamuser.team.tournament.reserves.all %}
-                                    <option value="" selected>{{elem.username}}</option>
-
+                                    <option id="{{teamuser.team.tournament.reserves.id}}" value="{{elem.pk}}|{{user.pk}}|{{teamuser.team.pk}}" selected>{{elem.username}}</option>
                                     {% endfor %}
-
                                 </select>
 
-                                <button class="btn btn-light btn-outline-secondary" data-toggle="modal" data-target="#daStuff{{elem.player.pk}}|{{elem.team.pk}}">
+                                <button id="{{teamuser.player.id}}|{{teamuser.team.id}}" class="btn btn-light btn-outline-secondary reserve">
                                     <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                                     Ask for a tournament reservation
                                 </button>
+
+                                {% else %}
+                                <h3 class="text-danger">
+                                    <b>
+                                        No tournament reserves
+                                    </b>
+                                </h3>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-
-
-
                 <li class="groupList list-group-item">
                     <a class="text-danger" href="/tournaments/{{teamuser.team.tournament.id}}/">
                         {{teamuser.team.tournament.name}}
@@ -130,6 +135,7 @@
                 {% endif %}
             </ul>
         </div>
+
     </div>
     <div class="col-lg-4">
         <div class="centered">

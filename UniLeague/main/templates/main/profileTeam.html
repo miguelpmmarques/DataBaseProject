@@ -35,7 +35,6 @@
                 <div class="col-lg-1">
                 </div>
                 <div class="col-lg-10">
-
                     <div class="row  text-center mx-auto d-block">
                         <h3 id="numberPlayer">Number of players: {{players.all.count}}/16</h3>
                         <button class="btn btn-light btn-outline-secondary convocatoria" id="{{myTeam.pk}}">
@@ -117,10 +116,19 @@
             <div class="card bg-dark col-lg-5 float-left text-center card h-15 mr-4" style="height:450px;">
                 <h1>Captain: {{captain.username}}</b>
                     {% if not user in players or not user.is_authenticated%}
+                    {% if user.is_authenticated %}
                     <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/team/apply/{{myTeam.id}}';">
                         <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
                         Join Team
                     </button>
+                    {% else %}
+                    <button class="btn btn-light btn-outline-secondary" onclick="window.location.href='/login';">
+                        <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                        Join Team
+                    </button>
+
+                    {% endif %}
+
                     {% endif %}
                 </h1>
                 <br>
