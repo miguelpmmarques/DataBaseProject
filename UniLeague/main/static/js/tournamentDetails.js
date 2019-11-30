@@ -15,9 +15,6 @@ function main() {
       }
   });
   var reserve = document.getElementsByClassName('apllyReserve')[0];
-  console.log(reserve);
-  console.log("bom tarde");
-
   reserve.addEventListener("click",function(e) {
       console.log(e)
 

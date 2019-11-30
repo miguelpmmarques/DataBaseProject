@@ -24,6 +24,7 @@ function main() {
                 }, //, processData:false, contentType = 'application/json'
                 success: function(d) {
                     console.log("DATA==", d);
+                    window.location.href="";
                 }, //, processData:false, contentType = 'application/json'
             })
             .fail(function() {
