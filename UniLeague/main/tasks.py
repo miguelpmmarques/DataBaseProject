@@ -142,25 +142,50 @@ def send_notification_for_absences(self):
         with transaction.atomic():
             absentees = TeamUser.objects.filter(absences__gte=5)
             for elem in absentees:
-                notification = Notifications.objects.filter(
+                notification = Notifications.objects.get_or_create(
                     title="The user "
                     + elem.player.username
                     + " has "
                     + str(elem.absences)
-                    + " absences"
-                ).first()
-                if not notification:
-                    notification = Notifications.objects.create(
-                        title="The user "
-                        + elem.player.username
-                        + " has "
-                        + str(elem.absences)
-                        + " absences",
-                        description="<br> <h3>Please go to your administration menu if you want to blacklist him/her.</h3>",
-                        user_send=CustomUser.objects.get(is_superuser=True),
-                        origin="System",
-                    ).save()
-                print(notification)
+                    + " absences",
+                    description="<br> <h3>This  user has been automatically removed from his team after this many strikes. Please go to your administration menu if you want to blacklist him/her.</h3>",
+                    user_send=CustomUser.objects.get(is_superuser=True),
+                    origin="System",
+                ).save()
+
+                notification = Notifications.objects.get_or_create(
+                    title="The user "
+                    + elem.player.username
+                    + " has "
+                    + str(elem.absences)
+                    + " absences",
+                    description="<br> <h3>This  user has been automatically removed from his team after this many strikes. Please contact your administrator for more information.</h3>",
+                    user_send=elem.team.teamuser_set.filter(isCaptain=True).first(),
+                    origin="System",
+                ).save()
+                elem.delete()
+
+                notification = Notifications.objects.get_or_create(
+                    title="You have " + str(elem.absences) + " absences",
+                    description="<br> <h3>You have been automatically banned from the team"
+                    + str(elem.team.name)
+                    + ". Please contact your administrator for more information.</h3>",
+                    user_send=elem,
+                    origin="System",
+                ).save()
+                elem.delete()
+
+            print(notification)
+            absentees = TeamUser.objects.filter(absences__gte=3)
+            for elem in absentees:
+                notification = Notifications.objects.get_or_create(
+                    title="You have " + str(elem.absences) + " absences",
+                    description="<br> <h3>Two more and you will be banned from the team +"
+                    + str(elem.team.name)
+                    + ". Talk to your captain for more information.</h3>",
+                    user_send=CustomUser.objects.get(is_superuser=True),
+                    origin="System",
+                ).save()
 
     except IntegrityError:
         raise self.retry()

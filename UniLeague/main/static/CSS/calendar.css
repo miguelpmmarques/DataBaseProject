@@ -2,21 +2,25 @@
     width: 98%;
     margin: auto;
     font-size: 13px;
-    border: 1px white;
+    border: 1px #ffffff;
 }
 
 .calendar th {
     padding: 10px;
     text-align: center;
     font-size: 18px;
-    border: 1px white;
+    border: 1px #FFFFFF;
+    border-color: #ffffff;
+    color: white;
 }
 
 .calendar td {
     width: 200px;
     height: 150px;
     padding: 20px 0px 0px 5px;
-    border: 1px white;
+    border: 1px #FFFFFF;
+    border-color: #ffffff;
+    color: white;
 }
 
 .month {

@@ -12,16 +12,16 @@
 {% block content %}
 {% block body %}
 <br>
-<div class="card bg-dark text-center m-auto" style="max-width:40%; height:60%;margin:auto;border-radius:5vw">
+<div class="alert alert-warning alert-dismissible fade show" id="alert" role="alert" hidden>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="card bg-dark text-center m-auto shadow-lg p-3" style="max-width:40%; height:60%;margin:auto;border-radius:5vw">
     <h1 class="text-center font-weight-bold bg-secondary pt-3 pb-3 mt-2" style="text-shadow: 4px 4px #000000;margin-left:10%;margin-right:10%;border-radius:25vw;"><b>CREATE TOURNAMENT</b></h1>
     <form method="post" class="text-center mx-auto mt-2 mb-5" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="alert alert-warning alert-dismissible fade show" id="alert" role="alert" hidden>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
 
         <!-- TEST CAROUSEL -->
         <div id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval=false>
@@ -93,7 +93,7 @@
                                 {% if k == "days_without_games" %}
                                 <br><label for="datepicker" class="mt-2 bg-light p-3 text-dark" style="border-radius:25vw;">{{v.value}}:</label>
 
-                                <div id="datepicker" class="ml-2" name="datepicker">
+                                <div id="datepicker" class="ml-5" name="datepicker">
                                     <input type="text" class="form-control" hidden="true" name="{{k}}">
 
                                 </div>
@@ -102,10 +102,11 @@
                                 {% endfor %}
                                 <!-- <button type="submit" class="mt-2" id="create">Create Tournament</button> -->
                             </div>
-                            <button type="submit" class="btn btn-light btn-outline-dark" id="create">
+                            <button type="submit" class="btn btn-light btn-outline-dark m-3 shadow-lg p-3 rounded" id=" create">
 
                                 <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-                                Create Tournament
+                                <h3>
+                                    Create Tournament</h3>
 
                             </button>
                         </div>

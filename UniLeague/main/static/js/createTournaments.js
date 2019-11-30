@@ -48,7 +48,9 @@ function main() {
             var msg = document.getElementById("alert");
             msg.innerHTML = alert_msg;
             msg.hidden = false;
+            alert_msg = "";
         } else {
+            console.log("HERE2");
             $.ajax({
                 url: "",
                 data: data,

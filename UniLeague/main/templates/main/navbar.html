@@ -124,7 +124,7 @@
 
                 {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/notifications/"> Notifications <span class="circle text-center">{{user.notifications_set.count}}</span> </a>
+                    <a class="nav-link text-white" href="/notifications/"> Notifications <span class="circle px-2 py-1 text-center">{{user.notifications_set.count}}</span> </a>
                 </li>
                 {% endif %}
                 <li>

@@ -21,75 +21,79 @@
 {% endif %}
 <div class="row">
     <div class="col-sm-3 mt-4 text-center">
-      <div class="border border-dark rounded" style="background-color: rgba(0,0,0,0.2)">
-        {% if tournament %}
-        <h1>
-          <b>
-            Tournament:
-          </b>
-        </h1>
-        <h1 class="text-center">
-          <b>
-            {{tournament.name}}
-          </b>
-        </h1>
-        <h1 class="text-center">
-          <b>
-            Manager:
-            {{tournament.tournament_manager}}
-          </b>
-        </h1>
-        {% endif %}
-        <div class="border-top"></div>
-        <br>
-
-        <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
-            <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-            Tournament Calendar
-        </button>
-        <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
-          <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
-          Apply as Reserve
-        </button>
-        <br>
-        <br>
-        <div class="border-top"></div>
-
-        <div class="">
-          <h3>
-            <b>
-            Reservas:
-          </b>
-          </h3>
-
-            {% if tournament.reserves.all %}
-            <ul id="teams_tournament" class="list-group margin">
-
-                {% for user in tournament.reserves.all %}
-                <a href="/users/profile/{{user.id}}/">
-                    <li class="groupList list-group-item">{{user.username}}</li>
-                </a>
-                {% endfor %}
-
-            </ul>
-            {% else %}
-            <li class="groupList list-group-item">No Reserves found</li>
+        <div class="border border-dark rounded" style="background-color: rgba(0,0,0,0.2)">
+            {% if tournament %}
+            <h1>
+                <b>
+                    Tournament:
+                </b>
+            </h1>
+            <h1 class="text-center">
+                <b>
+                    {{tournament.name}}
+                </b>
+            </h1>
+            <h1 class="text-center">
+                <b>
+                    Manager:
+                    {{tournament.tournament_manager}}
+                </b>
+            </h1>
             {% endif %}
+            <div class="border-top"></div>
+            <br>
+            <span class="text-center" style="font-size:18px;">Teams Ready To Play: {{teams|length}}/{{tournament.number_teams}}</span>
+            <br>
+            <button type="submit" class="btn btn-light btn-outline-secondary" onclick="window.location.href='/games/calendar/tournament/{{tournament.id}}/'">
+                <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                Tournament Calendar
+            </button>
+            <button id="{{tournament.pk}}" class="btn btn-light btn-outline-secondary apllyReserve">
+                <span id="spinner" class="spinner-border spinner-border-sm" hidden="true"></span>
+                Apply as Reserve
+            </button>
+            <br>
+            <br>
+            <div class="border-top"></div>
+
+            <div class="">
+                <h3>
+                    <b>
+                        Reservas:
+                    </b>
+                </h3>
+
+                {% if tournament.reserves.all %}
+                <ul id="teams_tournament" class="list-group margin">
+
+                    {% for user in tournament.reserves.all %}
+                    <a href="/users/profile/{{user.id}}/">
+                        <li class="groupList list-group-item">{{user.username}}</li>
+                    </a>
+                    {% endfor %}
+
+                </ul>
+                {% else %}
+                <li class="groupList list-group-item">No Reserves found</li>
+                {% endif %}
+            </div>
+
+
         </div>
-
-
-      </div>
-      {% if not tournament.game_set.all.exists %}
-      <br>
-      <button id="{{tournament.pk}}" name="createGames" class="table-dark btn btn-light btn-outline-secondary apllyReserve ">
-          <h3>
-            <b>
-              Start tournament
-            </b>
-          </h3>
-          <i class="fas fa-futbol" aria-hidden="true"></i>
-      </button>
-      {% endif %}
+        {% if not tournament.game_set.all.exists %}
+        <p>{{ready_to_start}}</p>
+        {% if ready_to_start %}
+        <br>
+        <button id="{{tournament.pk}}" name="createGames" class="table-dark btn btn-light btn-outline-secondary apllyReserve ">
+            <h3>
+                <b>
+                    Start tournament
+                </b>
+            </h3>
+            <i class="fas fa-futbol" aria-hidden="true"></i>
+        </button>
+        {% endif %}
+        {% endif %}
     </div>
 
     <div class="col-sm-9">

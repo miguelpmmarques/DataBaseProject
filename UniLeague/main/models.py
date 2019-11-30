@@ -69,6 +69,7 @@ class RegularSlot(BaseAbstractModel):
 class Field(BaseAbstractModel):
     name = models.CharField(max_length=512, null=False, default="")
     regular_slots = models.ManyToManyField(RegularSlot)
+    cost = models.IntegerField(null=False, default=0)
 
     class Meta:
         db_table = "Field"
@@ -193,7 +194,6 @@ class TimeSlot(BaseAbstractModel):
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(auto_now=True)
 
-    cost = models.IntegerField(null=False, default=0)
     isFree = models.BooleanField(null=False, default=True)
     field = models.ForeignKey(Field, null=False, on_delete=models.PROTECT)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
@@ -226,7 +226,7 @@ class Tactic(BaseAbstractModel):
 # foreign keys done
 class Team(BaseAbstractModel):
     name = models.CharField(max_length=512, null=False, default="")
-    numberPlayers = models.IntegerField(null=True, default=1)
+    numberPlayers = models.IntegerField(null=True, default=16)
     tournament = models.ForeignKey(Tournament, null=True, on_delete=models.PROTECT)
     # players = models.ManyToManyField(CustomUser, blank=True, related_name="players")
     tactic = models.ForeignKey(Tactic, null=True, on_delete=models.PROTECT)

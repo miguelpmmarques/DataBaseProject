@@ -10,15 +10,14 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
-
 .circle {
-  width: 30px;
-  height: 30px;
-  border-radius: 100%;
-  color: #fff;
-  line-height: 30px;
-  text-align: center;
-  background: rgba(253, 184, 39, .9)
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    color: #fff;
+    line-height: 30px;
+    text-align: center;
+    background: rgba(253, 184, 39, .9)
 }
 
 .menuButton {

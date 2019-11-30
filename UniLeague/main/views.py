@@ -779,31 +779,22 @@ class CreateTournamentView(APIView):
             data_copy.update({"fields": 1})
             serializer = TournamentSerializer(data=data_copy)
             if serializer.is_valid():
-                serializer.save()
-                request.user.isTournamentManager = True
-                request.user.save()
-                return Response({"sucess": True})
+                t = serializer.save()
+                if self.generateTimeSlots(t):
+                    request.user.isTournamentManager = True
+                    request.user.save()
+                    return Response({"sucess": True})
+                else:
+                    t.delete()
+                    messages.error(
+                        request,
+                        "The timeframe you've provided for the tournament is to small for the amount of games that have to be generated. Try creating a game with less teams. There'll still be plenty of games to play!",
+                    )
+                    return HttpResponseRedirect("")
             print(serializer.errors)
             return Response({"errors": serializer.errors})
         else:
             return HttpResponseRedirect(reverse("main:landing-page"))
-
-
-class CreateGames(generic.CreateView):
-    def get(self, request, tournament_pk):
-        try:
-            tournament = Tournament.objects.get(pk=tournament_pk)
-            return render(request, "main/createGames.html", {"tournament": tournament})
-        except Tournament.DoesNotExist:
-            raise Http404
-
-    def post(self, request, tournament_pk):
-        try:
-            tournament = Tournament.objects.get(pk=tournament_pk)
-            self.generateTimeSlots(tournament)
-            return JsonResponse({"sucess": True})
-        except Tournament.DoesNotExist:
-            raise Http404
 
     def generateTimeSlots(self, tournament):
         number_of_teams = tournament.number_teams
@@ -864,9 +855,39 @@ class CreateGames(generic.CreateView):
         ).count()
         print("NUMBER OF TIMESLOTS===", number_of_timeslots)
         print("NUMBER OF GAMES TO PLAY===", num_games)
+
         if number_of_timeslots >= num_games:
-            self.generate_games(tournament)
-        return
+            return True
+        return False
+
+
+class CreateGames(generic.CreateView):
+    def get(self, request, tournament_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+            return render(request, "main/createGames.html", {"tournament": tournament})
+        except Tournament.DoesNotExist:
+            raise Http404
+
+    def post(self, request, tournament_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+            number_of_teams = tournament.number_teams
+            number_of_hands = tournament.number_of_hands
+            num_games = nCr(number_of_teams, 2) * number_of_hands
+            number_of_timeslots = TimeSlot.objects.filter(
+                tournament__pk=tournament.pk
+            ).count()
+            print("NUMBER OF TIMESLOTS===", number_of_timeslots)
+            print("NUMBER OF GAMES TO PLAY===", num_games)
+
+            if number_of_timeslots >= num_games:
+                self.generate_games(tournament)
+                return HttpResponseRedirect("/tournaments/" + str(tournament_pk) + "/")
+            messages.error(request, "Could not create games!")
+            return HttpResponseRedirect("/tournaments/" + str(tournament_pk) + "/")
+        except Tournament.DoesNotExist:
+            raise Http404
 
     # ficaste aqui verifica o n de jogos jogados
     def generate_games(self, tournament):
@@ -930,7 +951,7 @@ class CreateGames(generic.CreateView):
                                             day=timeslot.start_time
                                         )
                                         game = Game.objects.create(
-                                            cost=tournament.cost,
+                                            cost=timeslot.field.cost,
                                             gameDate=aux_day,
                                             tournament=tournament,
                                             timeslot=timeslot,
@@ -1517,7 +1538,6 @@ class TournamentDetailsView(generic.View):
                     )
                 # tournament = TournamentSerializer(Tournament.objects.get(pk=pk)).data
                 scorers = self.get_top_scorers(tournament)
-                ready_to_start = False
             else:
                 for elem in teams_data:
                     teams.append(
@@ -1533,6 +1553,7 @@ class TournamentDetailsView(generic.View):
                         }
                     )
             print("teams===", teams)
+            print("ready-to_start==", ready_to_start)
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
             teams.reverse()
             return render(
@@ -1542,7 +1563,7 @@ class TournamentDetailsView(generic.View):
                     "tournament": tournament,
                     "teams": teams,
                     "scorers": scorers,
-                    "checkStart": ready_to_start,
+                    "ready_to_start": ready_to_start,
                 },
             )
         except (Team.DoesNotExist, Tournament.DoesNotExist):
@@ -1610,8 +1631,6 @@ class TournamentDetailsView(generic.View):
     def get_top_scorers(self, tournament):
         teams_pks = Team.objects.filter(tournament__pk=tournament.pk).values_list("pk")
         tournament_users = TeamUser.objects.filter(team__pk__in=teams_pks)
-
-        print(tournament_users)
         # create lists and order them by count
         # ordered_list = sorted(tournament_users, key=tournament_users.goal_set.all().count())
         ordered_list = {}
@@ -1629,10 +1648,20 @@ class TournamentDetailsView(generic.View):
 
     def check_start_status(self, tournament):
         teams = Team.objects.filter(tournament__pk=tournament.pk)
+        print("TEAMS COUNT===", teams.count())
         if teams.count() < tournament.number_teams:
             return False
         else:
-            return True
+            count = 0
+            for team in teams:
+                print("team_users===", team.teamuser_set.count())
+                print("num_players===", team.numberPlayers)
+                if team.teamuser_set.all().count() == team.numberPlayers:
+                    count += 1
+            print("COUNT===", count)
+            if count == tournament.number_teams:
+                return True
+        return False
 
 
 class CalendarView(BaseCalendarView):
