@@ -17,7 +17,6 @@ kombu
 more-itertools
 phonenumberslite
 Pillow
-pkg-resources
 psycopg2
 python-crontab
 python-dateutil
