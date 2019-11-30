@@ -13,7 +13,6 @@ function main() {
   });
   var replacement = document.getElementsByClassName('replace');
 
-  console.log(replacement);
 
   for (var i = 0; i < replacement.length; i++) {
 
@@ -24,8 +23,7 @@ function main() {
       });
   }
   var reserve = document.getElementsByClassName('reserve');
-  console.log("------------------------------------");
-  console.log(reserve);
+
   for (var i = 0; i < reserve.length; i++) {
 
     reserve[i].addEventListener("click", function(e) {
@@ -36,11 +34,9 @@ function main() {
 }
 
 function reserveReplace(pk) {
-  console.log(pk);
   var getSelect = document.getElementById('select'+pk);
   var dataHtml = getSelect.options[getSelect.selectedIndex].value;
   dataHtml = dataHtml.split("|")
-  console.log(dataHtml);
   var data = {
   "user" : dataHtml[1],
   "replace" : dataHtml[0],
@@ -63,7 +59,6 @@ function reserveReplace(pk) {
 }
 
 function askReplacement(teampk) {
-  console.log(teampk);
   var name = document.getElementById('name|'+teampk).value
   var email = document.getElementById('email|'+teampk).value
   var phone = document.getElementById('phone|'+teampk).value

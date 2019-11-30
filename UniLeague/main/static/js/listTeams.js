@@ -63,7 +63,6 @@ function main() {
         var elements = ul.getElementsByTagName("li");
         var length = elements.length;
         for (i = 0; i < length; i++) {
-            console.log(i);
             elements[0].remove();
         }
         if (type == "users") {
@@ -86,11 +85,10 @@ function main() {
         }
     }
     var failure_helper = function(response_data) {
-        console.log(response_data);;
+        console.log(response_data);
     }
     $("form").submit(function(e) {
         e.preventDefault();
-        //console.log("HERERE FDS");
         var type = this.id;
         if (type !== "blacklist" &&
             type !== "blacklist_i") {

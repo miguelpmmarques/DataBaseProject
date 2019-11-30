@@ -25,7 +25,6 @@ function createChildren(text, ul, has_icon = true) {
 }
 
 function main() {
-  console.log("Encontrou o js");
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
 
     const activate_user = document.getElementById("activate_users");
@@ -44,11 +43,8 @@ function main() {
         }
     });
     var lis = document.getElementsByName("users_li");
-    console.log(lis);
     for (elem of lis) {
         elem.addEventListener("click", function(e) {
-            console.log("CURRR===", e.currentTarget);
-            console.log("TAR===", e.target.disabled);
 
             if (e.target.getAttribute("name") === "users_li") {
               alert(e.target.id)
@@ -58,7 +54,6 @@ function main() {
             } else if (e.target.disabled === undefined) {
 
                 $(function() {
-                    console.log("EE==", e);
 
                     var data = JSON.stringify({
                         is_active: false,
@@ -92,7 +87,6 @@ function main() {
         var elements = ul.getElementsByTagName("li");
         var length = elements.length;
         for (i = 0; i < length; i++) {
-            console.log(i);
             elements[0].remove();
         }
         if (type == "users") {
@@ -118,7 +112,6 @@ function main() {
         console.log(response_data);;
     }
     $("form").submit(function(e) {
-      console.log("BATEULELELELELELE");
         e.preventDefault();
         var type = this.id;
         if (type !== "blacklist" &&
@@ -146,8 +139,7 @@ function main() {
 
 function activateMultipleUsers(e, param) {
     let users_to_activate = document.getElementsByTagName("input");
-    console.log("users_to_activate");
-    console.log("users===", users_to_activate);
+
     this.loading = true;
     let reqData = [];
     for (elem of users_to_activate) {
@@ -159,7 +151,6 @@ function activateMultipleUsers(e, param) {
             reqData.push(obj)
         }
     }
-    console.log("OLOLE:::>", reqData);
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     try {
         fetch(`http://127.0.0.1:8000/users/rest/list/patch/`, {
@@ -178,7 +169,6 @@ function activateMultipleUsers(e, param) {
             });
         });
     } catch (e) {
-        console.log(e, "erro");
         setTimeout(() => {
             patch_user_data();
         }, this.loadInterval);

@@ -10,10 +10,9 @@ function main() {
         window.location.href = window.location.origin;
     }
     var failure_helper = function(e) {
-        console.log(e);;
+        console.log(e);
     }
     $(document).ready(function() {
-        console.log("ready!");
         $('#datepicker').datepicker({
             todayBtn: "linked",
             multidate: true,
@@ -31,17 +30,14 @@ function main() {
         var num_hands = data.get("number_of_hands");
         var today = new Date();
         if (date_begin.getTime() > date_end.getTime()) {
-            console.log("here");
             alert_msg += " Begining date can't be superior to End Date!"
         }
         if (date_begin.getTime() < today.getTime() || date_end.getTime() < today.getTime()) {
             alert_msg += " Tournament can't take place before today!"
         }
         if (Number(num_hands) < 1) {
-            console.log("here2");
             alert_msg += " Your games have to have at least one hand!";
         } else if (Number(num_hands) > 6) {
-            console.log("here3");
             alert_msg += " Too many hands to play!";
         }
         if (alert_msg !== "") {
@@ -50,7 +46,6 @@ function main() {
             msg.hidden = false;
             alert_msg = "";
         } else {
-            console.log("HERE2");
             $.ajax({
                 url: "",
                 data: data,

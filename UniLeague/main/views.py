@@ -143,7 +143,6 @@ class WeekCalendarView(generic.WeekArchiveView):
         week = self.get_week()
         date_field = self.get_date_field()
         week_format = self.get_week_format()
-        print("OLE==", week)
         week_choices = {"%W": "1", "%U": "0"}
         try:
             week_start = week_choices[week_format]
@@ -157,8 +156,7 @@ class WeekCalendarView(generic.WeekArchiveView):
         )
         since = self._make_date_lookup_arg(date)
         until = self._make_date_lookup_arg(self._get_next_week(date))
-        lookup_kwargs = {"%s__gte" %
-                         date_field: since, "%s__lt" % date_field: until}
+        lookup_kwargs = {"%s__gte" % date_field: since, "%s__lt" % date_field: until}
         qs = self.get_queryset()
         return (
             None,
@@ -172,7 +170,6 @@ class WeekCalendarView(generic.WeekArchiveView):
 
     def get_week(self):
         """Return the week for which this view should display data."""
-        print("OIOI")
         week = self.week
         if week is None:
             try:
@@ -190,7 +187,6 @@ class WeekCalendarView(generic.WeekArchiveView):
         The return value must be an iterable and may be an instance of
         `QuerySet` in which case `QuerySet` specific behavior will be enabled.
         """
-        print("HERE")
         pk = int(self.kwargs.get("pk"))
         games = Game.objects.filter(
             Q(home_team__pk=pk) | Q(away_team__pk=pk)
@@ -200,17 +196,13 @@ class WeekCalendarView(generic.WeekArchiveView):
             .filter(start_time__date__week=datetime.today().isocalendar()[1])
             .order_by("start_time")
         )
-        print("TIMESLUTS===", timeslots)
         return timeslots
 
     def get(self, request, *args, **kwargs):
-        print("OIOI")
         self.date_list, self.object_list, extra_context = self.get_dated_items()
-        print("LLMLMLMLE")
         context = self.get_context_data(
             object_list=self.object_list, date_list=self.date_list, **extra_context
         )
-        print(context)
         serializer = TimeSlotSerializer(context["timeslot_list"], many=True)
 
         return JsonResponse(serializer.data, safe=False)
@@ -226,8 +218,7 @@ class GoToTeamFromPlayer(generic.DetailView):
 
         teamuser = TeamUser.objects.all().order_by("player__first_name")
         return render(
-            request, template_name=self.template_name, context={
-                "users": teamuser}
+            request, template_name=self.template_name, context={"users": teamuser}
         )
 
 
@@ -235,7 +226,6 @@ class TeamView(generic.DetailView):
     template_name = "main/profileTeam.html"
 
     def get(self, request, pk):
-        print(request.user)
         if request.user.is_authenticated:
 
             teamuser = (
@@ -244,16 +234,13 @@ class TeamView(generic.DetailView):
                 .filter(player__pk=request.user.id)
             ).first()
 
-            print(teamuser)
             if teamuser == None:
                 team_selected = Team.objects.filter(pk=pk).first()
                 captainTeamUser = (
-                    TeamUser.objects.filter(team__pk=pk).filter(
-                        isCaptain=True).first()
+                    TeamUser.objects.filter(team__pk=pk).filter(isCaptain=True).first()
                 )
             else:
                 if teamuser.isCaptain:
-                    print(request.user.teamuser_set.all)
 
                     team_selected = teamuser.team
                 else:
@@ -298,7 +285,6 @@ class TeamView(generic.DetailView):
             }
             return render(request, template_name=self.template_name, context=context)
         except Exception as err:
-            print("err===", err)
             raise Http404
 
 
@@ -374,7 +360,6 @@ class CreateTeam(generic.CreateView):
                 return redirect("/team/apply/0/")
 
             messages.error(request, form.errors)
-            print(form.errors)
             return HttpResponseRedirect("")
         return HttpResponseRedirect(reverse("main:landing-page"))
 
@@ -386,7 +371,6 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
 
     def get(self, request, pk):
         team_selected = Team.objects.filter(pk=pk).first()
-        print(team_selected)
         if not team_selected:
             team_serialized = request.session["team_form"]
             tactic = Tactic.objects.get(pk=team_serialized["tactic"])
@@ -411,9 +395,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
     def patch(self, request, pk):
         try:
             position = Position.objects.get(name=request.data["position"])
-            print(position)
             team_exists = Team.objects.get(pk=pk)
-            print(team_exists)
         except Position.DoesNotExist:
             raise Http404
         except Team.DoesNotExist:
@@ -427,11 +409,6 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     team=new_team,
                     position=position,
                 ).save()
-                print(request.user.first_name)
-                print(request.user.last_name)
-                print(new_team.name)
-                print(new_team.tournament.name)
-                print("GUARDOU")
                 Notifications.objects.create(
                     title="OH CAPTAIN MY CAPTAIN",
                     description="<h3>"
@@ -447,8 +424,7 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
                     origin="Tournament Manager",
                 ).save()
                 return Response("success")
-            else:
-                print("\n\n" + team.errors)
+
         TeamUser.objects.create(
             isCaptain=False, player=request.user, team=team_exists, position=position
         ).save()
@@ -467,7 +443,6 @@ class ChoosePositionView(generics.RetrieveUpdateAPIView):
             user_send=request.user,
             origin="Captain",
         ).save()
-        print(request.data["position"])
 
         return Response("success")
 
@@ -478,10 +453,8 @@ def profileOtherView(request, user_selected):
 
 
 def profileTeamOtherView(request, team_selected):
-    print("Chegou aqui")
     team = Team.objects.get(name=team_selected)
     teamuser = TeamUser.objects.filter(team__name=team_selected)
-    print(teamuser)
     return render(
         request,
         template_name="main/profileTeam.html",
@@ -493,7 +466,6 @@ class LandingPageView(generic.TemplateView):
     template_name = "main/MainMenu.html"
 
     def get(self, request):
-        print("REQUEST===", self.request)
         if request.user.is_superuser:
             return HttpResponseRedirect("administration/")
 
@@ -546,7 +518,6 @@ class LandingPageView(generic.TemplateView):
 def log_out_request(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
-    print("Fez logout e chegou aqui")
     return HttpResponseRedirect(reverse("main:landing-page"))
 
 
@@ -629,7 +600,6 @@ class RegisterView(generic.CreateView):
                         user.is_superuser = True
                     user.save()
             except IntegrityError as err:
-                print("Database Integrity error:", err)
                 return HttpResponse(
                     "Critical database error\nUnable to save your user\nPlease try again"
                 )
@@ -675,8 +645,7 @@ class RegisterView(generic.CreateView):
             email.send()
             messages.error(request, "Confirm your account in your mail")
             return HttpResponseRedirect(reverse("main:landing-page"))
-            for error in form.errors:
-                print("error===", error)
+
         messages.error(request, form.errors)
         return HttpResponseRedirect(reverse("main:register"))
 
@@ -730,8 +699,7 @@ class CreateTournamentView(APIView):
             if not self.list_to_send[0] == "Monday":
                 self.list_to_send.reverse()
             # change this to work in the same way as the fields to make it fully restfull
-            self.labels["game_week_days"].update(
-                {"choices": self.list_to_send})
+            self.labels["game_week_days"].update({"choices": self.list_to_send})
             # send the fields list
             for elem in self.fields_serializer.data:
                 aux_elem = {"id": elem["id"], "name": elem["name"]}
@@ -795,7 +763,6 @@ class CreateTournamentView(APIView):
                         "The timeframe you've provided for the tournament is to small for the amount of games that have to be generated. Try creating a game with less teams. There'll still be plenty of games to play!",
                     )
                     return HttpResponseRedirect("")
-            print(serializer.errors)
             return Response({"errors": serializer.errors})
         else:
             return HttpResponseRedirect(reverse("main:landing-page"))
@@ -806,10 +773,7 @@ class CreateTournamentView(APIView):
         num_games = nCr(number_of_teams, 2) * number_of_hands
         fields = tournament.fields.all()
         number_of_days = tournament.endTournament - tournament.beginTournament
-        # tournament_aux = datetime.today().replace(tzinfo=pytz.UTC)
-        # if tournament.beginTournament < tournament_aux:
-        print("NOW===", timezone.now())
-        print("beginTournament===", tournament.beginTournament)
+
         if tournament.beginTournament < timezone.now():
             day = timezone.now()
         else:
@@ -821,8 +785,7 @@ class CreateTournamentView(APIView):
             if tournament.days_without_games.filter(day=day).count() == 0:
                 # checking if this day is a game week day
                 if (
-                    tournament.game_week_days.filter(
-                        week_day=day.weekday()).count()
+                    tournament.game_week_days.filter(week_day=day.weekday()).count()
                     != 0
                 ):
                     # going through all the fields chosen by the administrator
@@ -857,8 +820,6 @@ class CreateTournamentView(APIView):
         number_of_timeslots = TimeSlot.objects.filter(
             tournament__pk=tournament.pk
         ).count()
-        print("NUMBER OF TIMESLOTS===", number_of_timeslots)
-        print("NUMBER OF GAMES TO PLAY===", num_games)
 
         if number_of_timeslots >= num_games:
             return True
@@ -882,8 +843,6 @@ class CreateGames(generic.CreateView):
             number_of_timeslots = TimeSlot.objects.filter(
                 tournament__pk=tournament.pk
             ).count()
-            print("NUMBER OF TIMESLOTS===", number_of_timeslots)
-            print("NUMBER OF GAMES TO PLAY===", num_games)
 
             if number_of_timeslots >= num_games:
                 self.generate_games(tournament)
@@ -896,7 +855,6 @@ class CreateGames(generic.CreateView):
     # ficaste aqui verifica o n de jogos jogados
     def generate_games(self, tournament):
         teams = tournament.team_set.all()
-        print("teams_count===", teams.count())
         try:
             with transaction.atomic():
                 for k in range(tournament.number_of_hands):
@@ -904,22 +862,19 @@ class CreateGames(generic.CreateView):
                         # getting the number of games team_a already has, by checking how many times
                         # team_a is registered as home_team or away_team in this tournament
                         num_games_team_a = tournament.game_set.filter(
-                            Q(home_team__pk=teams[i].pk) | Q(
-                                away_team__pk=teams[i].pk)
+                            Q(home_team__pk=teams[i].pk) | Q(away_team__pk=teams[i].pk)
                         ).count()
                         # checking if team_a already has all it's games scheduled
                         if num_games_team_a < (
                             (teams.count() - 1) * tournament.number_of_hands
                         ):
                             for j in range(i + 1, teams.count()):
-                                print("j=", j)
                                 num_games_team_b = tournament.game_set.filter(
                                     Q(home_team__pk=teams[j].pk)
                                     | Q(away_team__pk=teams[j].pk)
                                 ).count()
                                 if num_games_team_b < (
-                                    (teams.count() - 1) *
-                                    tournament.number_of_hands
+                                    (teams.count() - 1) * tournament.number_of_hands
                                 ):
                                     random_timeslots = (
                                         TimeSlot.objects.filter(
@@ -932,8 +887,7 @@ class CreateGames(generic.CreateView):
                                         timeslot = random_timeslots.first()
                                         timeslot.isFree = False
                                         timeslot.title = (
-                                            str(teams[i]) +
-                                            " vs " + str(teams[j])
+                                            str(teams[i]) + " vs " + str(teams[j])
                                         )
                                         timeslot.description = (
                                             "Field="
@@ -953,7 +907,6 @@ class CreateGames(generic.CreateView):
                                         else:
                                             home_team = teams[j]
                                             away_team = teams[i]
-                                        print("DAY===", timeslot.start_time.day)
                                         aux_day = Day.objects.create(
                                             day=timeslot.start_time
                                         )
@@ -968,8 +921,6 @@ class CreateGames(generic.CreateView):
                                         game.save()
         except IntegrityError:
             pass
-        print("ALL CREATED GAMES====", tournament.game_set.all())
-        print("THEIR COUNT===", tournament.game_set.all().count())
         return
 
 
@@ -981,16 +932,13 @@ class RestResults(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         try:
             with transaction.atomic():
-                instance.home_score = instance.goal_set.filter(
-                    is_home=True).count()
-                instance.away_score = instance.goal_set.filter(
-                    is_away=True).count()
+                instance.home_score = instance.goal_set.filter(is_home=True).count()
+                instance.away_score = instance.goal_set.filter(is_away=True).count()
                 instance.save()
         except IntegrityError:
             pass
@@ -1059,8 +1007,7 @@ class replaceMember(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         teampk = kwargs.pop("teampk", False)
         user = request.user
-        instance = TeamUser.objects.filter(
-            team=teampk).filter(player=user).first()
+        instance = TeamUser.objects.filter(team=teampk).filter(player=user).first()
 
         findCaptain = (
             TeamUser.objects.filter(team=teampk).filter(isCaptain=True).first()
@@ -1142,7 +1089,6 @@ class addReserve(APIView):
         listReserves.add(request.user)
         instance.save()
 
-        print("Chegou")
         Notifications.objects.create(
             title="NEW RESERVE IN YOUT TOURNAMENT " + instance.name,
             description="<h3>The user "
@@ -1167,12 +1113,10 @@ class changeInfo(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         teampk = kwargs.pop("teampk", False)
         playerpk = kwargs.pop("playerpk", False)
-        print(request.data)
         budget = request.data["budget"]
         absences = request.data["absences"]
 
-        instance = TeamUser.objects.filter(
-            player=playerpk).filter(team=teampk).first()
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
         try:
             with transaction.atomic():
                 user = instance.player
@@ -1213,8 +1157,7 @@ class changePos(generics.RetrieveUpdateAPIView):
         teampk = kwargs.pop("teampk", False)
         playerpk = kwargs.pop("playerpk", False)
 
-        instance = TeamUser.objects.filter(
-            player=playerpk).filter(team=teampk).first()
+        instance = TeamUser.objects.filter(player=playerpk).filter(team=teampk).first()
         position_name = instance.position.name.split(" ")[0]
 
         if instance.position.start == False:
@@ -1239,8 +1182,7 @@ class changePos(generics.RetrieveUpdateAPIView):
                 instance2 = (
                     TeamUser.objects.filter(team=teampk)
                     .filter(
-                        position__name__contains=instance.position.name.split(" ")[
-                            0]
+                        position__name__contains=instance.position.name.split(" ")[0]
                     )
                     .filter(~Q(player=instance.player))
                 )
@@ -1331,7 +1273,6 @@ class RestListTournaments(generics.ListAPIView):
         params = request.query_params
         if params["name"] != "":
             queryset = queryset.filter(name__icontains=params["name"])
-        print("SET?===", queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -1408,7 +1349,6 @@ class RestUsersListPatch(APIView):
 
     def patch(self, request):
         data = request.data
-        print(data)
         try:
             for elem in request.data:
                 instance = CustomUser.objects.get(pk=list(elem.keys())[0])
@@ -1419,7 +1359,6 @@ class RestUsersListPatch(APIView):
                 serializer.save()
             return Response("success")
         except Exception as exp:
-            print("exp::", exp)
             raise exp
 
 
@@ -1444,7 +1383,6 @@ class RestUsersList(generics.ListAPIView):
             | Q(first_name__icontains=params["name"])
             | Q(last_name__icontains=params["name"])
         )
-        print("SET?===", queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -1462,7 +1400,6 @@ class RestCaptainsList(RestUsers):
         q_set = TeamUser.objects.filter(isCaptain=True).team(
             tournament__pk=tournamentId
         )
-        print(q_set)
         page = self.paginate_queryset(q_set)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -1506,8 +1443,7 @@ class AdminMenuView(generic.TemplateView):
         if request.user.is_superuser == True:
             users = CustomUserSerializer(CustomUser.objects.all(), many=True)
             teams = TeamSerializer(Team.objects.all(), many=True)
-            tournaments = TournamentSerializer(
-                Tournament.objects.all(), many=True)
+            tournaments = TournamentSerializer(Tournament.objects.all(), many=True)
             return render(
                 request,
                 template_name=self.template_name,
@@ -1538,7 +1474,6 @@ class TournamentDetailsView(generic.View):
                         lost_games,
                         goals_conceded,
                     ) = self.get_games_won_goals_scored(elem, tournament)
-                    # print(elem.name)
                     teams.append(
                         {
                             "id": elem.pk,
@@ -1567,8 +1502,7 @@ class TournamentDetailsView(generic.View):
                             "goals_conceded": 0,
                         }
                     )
-            print("teams===", teams)
-            print("ready-to_start==", ready_to_start)
+
             teams = sorted(teams, key=itemgetter("points", "goals_scored"))
             teams.reverse()
             return render(
@@ -1583,8 +1517,7 @@ class TournamentDetailsView(generic.View):
             )
         except (Team.DoesNotExist, Tournament.DoesNotExist):
             return JsonResponse(
-                {"teams": ["Nothing was Found"],
-                    "tournament": ["Nothing Was Found"]}
+                {"teams": ["Nothing was Found"], "tournament": ["Nothing Was Found"]}
             )
 
     def get_games_won_goals_scored(self, team, tournament):
@@ -1604,8 +1537,6 @@ class TournamentDetailsView(generic.View):
 
             if first_res == None or second_res == None:
                 return games_won, goals_scored, tied_games, games_lost, goals_conceded
-            print("fr===", first_res)
-            print("sr===", second_res)
             if first_res == None or second_res == None:
                 return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
@@ -1645,14 +1576,12 @@ class TournamentDetailsView(generic.View):
         return games_won, goals_scored, tied_games, games_lost, goals_conceded
 
     def get_top_scorers(self, tournament):
-        teams_pks = Team.objects.filter(
-            tournament__pk=tournament.pk).values_list("pk")
+        teams_pks = Team.objects.filter(tournament__pk=tournament.pk).values_list("pk")
         tournament_users = TeamUser.objects.filter(team__pk__in=teams_pks)
         # create lists and order them by count
         # ordered_list = sorted(tournament_users, key=tournament_users.goal_set.all().count())
         ordered_list = {}
         for user in tournament_users:
-            print(user.player.username)
             ordered_list[user.player.username] = 0
             goals = user.goal_set.all()
             for goal in goals:
@@ -1665,17 +1594,13 @@ class TournamentDetailsView(generic.View):
 
     def check_start_status(self, tournament):
         teams = Team.objects.filter(tournament__pk=tournament.pk)
-        print("TEAMS COUNT===", teams.count())
         if teams.count() < tournament.number_teams:
             return False
         else:
             count = 0
             for team in teams:
-                print("team_users===", team.teamuser_set.count())
-                print("num_players===", team.numberPlayers)
                 if team.teamuser_set.all().count() == team.numberPlayers:
                     count += 1
-            print("COUNT===", count)
             if count == tournament.number_teams:
                 return True
         return False
@@ -1763,7 +1688,6 @@ class CalendarView(BaseCalendarView):
         if year is None:
             try:
                 year = year = date.today().year
-                print("YEAR", year)
             except Exception:
                 try:
                     year = self.request.GET["year"]
@@ -1778,7 +1702,6 @@ class CalendarView(BaseCalendarView):
         d = get_date(self.request.GET.get("month", None))
         filter = self.kwargs["filter"]
         pk = int(self.kwargs["pk"])
-        print("DATE===", d)
         # Instantiate our calendar class with today's year and date
         cal = Calendar(d.year, d.month)
 
@@ -1788,7 +1711,6 @@ class CalendarView(BaseCalendarView):
         context["prev_month"] = prev_month(d)
         context["next_month"] = next_month(d)
 
-        print("CONTEXT===", context)
         return context
 
 
@@ -1856,11 +1778,9 @@ class GameView(generics.CreateAPIView):
 
         q_set = None
         if is_home_captain or is_tournament_manager:
-            q_set = Goal.objects.filter(
-                result__game__home_team__pk=home_team.pk)
+            q_set = Goal.objects.filter(result__game__home_team__pk=home_team.pk)
         elif is_away_captain:
-            q_set = Goal.objects.filter(
-                result__game__away_team__pk=away_team.pk)
+            q_set = Goal.objects.filter(result__game__away_team__pk=away_team.pk)
 
         if q_set:
 
@@ -1891,29 +1811,22 @@ class GameView(generics.CreateAPIView):
 
         if selected_game:
             today = timezone.now()
-            print("TIMESLOT===", selected_game.timeslot.start_time)
-            print("now===", today)
+
             done = selected_game.timeslot.start_time < today
 
-            print("HERERERERE===", done)
             if done:
                 final_score = selected_game.result_set.all()
-                print("FINAL SCORE===", final_score.count())
                 if final_score.count() == 2:
 
                     if compareResults(final_score.first(), final_score.last()):
-                        print(
-                            "_________________________________________________________________"
-                        )
+
                         final_score.first().is_final = True
                         final_score.first().save()
                         if selected_game:
-                            print("FDSFSDSFDSFSDSFDS")
                             return render(
                                 request,
                                 template_name=self.template_name,
-                                context={"game": selected_game,
-                                         "result": final_score},
+                                context={"game": selected_game, "result": final_score},
                             )
                         raise Http404(("Game Does Not Exist"))
                     else:
@@ -1939,15 +1852,12 @@ class GameView(generics.CreateAPIView):
                             request,
                             "Erros no resultado. Para apurar o resultado definitivo, por favor contacte o Gestor de Torneio",
                         )
-                print("OIOI")
                 home_captain = selected_game.home_team.teamuser_set.filter(
                     isCaptain=True
                 ).first()
-                print("HOME CAPTAIN===", home_captain)
                 away_captain = selected_game.away_team.teamuser_set.filter(
                     isCaptain=True
                 ).first()
-                print("AWAY CAPTAIN===", away_captain)
                 # tratar do caso em que n ha capitao
                 is_home_captain = False
                 is_away_captain = False
@@ -1968,15 +1878,12 @@ class GameView(generics.CreateAPIView):
                     result = selected_game.result_set.filter(
                         captain__pk=home_captain.pk
                     ).first()
-                    print("IS TM===", result)
                 else:
                     result = None
 
                 form, form2 = self.get_form(
                     pk, is_home_captain, is_away_captain, is_tournament_manager
                 )
-                print("FORM===", form)
-                print("FORM2===", form2)
                 return render(
                     request,
                     template_name=self.template_name,
@@ -2010,7 +1917,6 @@ class GameView(generics.CreateAPIView):
 
         except (ValueError, Game.DoesNotExist):
             selected_game = None
-        print("ole===", request.data)
         serializer = GoalSerializer(data=request.data)
         if serializer.is_valid():
             goal = serializer.save()
@@ -2024,29 +1930,23 @@ class GameView(generics.CreateAPIView):
             captain = False
             if request.user.pk == selected_game.tournament.tournament_manager.pk:
                 tournament_manager = True
-                print("TM==", tournament_manager)
 
             if tournament_manager:
                 captain = selected_game.home_team.teamuser_set.filter(
                     isCaptain=True
                 ).first()
-                print("TM_CAP===", captain)
             else:
                 if not selected_game.result_set.filter(is_final=True).exists():
-                    print("HERERERE")
                     captain = selected_game.home_team.teamuser_set.filter(
                         player__pk=request.user.pk
                     ).first()
-                    print("captain==", captain)
                     # searching for the captain in the away team
                     if not captain:
                         captain = selected_game.away_team.teamuser_set.filter(
                             player__pk=request.user.pk
                         ).first()
-                        print("captain2==", captain)
             if captain:
-                result = selected_game.result_set.filter(
-                    captain__pk=captain.pk).first()
+                result = selected_game.result_set.filter(captain__pk=captain.pk).first()
 
                 if not result:
                     result = Result.objects.create(
@@ -2072,10 +1972,8 @@ class GameView(generics.CreateAPIView):
                     else:
                         goal.is_away = True
                     goal.save()
-                    result.home_score = result.goal_set.filter(
-                        is_home=True).count()
-                    result.away_score = result.goal_set.filter(
-                        is_away=True).count()
+                    result.home_score = result.goal_set.filter(is_home=True).count()
+                    result.away_score = result.goal_set.filter(is_away=True).count()
                     if tournament_manager:
                         result.is_final = True
                     result.save()
