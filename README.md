@@ -1,4 +1,4 @@
-# DataBaseProject
+﻿# DataBaseProject
 
 Requisitos:
 	Python(3.6.*) e Pip
@@ -13,11 +13,22 @@ Procedimentos:
 1)	Abrir cmd e aceder à pasta do projeto
 
 2)	criar um environment e entrar nele
-		na shell:
+		no windows e linux:
 			/DataBaseProject$ virtualenv env
+		na shell de linux:
 			/DataBaseProject$ source env/bin/activate
 
-3)	no cmd tem correr a seguinte linha de comandoo:
+			( no windows command line:
+				DataBaseProject> cd env/Scripts
+				DataBaseProject> activate 
+				DataBaseProject> cd ../..
+			)
+
+			( na powershell do windows:
+				DataBaseProject> . env/Scripts/activate 
+			)
+
+3)	na shell em Windows e linux tem correr a seguinte linha de comando:
 		(env)	...	/DataBaseProject$ pip install -r requirements.txt
 
 5)	criar base de dados no pgadmin com nome "UniLeague"
@@ -41,7 +52,7 @@ Procedimentos:
 10)	abrir uma nova consola
 
 11)	na shell novamente:
-			/DataBaseProject$ source env/bin/activate
+			/DataBaseProject$ source env/bin/activate (ou equivalente para o OS como explicado acima)
 			cd UniLeague
 			celery -A UniLeague beat
 
@@ -49,6 +60,12 @@ Procedimentos:
 12)	abrir uma nova consola
 
 13)	na shell novamente:
-			/DataBaseProject$ source env/bin/activate
+			/DataBaseProject$ source env/bin/activate (ou equivalente para o OS como explicado acima)
 			cd UniLeague
 			celery -A UniLeague worker --loglevel=info
+
+
+14) 	Advertência: o pacote psycopg2 necessário à integração de postgresql no Django 
+	é notório pelos seus problemas na instalação. Caso esse pacote em especial dê problemas
+ 	a instalar, recomendamos a sua instalação via package managers generalistas como o
+	"apt" do ubuntu, ou "chocolatey" do windows
