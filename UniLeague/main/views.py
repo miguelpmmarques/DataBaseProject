@@ -851,7 +851,6 @@ class CreateGames(generic.CreateView):
             number_of_timeslots = TimeSlot.objects.filter(
                 tournament__pk=tournament.pk
             ).count()
-
             if number_of_timeslots >= num_games:
                 self.generate_games(tournament)
                 return JsonResponse(json.dumps("success"), safe=False)
