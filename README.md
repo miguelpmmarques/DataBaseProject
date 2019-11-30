@@ -48,6 +48,21 @@ Procedimentos:
 		http://127.0.0.1:8000/
 
 
+ADVERTÊNCIA: O pacote psycopg2 necessário à integração de postgresql no Django 
+	é notório pelos seus problemas na instalação. Caso esse pacote em especial dê problemas
+ 	a instalar, recomendamos a sua instalação via package managers generalistas como o
+	"apt" do ubuntu, ou "chocolatey" do windows (
+						experimentar o seguinte:
+						$ sudo apt-get update
+						$ sudo apt-get install libpq-dev python-dev
+						$ sudo pip install psycopg2
+						)
+
+
+//-------------------------------------------------------------------------------------------------------------------------
+
+OPCIONAL, MAS MUITAS FEATUTRES ESTÃO IMPLEMENTADAS COM RECURSO A ESTAS FERRAMENTAS:
+
 
 10)	abrir uma nova consola
 
@@ -63,9 +78,12 @@ Procedimentos:
 			/DataBaseProject$ source env/bin/activate (ou equivalente para o OS como explicado acima)
 			cd UniLeague
 			celery -A UniLeague worker --loglevel=info
+		caso a connecção seja recusada é necessário abrir uma nova consola e executar o comando:
+			$ redis-server
+		
 
 
-14) 	Advertência: o pacote psycopg2 necessário à integração de postgresql no Django 
-	é notório pelos seus problemas na instalação. Caso esse pacote em especial dê problemas
- 	a instalar, recomendamos a sua instalação via package managers generalistas como o
-	"apt" do ubuntu, ou "chocolatey" do windows
+14) 	O mesmo que acontece com o "psycopg2" se aplica ao "Redis", embora a instalação inicial deva já conter este programa. (
+
+						$ sudo apt install redis-server
+						)
