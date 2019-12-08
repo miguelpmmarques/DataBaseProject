@@ -81,7 +81,6 @@
 
         </div>
         {% if not tournament.game_set.all.exists %}
-        <p>{{ready_to_start}}</p>
         {% if ready_to_start %}
         <br>
         <button id="{{tournament.pk}}" name="createGames" class="table-dark btn btn-light btn-outline-secondary apllyReserve ">

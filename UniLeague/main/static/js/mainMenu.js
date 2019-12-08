@@ -66,12 +66,10 @@ function main() {
         var elements = ul.getElementsByTagName("li");
         var length = elements.length;
         for (i = 0; i < length; i++) {
-            console.log(i);
             elements[0].remove();
         }
         if (type == "teams") {
           for (elem of e) {
-            console.log(elem.teamuser_set.length);
             if (elem.teamuser_set.length < 16) {
               createChildren(`${elem.name} has ${elem.teamuser_set.length}/16 players`, ul, false);
 
@@ -82,7 +80,6 @@ function main() {
         } else {
 
             for (elem of e) {
-              console.log(elem);
                 var date = new Date(elem.beginTournament)
                 let hour;
                 let daStuff;

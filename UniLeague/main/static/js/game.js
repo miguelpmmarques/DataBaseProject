@@ -6,7 +6,6 @@ if (document.readyState === "complete" ||
 }
 
 function main() {
-    console.log("HERE");
     const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value
     $.ajaxSetup({
 
@@ -50,8 +49,6 @@ function main() {
         var minutes = Number(split_time[1]);
         var my_time = new Date(year = 0, month = 0, day = 0, hour = hours, minute = minutes);
         var compare_date = new Date(year = 0, month = 0, day = 0, hour = 1, minute = 30);
-        console.log("kookok==", my_time.getTime());
-        console.log("oioi==", compare_date.getTime());
 
         if (my_time.getTime() > compare_date.getTime()) {
             alert("Wrong time! Please enter a goal time between 00:00 and 1:30")
@@ -81,7 +78,6 @@ function main() {
         e.preventDefault();
         var goal = $("#goals_rm option:selected")[0].value
         var result_id = this.name;
-        console.log("DELETE===", `/goals/${goal}`);
         $.ajax({
             type: "DELETE",
             url: `/goals/${goal}`,
@@ -92,7 +88,6 @@ function main() {
                 console.log(d);
             }
         });
-        console.log("PATCH===", "/results/" + result_id + "/");
         $.ajax({
             type: "PATCH",
             url: "/results/" + result_id + "/",

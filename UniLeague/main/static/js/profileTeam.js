@@ -1,6 +1,5 @@
 if (document.readyState === "complete" ||
     (document.readyState !== "loading" && !document.documentElement.doScroll)) {
-    console.log("XAU");
     main();
 } else {
     document.addEventListener("DOMContentLoaded", function(e) {
@@ -22,7 +21,6 @@ function main() {
     get_games_next_week();
 
     var leave = document.getElementsByClassName("float-none leave");
-    console.log(leave);
     for (var i = 0; i < leave.length; i++) {
         leave[i].addEventListener("click", function(e) {
             e.preventDefault();
@@ -32,7 +30,6 @@ function main() {
 
     try {
         var convocatoria = document.getElementsByClassName('btn btn-light btn-outline-secondary convocatoria')[0];
-        console.log(convocatoria);
         convocatoria.addEventListener("click", function(e) {
 
             e.preventDefault();
@@ -43,7 +40,6 @@ function main() {
 
             changePosition[i].addEventListener("click", function(e) {
                 e.preventDefault();
-                console.log("Clicou");
                 changePositionSubs(this.id.split("|"));
 
             });
@@ -76,19 +72,15 @@ function main() {
 
             changePosition[i].addEventListener("click", function(e) {
                 e.preventDefault();
-                console.log("Clicou");
-
                     changePositionSubs(this.id.split("|"));
 
                 return;
             });
         }
-        console.log("not captain");
     }
 }
 
 function sendNotifications(teampk) {
-    console.log("BATEU " + teampk);
     $.ajax({
             url: "/notifyteam/" + teampk + "/",
             type: 'PATCH',
@@ -107,8 +99,6 @@ function sendNotifications(teampk) {
 function saveBudgetAbsences(mypk) {
     var budget = document.getElementById("budget|" + mypk).value
     var absences = document.getElementById("absences|" + mypk).value
-    console.log(budget);
-    console.log(absences);
 
     mypk = mypk.split("|")
     data = {
@@ -134,7 +124,6 @@ function saveBudgetAbsences(mypk) {
 }
 
 function changePositionSubs(mypk) {
-    console.log("CLICOU");
     data = {
         "playerpk": mypk[0],
         "teampk": mypk[1]
@@ -189,11 +178,7 @@ function changeCaptainFun(e, old_captain, options) {
     var selected = options.value;
     var data = [];
     var urls = [];
-    console.log("HERERER");
-    console.log(selected);
-    console.log(old_captain);
     if (selected !== old_captain) {
-        console.log(selected);
         spinner.hidden = false;
         data.push({
             isCaptain: false
@@ -208,10 +193,6 @@ function changeCaptainFun(e, old_captain, options) {
         urls.push(`${window.location.origin}/teams/rest/${my_team_id}/`);
         urls.push(`${window.location.origin}/teamusers/rest/${selected}/`)
         for (elem in urls) {
-            console.log(data[elem]);
-            console.log(urls[elem]);
-            console.log(elem);
-
             $.ajax({
                     url: urls[elem],
                     type: 'PATCH',
@@ -237,7 +218,6 @@ function changeCaptainFun(e, old_captain, options) {
 }
 
 function leaveTeam(leave) {
-    console.log(`/teamusers/rest/${leave.name}/`);
     $.ajax({
             url: `/teamusers/rest/${leave.name}/`,
             type: 'DELETE',
@@ -253,7 +233,6 @@ function leaveTeam(leave) {
 }
 
 function get_games_next_week() {
-    console.log("HERE");
     var ul = document.getElementById("games_next_week");
     if (xhr != null) {
         xhr.abort();
@@ -275,7 +254,6 @@ function get_games_next_week() {
 }
 
 function success_populate_list(data, ul) {
-    console.log("data=== ", data);
     for (elem of data) {
         let li = document.createElement("li");
         li.id = elem.id;

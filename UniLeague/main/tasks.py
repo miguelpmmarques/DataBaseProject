@@ -160,7 +160,8 @@ def send_notification_for_absences(self):
                     + str(elem.absences)
                     + " absences",
                     description="<br> <h3>This  user has been automatically removed from his team after this many strikes. Please contact your administrator for more information.</h3>",
-                    user_send=elem.team.teamuser_set.filter(isCaptain=True).first(),
+                    user_send=elem.team.teamuser_set.filter(
+                        isCaptain=True).first(),
                     origin="System",
                 ).save()
                 elem.delete()
@@ -238,7 +239,8 @@ def check_games_results(self):
     today = timezone.now()
     try:
         with transaction.atomic():
-            finished_games = Game.objects.filter(timeslot__start_time__lte=today)
+            finished_games = Game.objects.filter(
+                timeslot__start_time__lte=today)
             for game in finished_games:
                 # updating user budgets
                 game.teamusers_set.all().update(budget=F("budget") - game.cost)
@@ -251,7 +253,8 @@ def check_games_results(self):
                         and second_result
                         and (first_result != second_result)
                     ):
-                        results_equal = compareResults(first_result, second_result)
+                        results_equal = compareResults(
+                            first_result, second_result)
                         if results_equal:
                             first_result.is_final = True
                             first_result.save()
@@ -313,6 +316,7 @@ def compareResults(f, s):
 )
 def check_for_negative_budget(self):
     team_users = TeamUser.objects.filter(budget__lt=0)
+    users_to_expel = TeamUser.objects.filter(budget_lte=-10)
     for team_user in team_users:
         try:
             with transaction.atomic():
@@ -320,7 +324,7 @@ def check_for_negative_budget(self):
                     title="Your budget is bellow zero ",
                     description="<br> <h3>Your budget is"
                     + str(team_user.budget)
-                    + "</h3><h3>Please pay your bills to your captain.</h3>",
+                    + "</h3><h3>Please pay your bills to your captain. Once you reach a threshhold of -10€, you'll be automatically expelled from your team.</h3>",
                     user_send=team_user.player,
                     origin="System",
                     html="",
@@ -328,5 +332,46 @@ def check_for_negative_budget(self):
                 notification.save()
         except IntegrityError:
             raise self.retry()
-        print(notification)
+        for team_user in users_to_expel:
+            try:
+                with transaction.atomic():
+                    notification = Notifications.objects.get_or_create(
+                        title="Your budget is bellow 10€ ",
+                        description="<br> <h3>Your budget is"
+                        + str(team_user.budget)
+                        + "</h3><h3>You are hereby expelled from team " +
+                        str(team_user.team),
+                        user_send=team_user.player,
+                        origin="System",
+                        html="",
+                    )
+                    notification.save()
+
+                    notification2 = Notifications.objects.get_or_create(
+                        title="The budget of user " +
+                        str(team_user.player.name) + " is bellow 10€ ",
+                        description="<br> <h3>This user has been automatically expelled from team" +
+                        str(team_user.team),
+                        user_send=team_user.team.teamuser_set.filter(
+                            isCaptain=True).first(),
+                        origin="System",
+                        html="",
+                    )
+
+                    notification3 = Notifications.objects.get_or_create(
+                        title="The budget of user " +
+                        str(team_user.player.name) + " is bellow 10€ ",
+                        description="<br> <h3>This user has been automatically expelled from team" +
+                        str(team_user.team),
+                        user_send=CustomUser.objects.filter(
+                            is_superuser=True).first(),
+                        origin="System",
+                        html="",
+                    )
+                    notification.save()
+                    notification2.save()
+                    notification3.save()
+                    team_user.delete()
+            except IntegrityError:
+                raise self.retry()
         return True
