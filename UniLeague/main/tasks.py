@@ -241,7 +241,7 @@ def check_games_results(self):
             finished_games = Game.objects.filter(timeslot__start_time__lte=today)
             for game in finished_games:
                 # updating user budgets
-                game.users_set.all().update(budget=F("budget") - game.cost)
+                game.teamusers_set.all().update(budget=F("budget") - game.cost)
                 results = game.result_set.all()
                 if not results.filter(is_final=True).exists():
                     first_result = results.first()
